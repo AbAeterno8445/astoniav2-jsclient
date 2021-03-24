@@ -1,0 +1,14 @@
+{
+  "name": "av2clienttest",
+  "version": "1.0.0",
+  "description": "v2 Client experiment",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Ab Aeterno",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^12.0.1"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>v2 Client Test</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div style="display: flex">
+        <canvas id="cv-map" oncontextmenu="return false"></canvas>
+        <div id="div-chatbox"></div>
+    </div>
+
+    <!-- Misc scripts -->
+    <script src="scripts_rend/sfx-player.js"></script>
+    <script src="scripts_rend/chat-logger.js"></script>
+
+    <!-- Map renderer scripts-->
+    <script src="scripts_rend/map_renderer/canvas_funcs.js"></script>
+    <script src="scripts_rend/map_renderer/map-render.js"></script>
+
+    <!-- Main -->
+    <script src="scripts_rend/main.js"></script>
+</body>
+
+</html>

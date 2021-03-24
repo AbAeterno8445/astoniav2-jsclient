@@ -1,0 +1,18 @@
+body {
+    background-color: rgb(40, 40, 40);
+}
+
+canvas {
+    border: 1px solid gray;
+}
+
+#cv-map {
+    width: 1200px;
+    height: 720px;
+}
+
+#div-chatbox {
+    flex: 1;
+    color: wheat;
+    border: 1px solid white;
+}

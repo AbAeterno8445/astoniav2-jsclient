@@ -1,15 +1,14 @@
-const net = require("net");
-const { ServerCMDDispatcher } = require("./sv-funcs");
-const { sv_cmds, cl_cmds, render_consts, renderdistance } = require("./gendefs");
-const { RenderEngine } = require("./render-engine");
+//const net = require("net");
+//const { ServerCMDDispatcher } = require("../scripts_main/sv-funcs");
+//const { sv_cmds, cl_cmds, renderdistance } = require("../scripts_main/gendefs");
+//const { RenderEngine } = require("../scripts_main/render-engine");
 
 class SocketClient {
-    constructor() {
+    constructor(sfx_player) {
+        this._sfx_player = sfx_player;
         this._renderengine = new RenderEngine();
-        this._cmd_dispatcher = new ServerCMDDispatcher(this._renderengine);
+        this._cmd_dispatcher = new ServerCMDDispatcher(this._renderengine, this._sfx_player);
         this._init();
-
-        this.rendSendData = () => {};
     }
 
     _init() {
@@ -22,18 +21,11 @@ class SocketClient {
 
         this.quit = 0;
 
-        clearInterval(this._engloop_intv);
-
         this._lastn = 0; // used in sv_setmap
 
         this.logged = false; // Logged-in state
 
         this._cmd_dispatcher.exit = 0;
-    }
-
-    set_rend_data_func(func) {
-        this.rendSendData = func;
-        this._cmd_dispatcher.set_rend_data_func(func);
     }
 
     connect(ip, port, version, callback) {
@@ -46,8 +38,6 @@ class SocketClient {
             var buf = Buffer.alloc(16);
             buf[0] = cl_cmds["CL_NEWLOGIN"];
             this._client.write(buf);
-
-            //clearInterval(this._tickloop_intv);
 
             try {
                 this.render_engine_loop();
@@ -65,13 +55,12 @@ class SocketClient {
         this._client.on('end', () => {
             console.log("disconnected from server.");
             this._init();
-            this.rendSendData({ res: "conn_end" });
         });
     }
 
     _recv_data(data) {
         this._tickbuf.push(...data);
-        this.render_engine_loop();
+        //this.render_engine_loop();
     }
 
     // Login-process related server commands
@@ -161,40 +150,28 @@ class SocketClient {
                 buf.writeUInt16LE(tcoords.x, 1);
                 buf.writeUInt16LE(tcoords.y, 3);
 
-                this.rendSendData({ res: "playsfx", sfx: "click" }); // click sfx
+                this._sfx_player.play_sfx("click"); // click sfx
             break;
         }
 
         this._client.write(buf);
     }
 
-    render_senddata() {
-        this.rendSendData({
-            res: "renderdata",
-            rdata: this._renderengine.eng_getdata()
-        });
-    }
-
     render_engine_loop() {
-        // Login state
-        if (!this.logged) {
-            this._login_proc();
-            return;
-        }
+        setInterval(() => {
+            // Login state
+            if (!this.logged) {
+                this._login_proc();
+                return;
+            }
 
-        var t1 = new Date().getTime();
-        if ((this._renderengine.ticker & 15) == 0) {
-            this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
-            console.log("send ctick took", new Date().getTime() - t1, "ms");
-        }
+            if ((this._renderengine.ticker & 15) == 0) {
+                this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
+            }
 
-        this._tick_do();
+            this._tick_do();
 
-        this._renderengine.engine_tick();
-        this.render_senddata();
+            this._renderengine.engine_tick();
+        }, TICK);
     }
-}
-
-module.exports = {
-    SocketClient: SocketClient
 }

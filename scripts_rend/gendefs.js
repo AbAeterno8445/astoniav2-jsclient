@@ -114,46 +114,39 @@ const cl_cmds = {
     "CL_CMD_CTICK": 255
 }
 
-const render_consts = {
-    INJURED: (1<<0) >>> 0,
-    INJURED1: (1<<1) >>> 0,
-    INJURED2: (1<<2) >>> 0,
-    STONED: (1<<3) >>> 0,
-    INFRARED: (1<<4) >>> 0,
-    UWATER: (1<<5) >>> 0,
+const INJURED = (1<<0) >>> 0;
+const INJURED1 = (1<<1) >>> 0;
+const INJURED2 = (1<<2) >>> 0;
+const STONED = (1<<3) >>> 0;
+const INFRARED = (1<<4) >>> 0;
+const UWATER = (1<<5) >>> 0;
 
-    ISUSABLE: (1<<7) >>> 0,
-    ISITEM: (1<<8) >>> 0,
-    ISCHAR: (1<<9) >>> 0,
-    INVIS: (1<<10) >>> 0,
-    STUNNED: (1<<11) >>> 0,
+const ISUSABLE = (1<<7) >>> 0;
+const ISITEM = (1<<8) >>> 0;
+const ISCHAR = (1<<9) >>> 0;
+const INVIS = (1<<10) >>> 0;
+const STUNNED = (1<<11) >>> 0;
 
-    TOMB: ((1<<12)|(1<<13)|(1<<14)|(1<<15)|(1<<16)) >>> 0,
-    TOMB1: (1<<12) >>> 0,
-    DEATH: ((1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)) >>> 0,
-    DEATH1: (1<<17) >>> 0,
+const TOMB = ((1<<12)|(1<<13)|(1<<14)|(1<<15)|(1<<16)) >>> 0;
+const TOMB1 = (1<<12) >>> 0;
+const DEATH = ((1<<17)|(1<<18)|(1<<19)|(1<<20)|(1<<21)) >>> 0;
+const DEATH1 = (1<<17) >>> 0;
 
-    EMAGIC: ((1<<22)|(1<<23)|(1<<24)) >>> 0,
-    EMAGIC1: (1<<22) >>> 0,
-    GMAGIC: ((1<<25)|(1<<26)|(1<<27)) >>> 0,
-    GMAGIC1: (1<<25) >>> 0,
-    CMAGIC: ((1<<28)|(1<<29)|(1<<30)) >>> 0,
-    CMAGIC1: (1<<28) >>> 0,
+const EMAGIC = ((1<<22)|(1<<23)|(1<<24)) >>> 0;
+const EMAGIC1 = (1<<22) >>> 0;
+const GMAGIC = ((1<<25)|(1<<26)|(1<<27)) >>> 0;
+const GMAGIC1 = (1<<25) >>> 0;
+const CMAGIC = ((1<<28)|(1<<29)|(1<<30)) >>> 0;
+const CMAGIC1 = (1<<28) >>> 0;
 
-    TPURPLE: (1<<31) >>> 0,
+const TPURPLE = (1<<31) >>> 0;
 
-    SPR_EMPTY: 999,
+const SPR_EMPTY = 999;
 
-    TICKS: 36,
-    TICK: (1000/36), // (1000/TICK)
-    QSIZE: 8
-}
+const TICKS = 18;
+const TICK = (1000/TICKS);
+const QSIZE = 8;
 
 const renderdistance = 54;
 
-module.exports = {
-    sv_cmds: sv_cmds,
-    cl_cmds: cl_cmds,
-    renderdistance: renderdistance,
-    render_consts: render_consts
-}
+const sv_version = 0x020E07;

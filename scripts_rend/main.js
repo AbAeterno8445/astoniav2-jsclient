@@ -1,13 +1,9 @@
-function winapi_send(data) {
-    window.api.send("toMain", data);
-}
-
-window.api.receive("fromMain", (data) => {
+/*window.api.receive("fromMain", (data) => {
     switch(data.res) {
         case "error": console.log("Server-side error:", data.error); break;
 
         case "connect_step1":
-            map_renderdist = data.renderdist;
+            renderdistance = data.renderdist;
             
             winapi_send({req: "connect_sv"});
         break;
@@ -20,10 +16,17 @@ window.api.receive("fromMain", (data) => {
 
         case "playsfx": sfxPlayer.play_sfx(data.sfx); break;
     }
-});
+});*/
 
+// Init audio player
 const audioContext = new AudioContext();
 const sfxPlayer = new SFXPlayer(audioContext);
 
-winapi_send({req: "connect_step1"});
+// Init socket client
+const sockClient = new SocketClient(sfxPlayer);
+var svConfig = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
+sockClient.connect(svConfig.ip, svConfig.port, sv_version, (err) => {
+    if (err) throw err;
+});
+
 console.log("Sent connection request.");

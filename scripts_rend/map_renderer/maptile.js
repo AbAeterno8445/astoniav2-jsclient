@@ -1,5 +1,3 @@
-function padSpriteNum(num) { return ("00000" + num).substr(-5); }
-
 class MapTile {
     constructor(id, x, y, floor, item) {
         this.id = id;
@@ -29,8 +27,4 @@ class MapTile {
 
         this.idle_ani = 0;
     }
-}
-
-module.exports = {
-    MapTile: MapTile
 }

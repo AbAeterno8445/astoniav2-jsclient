@@ -1,5 +1,5 @@
-const { MapTile } = require("./maptile");
-const { render_consts, renderdistance } = require("./gendefs");
+//const { MapTile } = require("./maptile");
+//const { render_consts, renderdistance } = require("./gendefs");
 
 class RenderEngine {
     speedtab = [
@@ -55,13 +55,12 @@ class RenderEngine {
     constructor() {
         this.ctick = 0;
         this.ticker = 0;
-        this.frame = 0;
 
         this.tilemap = {};
         for (var i = 0; i < renderdistance; i++) {
             for (var j = 0; j < renderdistance; j++) {
                 var tile_id = i + j * renderdistance;
-                var tile = new MapTile(tile_id, i, j, render_consts.SPR_EMPTY, 0);
+                var tile = new MapTile(tile_id, i, j, SPR_EMPTY, 0);
                 this.tilemap[tile_id] = tile;
             }
         }
@@ -71,6 +70,11 @@ class RenderEngine {
         return this.speedtab[this.tilemap[n].ch_speed][this.ctick];
     }
 
+    /** Before a character can arrive at their new position, the obj offset briefly becomes 0 again,
+     * making the character jump back in the current tile (before reaching the new one). This causes the
+     * occasional rubberband effect while characters move around. **/
+
+    // walk left -> speedstep(maptile n, 32, 8, 1)
     speedstep(n, d, s, update) {
         var hard_step, soft_step, total_step, speed, dist, z, m;
         speed = this.tilemap[n].ch_speed;
@@ -121,7 +125,7 @@ class RenderEngine {
     eng_char(n) {
         var tmp, update = 1;
     
-        if (this.tilemap[n].flags & render_consts.STUNNED) update = 0;
+        if (this.tilemap[n].flags & STUNNED) update = 0;
     
         switch(this.tilemap[n].ch_status) {
             // idle up
@@ -212,7 +216,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = -this.speedstep(n, 16, 8, update) / 2;
                 this.tilemap[n].obj_yoff = this.speedstep(n, 16, 8, update) / 4;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 16) + 64;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 16;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 16;
                 return tmp;
             
             // walk down
@@ -232,7 +236,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = this.speedstep(n, 24, 8, update) / 2;
                 this.tilemap[n].obj_yoff = -this.speedstep(n, 24, 8, update) / 4;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 24) + 72;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 24;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 24;
                 return tmp;
             
             // walk left
@@ -252,7 +256,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = -this.speedstep(n, 32, 8, update) / 2;
                 this.tilemap[n].obj_yoff = -this.speedstep(n, 32, 8, update) / 4;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 32) + 80;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 32;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 32;
                 return tmp;
             
             // walk right
@@ -272,7 +276,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = this.speedstep(n, 40, 8, update) / 2;
                 this.tilemap[n].obj_yoff = this.speedstep(n, 40, 8, update) / 4;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 40) + 88;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 40;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 40;
                 return tmp;
             
             // left+up
@@ -296,7 +300,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = -this.speedstep(n, 48, 12, update);
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 48) * 8 / 12 + 96;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 48;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 48;
                 return Math.round(tmp);
             
             // left+down
@@ -320,7 +324,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = -this.speedstep(n, 60, 12, update) / 2;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 60) * 8 / 12 + 104;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 60;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 60;
                 return Math.round(tmp);
             
             // right+up
@@ -342,9 +346,9 @@ class RenderEngine {
                 return Math.round(tmp);
             case 83:
                 this.tilemap[n].obj_xoff = 0;
-                this.tilemap[n].obj_yoff = -this.speedstep(n, 72, 12, update) / 2;
+                this.tilemap[n].obj_yoff = this.speedstep(n, 72, 12, update) / 2;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 72) * 8 / 12 + 112;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 72;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 72;
                 return Math.round(tmp);
             
             // right+down
@@ -368,7 +372,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = this.speedstep(n, 84, 12, update);
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 84) * 8 / 12 + 120;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 84;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 84;
                 return Math.round(tmp);
             
             // turn up to left-up
@@ -384,7 +388,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 96) + 128;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 96;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 96;
                 return tmp;
             
             // turn left-up to up
@@ -400,7 +404,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 100) + 132;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 100;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 100;
                 return tmp;
             
             // turn up to right-up
@@ -414,7 +418,7 @@ class RenderEngine {
                 return tmp;
             case 107:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 104) + 136;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 104;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 104;
                 return tmp;
             
             // turn right-up to right
@@ -428,7 +432,7 @@ class RenderEngine {
                 return tmp;
             case 111:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 108) + 140;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 108;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 108;
                 return tmp;
             
             // turn down to left-down
@@ -442,7 +446,7 @@ class RenderEngine {
                 return tmp;
             case 115:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 112) + 144;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 112;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 112;
                 return tmp;
             
             // turn left-down to left
@@ -458,7 +462,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 116) + 148;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 116;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 116;
                 return tmp;
             
             // turn down to right-down
@@ -472,7 +476,7 @@ class RenderEngine {
                 return tmp;
             case 123:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 120) + 152;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 120;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 120;
                 return tmp;
             
             // turn right-down to down
@@ -488,7 +492,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 124) + 156;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 124;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 124;
                 return tmp;
             
             // turn left to left-up
@@ -502,7 +506,7 @@ class RenderEngine {
                 return tmp;
             case 131:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 128) + 160;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 128;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 128;
                 return tmp;
             
             // turn left-up to up
@@ -518,7 +522,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 132) + 164;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 132;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 132;
                 return tmp;
             
             // turn left to left-down
@@ -532,7 +536,7 @@ class RenderEngine {
                 return tmp;
             case 139:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 136) + 168;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 136;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 136;
                 return tmp;
             
             // turn left-down to down
@@ -548,7 +552,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 140) + 172;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 140;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 140;
                 return tmp;
             
             // turn right to right-up
@@ -562,7 +566,7 @@ class RenderEngine {
                 return tmp;
             case 147:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 144) + 176;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 144;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 144;
                 return tmp;
             
             // turn right-up to up
@@ -578,7 +582,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 148) + 180;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 148;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 148;
                 return tmp;
             
             // turn right to right-down
@@ -592,7 +596,7 @@ class RenderEngine {
                 return tmp;
             case 155:
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 152) + 184;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 152;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 152;
                 return tmp;
             
             // turn right-down to down
@@ -608,7 +612,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 156) + 188;
-                if (this.speedo(n) && update) this.tilemap[n].ch_status = 156;
+                //if (this.speedo(n) && update) this.tilemap[n].ch_status = 156;
                 return tmp;
             
             // misc up
@@ -628,7 +632,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 160) + 192 + ((this.stattab[this.tilemap[n].ch_stat_off])<<5);
-                if (this.speedo(n && update)) this.tilemap[n].ch_status = 160;
+                //if (this.speedo(n && update)) this.tilemap[n].ch_status = 160;
                 return tmp;
             
             // misc down
@@ -648,7 +652,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 168) + 200 + ((this.stattab[this.tilemap[n].ch_stat_off])<<5);
-                if (this.speedo(n && update)) this.tilemap[n].ch_status = 168;
+                //if (this.speedo(n && update)) this.tilemap[n].ch_status = 168;
                 return tmp;
             
             // misc left
@@ -668,7 +672,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 176) + 208 + ((this.stattab[this.tilemap[n].ch_stat_off])<<5)>>>0;
-                if (this.speedo(n && update)) this.tilemap[n].ch_status = 176;
+                //if (this.speedo(n && update)) this.tilemap[n].ch_status = 176;
                 return tmp;
             
             // misc right
@@ -688,7 +692,7 @@ class RenderEngine {
                 this.tilemap[n].obj_xoff = 0;
                 this.tilemap[n].obj_yoff = 0;
                 tmp = this.tilemap[n].ch_sprite + (this.tilemap[n].ch_status - 184) + 216 + ((this.stattab[this.tilemap[n].ch_stat_off])<<5)>>>0;
-                if (this.speedo(n && update)) this.tilemap[n].ch_status = 184;
+                //if (this.speedo(n && update)) this.tilemap[n].ch_status = 184;
                 return tmp;
             
             default:
@@ -794,11 +798,8 @@ class RenderEngine {
     engine_tick() {
         this.ticker++;
 
-        this.ctick++;
-        if (this.ctick > 19) this.ctick = 0;
-
-        this.frame++;
-        if (this.frame > 16) this.frame = 0;
+        if (this.ctick < 19) this.ctick++;
+        else this.ctick = 0;
     
         for (var n = 0; n < renderdistance * renderdistance; n++) {
             this.tilemap[n].obj1 = 0;
@@ -816,6 +817,8 @@ class RenderEngine {
                 this.tilemap[n].obj2 = tmp;
             }
         }
+
+        renderMap(this.tilemap);
     }
 
     // Gets drawing data to be sent to renderer client
@@ -878,8 +881,4 @@ class RenderEngine {
             }
         }
     }
-}
-
-module.exports = {
-    RenderEngine: RenderEngine
 }

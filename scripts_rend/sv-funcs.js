@@ -1,4 +1,4 @@
-const { sv_cmds, renderdistance } = require("./gendefs");
+//const { sv_cmds, renderdistance } = require("./gendefs");
 
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
@@ -24,8 +24,9 @@ class ServerCMDDispatcher {
         "You have been banned for an hour. Enhance your social behaviour before you come back."                 //14
     ];
 
-    constructor(render_eng) {
+    constructor(render_eng, sfx_player) {
         this._render_eng = render_eng;
+        this._sfx_player = sfx_player;
 
         // sv_setmap vars
         this.lastn = 0;
@@ -36,13 +37,6 @@ class ServerCMDDispatcher {
 
         // Flag to end connection
         this.exit = 0;
-
-        // Function to send data to renderer
-        this.rendSendData = () => {};
-    }
-
-    set_rend_data_func(func) {
-        this.rendSendData = func;
     }
 
     sv_cmd(buf_arr) {
@@ -86,7 +80,7 @@ class ServerCMDDispatcher {
             case sv_cmds["SV_SETMAP6"]: return this.sv_setmap3(buf, 6);
             case sv_cmds["SV_SETORIGIN"]: this.sv_setorigin(buf); return 5;
     
-            case sv_cmds["SV_TICK"]: return 2;
+            case sv_cmds["SV_TICK"]: this.sv_tick(buf); return 2;
     
             case sv_cmds["SV_LOG0"]: this.sv_log(buf); break;
             case sv_cmds["SV_LOG1"]: this.sv_log(buf); break;
@@ -122,7 +116,7 @@ class ServerCMDDispatcher {
             case sv_cmds["SV_LOOK5"]: break;
             case sv_cmds["SV_LOOK6"]: break;
     
-            case sv_cmds["SV_SETTARGET"]: return 13;
+            case sv_cmds["SV_SETTARGET"]: this.sv_settarget(buf); return 13;
     
             case sv_cmds["SV_PLAYSOUND"]: this.sv_playsound(buf); return 13;
     
@@ -141,6 +135,10 @@ class ServerCMDDispatcher {
         }
     
         return 16;
+    }
+
+    sv_tick(buf) {
+        this._render_eng.ctick = buf.readUInt8(1);
     }
 
     sv_setorigin(buf) {
@@ -247,11 +245,15 @@ class ServerCMDDispatcher {
             console.log("WARNING: corrupt setmap3!");
             return -1;
         }
+
+        this._render_eng.set_tile_data(n, { light: tmp });
     
         if (cnt > 0) {
             for (var m = n + 2; m < n + cnt + 2; m += 2, p++) {
                 if (m < renderdistance * renderdistance) {
                     tmp = buf[p];
+                    this._render_eng.set_tile_data(m, { light: (tmp & 15) });
+                    this._render_eng.set_tile_data(m - 1, { light: (tmp >> 4) });
                 }
             }
         }
@@ -271,7 +273,7 @@ class ServerCMDDispatcher {
             this._log_text += ch;
             if (ch == String.fromCharCode(10)) {
                 console.log("Received log: < ", this._log_text.trim(), ">");
-                this.rendSendData({ res: "chatlog", msg: this._log_text.trim() });
+                chat_logmsg(this._log_text.trim());
                 this._log_text = "";
                 return;
             }
@@ -281,7 +283,16 @@ class ServerCMDDispatcher {
     sv_playsound(buf) {
         var nr = buf.readUInt32LE(1);
         
-        this.rendSendData({ res: "playsfx", sfx: nr });
+        this._sfx_player.play_sfx(nr);
+    }
+
+    sv_settarget(buf) {
+        pl.attack_cn = buf.readUInt16LE(1);
+        pl.goto_x = buf.readUInt16LE(3);
+        pl.goto_y = buf.readUInt16LE(5);
+        pl.misc_action = buf.readUInt16LE(7);
+        pl.misc_target1 = buf.readUInt16LE(9);
+        pl.misc_target2 = buf.readUInt16LE(11);
     }
 
     sv_exit(buf) {
@@ -292,8 +303,4 @@ class ServerCMDDispatcher {
 
         this.exit = 1;
     }
-}
-
-module.exports = {
-    ServerCMDDispatcher: ServerCMDDispatcher
 }

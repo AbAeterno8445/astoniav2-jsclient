@@ -171,7 +171,7 @@ class ServerCMDDispatcher {
             p = 4;
         }
     
-        if (n < 0 || n >= renderdistance * renderdistance) {
+        if (n < 0 || n > renderdistance * renderdistance) {
             console.log("WARNING: corrupt setmap!");
             console.log("Received n:", n, "= x:", n % renderdistance, "y:", Math.floor(n / renderdistance));
             return -1;
@@ -187,47 +187,47 @@ class ServerCMDDispatcher {
     
         var mapdata = {};
         if (flags & 1) {
-            if (buf.length < p + 2) return buf.length;
+            if (buf.length < p + 2) return p;
             mapdata.ba_sprite = buf.readUInt16LE(p); p += 2;
             this.map_cnt[0]++;
         }
         if (flags & 2) {
-            if (buf.length < p + 8) return buf.length;
+            if (buf.length < p + 8) return p;
             mapdata.flags = buf.readUInt32LE(p); p += 4;
             mapdata.flags3 = buf.readUInt32LE(p); p += 4;
             this.map_cnt[1]++;
         }
         if (flags & 4) {
-            if (buf.length < p + 4) return buf.length;
+            if (buf.length < p + 4) return p;
             mapdata.flags2 = buf.readUInt32LE(p); p += 4;
             this.map_cnt[2]++;
         }
         if (flags & 8) {
-            if (buf.length < p + 2) return buf.length;
+            if (buf.length < p + 2) return p;
             mapdata.it_sprite = buf.readUInt16LE(p); p += 2;
             this.map_cnt[3]++;
         }
         if (flags & 16) {
-            if (buf.length < p + 1) return buf.length;
+            if (buf.length < p + 1) return p;
             mapdata.it_status = buf.readUInt8(p); p += 1;
             this.map_cnt[4]++;
         }
         if (flags & 32) {
-            if (buf.length < p + 4) return buf.length;
+            if (buf.length < p + 4) return p;
             mapdata.ch_sprite = buf.readUInt16LE(p); p += 2;
             mapdata.ch_status = buf.readUInt8(p); p += 1;
             mapdata.ch_stat_off = buf.readUInt8(p); p += 1;
             this.map_cnt[5]++;
         }
         if (flags & 64) {
-            if (buf.length < p + 5) return buf.length;
+            if (buf.length < p + 5) return p;
             mapdata.ch_nr = buf.readUInt16LE(p); p += 2;
             mapdata.ch_id = buf.readUInt16LE(p); p += 2;
             mapdata.ch_speed = buf.readUInt8(p); p += 1;
             this.map_cnt[6]++;
         }
         if (flags & 128) {
-            if (buf.length < p + 1) return buf.length;
+            if (buf.length < p + 1) return p;
             mapdata.ch_proz = buf.readUInt8(p); p += 1;
             this.map_cnt[7]++;
         }

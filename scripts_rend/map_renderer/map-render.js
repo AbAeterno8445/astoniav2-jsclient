@@ -8,6 +8,8 @@ mapCanvas.setLoadingImage("./gfx/00035.png");
 var doc_keyheld = { ctrl: 0, shift: 0, alt: 0 };
 var doc_mouseheld = { left: 0, middle: 0, right: 0 };
 
+const cursor_default = "./gfx/MOUSE.png";
+
 // Sprite loading
 var loaded_gfx = {};
 // Pre-loaded images
@@ -23,8 +25,8 @@ for (var i = 280; i < 297; i++)
 for (var i = 1078; i < 1082; i++)
     loadGFX(getNumSpritePath(i)); // Injured fx
 
-function setCursorImg(img_path) {
-    mapCanvas.cv.style.cursor = "url(" + img_path + "), auto";
+function setCursorImg(img_path, offset = 0) {
+    mapCanvas.cv.style.cursor = "url(" + img_path + ") " + offset + " " + offset + ", auto";
 }
 
 // Get isometric tile position of cursor within mapcanvas
@@ -74,7 +76,7 @@ function scanMapFlag(tilemap, startpos, flag) {
 }
 
 function mouseCommand(event) {
-    var cursor_img = "./gfx/MOUSE.png";
+    var cursor_img = cursor_default;
     var mpos = getCursorIso(event);
     var tilemap = sockClient.get_tilemap();
 
@@ -112,6 +114,9 @@ function mouseCommand(event) {
                         sockClient.send_client_command(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
                     }
                 }
+            } else if (pl.citem && doc_mouseheld.left) {
+                // Drop item
+                sockClient.send_client_command(cl_cmds["CL_CMD_DROP"], { x: mpos.x, y: mpos.y });
             }
         } else if (doc_keyheld.ctrl || doc_keyheld.alt) {
             var scan = scanMapFlag(tilemap, tile_hovered, ISCHAR);
@@ -123,8 +128,13 @@ function mouseCommand(event) {
                     //cursor_img = getNumSpritePath();
 
                     if (doc_mouseheld.left) {
-                        // Attack character
-                        sockClient.send_client_command(cl_cmds["CL_CMD_ATTACK"], { target: tilemap[tile_hovered].ch_nr });
+                        if (pl.citem) {
+                            // Give character
+                            sockClient.send_client_command(cl_cmds["CL_CMD_GIVE"], { target: tilemap[tile_hovered].ch_nr });
+                        } else {
+                            // Attack character
+                            sockClient.send_client_command(cl_cmds["CL_CMD_ATTACK"], { target: tilemap[tile_hovered].ch_nr });
+                        }
                     } else if (doc_mouseheld.right) {
                         // Look at character
                         sockClient.send_client_command(cl_cmds["CL_CMD_LOOK"], { target: tilemap[tile_hovered].ch_nr });
@@ -151,7 +161,8 @@ function mouseCommand(event) {
     doc_mouseheld.left = 0;
     doc_mouseheld.middle = 0;
     doc_mouseheld.right = 0;
-    setCursorImg(cursor_img);
+
+    if (!pl.citem) setCursorImg(cursor_img);
 }
 
 /** CANVAS EVENTS */
@@ -205,7 +216,7 @@ function getNumSpritePath(n) {
     return "./gfx/" + padSpriteNum(n) + ".png";
 }
 
-var hideWalls = false;
+var hideWalls = true;
 function autohide(x, y)
 {
 	if (x >= renderdistance / 2 || y <= renderdistance / 2) return 0;
@@ -215,6 +226,7 @@ function autohide(x, y)
 // Map rendering
 var char_cv = document.createElement('canvas');
 var char_cv_ctx = char_cv.getContext('2d');
+var citem_last = 0;
 function renderMap(tilemap) {
     if (!tilemap) return;
 
@@ -246,9 +258,11 @@ function renderMap(tilemap) {
             var gfx_filter = "brightness(" + Math.round((16 - tile.light) * 100 / 16) + "%)";
 
             // Hovered tile effect
-            if (tile_hovered == tile_id && !doc_keyheld.ctrl && !doc_keyheld.shift && !doc_keyheld.alt) {
-                gfx_filter = "brightness(200%)";
-                fx_suff = "hover";
+            if (tile_hovered == tile_id && !doc_keyheld.ctrl && !doc_keyheld.alt) {
+                if (!doc_keyheld.shift || (doc_keyheld.shift && !(tilemap[tile_hovered].flags & ISITEM) && pl.citem)) {
+                    gfx_filter = "brightness(200%)";
+                    fx_suff = "hover";
+                }
             }
 
             if (tile.ba_sprite) {
@@ -326,7 +340,7 @@ function renderMap(tilemap) {
 
             // Give target sprite
             if (pl.misc_action == DR_GIVE && pl.misc_target1 == tilemap[tile_id].ch_nr)
-                mapCanvas.drawImageIsometric(getNumSpritePath(45), j, i, pl_xoff + tilemap[tile_id].obj_xoff + 16, pl_yoff + tilemap[tile_id].obj_yoff);
+                mapCanvas.drawImageIsometric(getNumSpritePath(45), j, i, pl_xoff + tilemap[tile_id].obj_xoff, pl_yoff + tilemap[tile_id].obj_yoff);
             
             // Drop at position
             if (pl.misc_action == DR_DROP && pl.misc_target1 == tilemap[tile_id].x && pl.misc_target2 == tilemap[tile_id].y)
@@ -371,6 +385,14 @@ function renderMap(tilemap) {
                 mapCanvas.drawImageIsometric(grave_spr, j, i, pl_xoff, pl_yoff);
             }
         }
+    }
+
+    if (pl.citem) {
+        setCursorImg(getNumSpritePath(pl.citem), 16);
+        citem_last = pl.citem;
+    } else if (citem_last) {
+        setCursorImg(cursor_default);
+        citem_last = 0;
     }
 }
 

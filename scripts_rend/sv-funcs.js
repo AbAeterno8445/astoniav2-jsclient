@@ -52,27 +52,27 @@ class ServerCMDDispatcher {
         //console.log("received", cmd_name, "command");
     
         switch (buf[0]) {
-            case sv_cmds["SV_SETCHAR_NAME1"]: break;
-            case sv_cmds["SV_SETCHAR_NAME2"]: break;
-            case sv_cmds["SV_SETCHAR_NAME3"]: break;
+            case sv_cmds["SV_SETCHAR_NAME1"]:
+            case sv_cmds["SV_SETCHAR_NAME2"]: this.sv_setchar_name(buf); break;
+            case sv_cmds["SV_SETCHAR_NAME3"]: this.sv_setchar_name_end(buf); break;
     
-            case sv_cmds["SV_SETCHAR_MODE"]: return 2;
-            case sv_cmds["SV_SETCHAR_ATTRIB"]: return 8;
-            case sv_cmds["SV_SETCHAR_SKILL"]: return 8;
-            case sv_cmds["SV_SETCHAR_HP"]: return 13;
-            case sv_cmds["SV_SETCHAR_ENDUR"]: return 13;
-            case sv_cmds["SV_SETCHAR_MANA"]: return 13;
-            case sv_cmds["SV_SETCHAR_AHP"]: return 3;
-            case sv_cmds["SV_SETCHAR_AEND"]: return 3;
-            case sv_cmds["SV_SETCHAR_AMANA"]: return 3;
-            case sv_cmds["SV_SETCHAR_DIR"]: return 2;
+            case sv_cmds["SV_SETCHAR_MODE"]: this.sv_setchar_mode(buf); return 2;
+            case sv_cmds["SV_SETCHAR_ATTRIB"]: this.sv_setchar_attrib(buf); return 8;
+            case sv_cmds["SV_SETCHAR_SKILL"]: this.sv_setchar_skill(buf); return 8;
+            case sv_cmds["SV_SETCHAR_HP"]: this.sv_setchar_hp(buf); return 13;
+            case sv_cmds["SV_SETCHAR_ENDUR"]: this.sv_setchar_endur(buf); return 13;
+            case sv_cmds["SV_SETCHAR_MANA"]: this.sv_setchar_mana(buf); return 13;
+            case sv_cmds["SV_SETCHAR_AHP"]: this.sv_setchar_ahp(buf); return 3;
+            case sv_cmds["SV_SETCHAR_AEND"]: this.sv_setchar_aend(buf); return 3;
+            case sv_cmds["SV_SETCHAR_AMANA"]: this.sv_setchar_amana(buf); return 3;
+            case sv_cmds["SV_SETCHAR_DIR"]: this.sv_setchar_dir(buf); return 2;
     
-            case sv_cmds["SV_SETCHAR_PTS"]: return 13;
-            case sv_cmds["SV_SETCHAR_GOLD"]: return 13;
-            case sv_cmds["SV_SETCHAR_ITEM"]: return 9;
-            case sv_cmds["SV_SETCHAR_WORN"]: return 9;
-            case sv_cmds["SV_SETCHAR_SPELL"]: return 9;
-            case sv_cmds["SV_SETCHAR_OBJ"]: return 5;
+            case sv_cmds["SV_SETCHAR_PTS"]: this.sv_setchar_pts(buf); return 13;
+            case sv_cmds["SV_SETCHAR_GOLD"]: this.sv_setchar_gold(buf); return 13;
+            case sv_cmds["SV_SETCHAR_ITEM"]: this.sv_setchar_item(buf); return 9;
+            case sv_cmds["SV_SETCHAR_WORN"]: this.sv_setchar_worn(buf); return 9;
+            case sv_cmds["SV_SETCHAR_SPELL"]: this.sv_setchar_spell(buf); return 9;
+            case sv_cmds["SV_SETCHAR_OBJ"]: this.sv_setchar_obj(buf); return 5;
     
             case sv_cmds["SV_SETMAP3"]: return this.sv_setmap3(buf, 20);
             case sv_cmds["SV_SETMAP4"]: return this.sv_setmap3(buf, 0);
@@ -154,6 +154,95 @@ class ServerCMDDispatcher {
                 });
             }
         }
+    }
+
+    sv_setchar_name(buf) { pl.name += buf.slice(1, 16).toString(); }
+
+    sv_setchar_name_end(buf) {
+        pl.name += buf.slice(1, 11).toString();
+        for (var i = 0; i < pl.name.length; i++) {
+            if (pl.name[i] == '\0') {
+                pl.name = pl.name.slice(0, i);
+                break;
+            }
+        }
+    }
+
+    sv_setchar_mode(buf) { pl.mode = buf[1]; }
+
+    sv_setchar_hp(buf) {
+        for (var i = 0; i < 6; i++) pl.hp[i] = buf.readUInt16LE(1 + i * 2);
+    }
+
+    sv_setchar_endur(buf) {
+        for (var i = 0; i < 6; i++) pl.end[i] = buf.readInt16LE(1 + i * 2);
+    }
+
+    sv_setchar_mana(buf) {
+        for (var i = 0; i < 6; i++) pl.mana[i] = buf.readInt16LE(1 + i * 2);
+    }
+
+    sv_setchar_attrib(buf) {
+        var n = buf[1];
+        if (n < 0 || n > 4) return;
+
+        for (var i = 0; i < 6; i++) pl.attrib[n][i] = buf[2 + i];
+    }
+
+    sv_setchar_skill(buf) {
+        var n = buf[1];
+        if (n < 0 || n > 49) return;
+
+        for (var i = 0; i < 6; i++) pl.skill[n][i] = buf[2 + i];
+    }
+
+    sv_setchar_ahp(buf) { pl.a_hp = buf.readUInt16LE(1); }
+    sv_setchar_aend(buf) { pl.a_end = buf.readUInt16LE(1); }
+    sv_setchar_amana(buf) { pl.a_mana = buf.readUInt16LE(1); }
+    
+    sv_setchar_dir(buf) { pl.dir = buf[1]; }
+
+    sv_setchar_pts(buf) {
+        pl.points = buf.readUInt32LE(1);
+        pl.points_tot = buf.readUInt32LE(5);
+        pl.kindred = buf.readUInt32LE(9);
+    }
+
+    sv_setchar_gold(buf) {
+        pl.gold = buf.readUInt32LE(1);
+        pl.armor = buf.readUInt32LE(5);
+        pl.weapon = buf.readUInt32LE(9);
+    }
+
+    sv_setchar_item(buf) {
+        var n = buf.readUInt32LE(1);
+        if (n < 0 || n > 39) console.log("WARNING: Invalid setchar item. n:", n);
+        //pl.item[n] = buf.readInt16LE(5);
+        //pl.item_p[n] = buf.readInt16LE(7);
+    }
+
+    sv_setchar_worn(buf) {
+        var n = buf.readUInt32LE(1);
+        if (n < 0 || n > 19) console.log("WARNING: Invalid setchar worn. n:", n);
+        //pl.worn[n] = buf.readInt16LE(5);
+        //pl.worn_p[n] = buf.readInt16LE(7);
+    }
+
+    sv_setchar_spell(buf) {
+        var n = buf.readUInt32LE(1);
+        if (n < 0 || n > 19) console.log("WARNING: Invalid setchar spell. n:", n);
+        //pl.spell[n] = buf.readInt16LE(5);
+        //pl.active[n] = buf.readInt16LE(7);
+    }
+
+    sv_setchar_obj(buf) {
+        pl.citem = buf.readInt16LE(1);
+        pl.citem_p = buf.readInt16LE(3);
+    }
+
+    sv_setchar_obj(buf) {
+        pl.citem = buf.readInt16LE(1);
+        pl.citem_p = buf.readInt16LE(3);
     }
 
     sv_setmap(buf, off) {

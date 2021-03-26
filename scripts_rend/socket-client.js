@@ -142,7 +142,9 @@ class SocketClient {
             break;
 
             case cl_cmds["CL_CMD_MOVE"]:
+            case cl_cmds["CL_CMD_TURN"]:
             case cl_cmds["CL_CMD_USE"]:
+            case cl_cmds["CL_CMD_LOOK_ITEM"]:
             case cl_cmds["CL_CMD_PICKUP"]:
                 if (data.x < 0 || data.y < 0 || data.x > renderdistance || data.y > renderdistance) return;
 
@@ -152,7 +154,13 @@ class SocketClient {
                 buf.writeUInt16LE(tcoords.x, 1);
                 buf.writeUInt16LE(tcoords.y, 3);
 
-                this._sfx_player.play_sfx("click"); // click sfx
+                this._sfx_player.play_sfx("click");
+            break;
+
+            case cl_cmds["CL_CMD_ATTACK"]:
+            case cl_cmds["CL_CMD_LOOK"]:
+                buf.writeUInt32LE(data.target, 1);
+                this._sfx_player.play_sfx("click");
             break;
         }
 

@@ -141,6 +141,18 @@ const CMAGIC1 = (1<<28) >>> 0;
 
 const TPURPLE = (1<<31) >>> 0;
 
+const DR_IDLE = 0;
+const DR_DROP = 1;
+const DR_PICKUP = 2;
+const DR_GIVE = 3;
+const DR_USE = 4;
+const DR_BOW = 5;
+const DR_WAVE = 6;
+const DR_TURN = 7;
+const DR_SINGLEBUILD = 8;
+const DR_AREABUILD1 = 9;
+const DR_AREABUILD2 = 10;
+
 const SPR_EMPTY = 999;
 
 const TICKS = 18;

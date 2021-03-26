@@ -142,6 +142,8 @@ class SocketClient {
             break;
 
             case cl_cmds["CL_CMD_MOVE"]:
+            case cl_cmds["CL_CMD_USE"]:
+            case cl_cmds["CL_CMD_PICKUP"]:
                 if (data.x < 0 || data.y < 0 || data.x > renderdistance || data.y > renderdistance) return;
 
                 var tcoords = this._renderengine.get_tile_coords(data.x, data.y);
@@ -173,5 +175,9 @@ class SocketClient {
 
             this._renderengine.engine_tick();
         }, TICK);
+    }
+
+    get_tilemap() {
+        return this._renderengine.tilemap;
     }
 }

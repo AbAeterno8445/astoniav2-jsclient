@@ -1,8 +1,8 @@
 class CanvasHandler {
     constructor(cv) {
         this.cv = cv;
-        this.cv.width = cv.offsetWidth;
-        this.cv.height = cv.offsetHeight;
+        this.cv.width = cv.clientWidth;
+        this.cv.height = cv.clientHeight;
         this.ctx = this.cv.getContext('2d');
 
         this.drawXOffset = 0;
@@ -97,9 +97,9 @@ class CanvasHandler {
     }
 
     clearContext() {
-        if (this.cv.offsetWidth != this.cv.width || this.cv.offsetHeight != this.cv.height) {
-            this.cv.width = this.cv.offsetWidth;
-            this.cv.height = this.cv.offsetHeight;
+        if (this.cv.clientWidth != this.cv.width || this.cv.clientHeight != this.cv.height) {
+            this.cv.width = this.cv.clientWidth;
+            this.cv.height = this.cv.clientHeight;
         }
         this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
     }

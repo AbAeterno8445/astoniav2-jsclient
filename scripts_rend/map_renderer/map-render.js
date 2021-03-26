@@ -45,6 +45,34 @@ function getCursorIso(e) {
     return { x: mx, y: my, in: in_canvas };
 }
 
+// Check surrounding tiles from given start position for given flag
+/** Returns a list of found tiles matching flag, sorted by distance to start point (closest -> farthest) */
+function scanMapFlag(tilemap, startpos, flag) {
+    if (tilemap[startpos].flags & flag) return [{ m: startpos, x: startpos % renderdistance, y: Math.floor(startpos / renderdistance) }];
+
+    var found_obj = [];
+    for (var i = -2; i <= 2; i++) {
+        for (var j = -2; j <= 2; j++) {
+            if (j == 0 && i == 0) continue;
+
+            var m = startpos + j + i * renderdistance;
+            if (m >= 0 && m <= renderdistance * renderdistance) {
+                if (tilemap[m].flags & flag) {
+                    found_obj.push({
+                        m: m,
+                        x: m % renderdistance,
+                        y: Math.floor(m / renderdistance),
+                        dist: Math.abs(j + i)
+                    });
+                }
+            }
+        }
+    }
+
+    found_obj.sort((a, b) => (a.dist > b.dist) ? 1 : -1);
+    return found_obj;
+}
+
 function mouseCommand(event) {
     var cursor_img = "./gfx/MOUSE.png";
     var mpos = getCursorIso(event);
@@ -57,45 +85,57 @@ function mouseCommand(event) {
     }
 
     if (tile_hovered > -1) {
-        if (tilemap[tile_hovered].flags & ISITEM && doc_keyheld.shift) {
-            if (tilemap[tile_hovered].flags & ISUSABLE) {
-                //cursor_img = getNumSpritePath();
+        if (doc_keyheld.shift) {
+            var scan = scanMapFlag(tilemap, tile_hovered, ISITEM);
+            if (scan.length > 0) {
+                tile_hovered = scan[0].m;
+                mpos.x = scan[0].x;
+                mpos.y = scan[0].y;
+                if (tilemap[tile_hovered].flags & ISUSABLE) {
+                    //cursor_img = getNumSpritePath();
 
-                if (doc_mouseheld.left) {
-                    // Use item
-                    sockClient.send_client_command(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
-                } else if (doc_mouseheld.right) {
-                    // Look at item
-                    sockClient.send_client_command(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
-                }
-            } else {
-                //cursor_img = getNumSpritePath();
+                    if (doc_mouseheld.left) {
+                        // Use item
+                        sockClient.send_client_command(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
+                    } else if (doc_mouseheld.right) {
+                        // Look at item
+                        sockClient.send_client_command(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                    }
+                } else {
+                    //cursor_img = getNumSpritePath();
 
-                if (doc_mouseheld.left) {
-                    // Pick up item
-                    sockClient.send_client_command(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
-                } else if (doc_mouseheld.right) {
-                    // Look at item
-                    sockClient.send_client_command(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                    if (doc_mouseheld.left) {
+                        // Pick up item
+                        sockClient.send_client_command(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
+                    } else if (doc_mouseheld.right) {
+                        // Look at item
+                        sockClient.send_client_command(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                    }
                 }
             }
-        } else if (tilemap[tile_hovered].flags & ISCHAR && (doc_keyheld.ctrl || doc_keyheld.alt)) {
-            if (doc_keyheld.ctrl) {
-                //cursor_img = getNumSpritePath();
+        } else if (doc_keyheld.ctrl || doc_keyheld.alt) {
+            var scan = scanMapFlag(tilemap, tile_hovered, ISCHAR);
+            if (scan.length > 0) {
+                tile_hovered = scan[0].m;
+                mpos.x = scan[0].x;
+                mpos.y = scan[0].y;
+                if (doc_keyheld.ctrl) {
+                    //cursor_img = getNumSpritePath();
 
-                if (doc_mouseheld.left) {
-                    // Attack character
-                    sockClient.send_client_command(cl_cmds["CL_CMD_ATTACK"], { target: tilemap[tile_hovered].ch_nr });
-                } else if (doc_mouseheld.right) {
-                    // Look at character
-                    sockClient.send_client_command(cl_cmds["CL_CMD_LOOK"], { target: tilemap[tile_hovered].ch_nr });
-                }
-            } else {
-                //cursor_img = getNumSpritePath();
+                    if (doc_mouseheld.left) {
+                        // Attack character
+                        sockClient.send_client_command(cl_cmds["CL_CMD_ATTACK"], { target: tilemap[tile_hovered].ch_nr });
+                    } else if (doc_mouseheld.right) {
+                        // Look at character
+                        sockClient.send_client_command(cl_cmds["CL_CMD_LOOK"], { target: tilemap[tile_hovered].ch_nr });
+                    }
+                } else {
+                    //cursor_img = getNumSpritePath();
 
-                if (doc_mouseheld.right) {
-                    // Look at character
-                    sockClient.send_client_command(cl_cmds["CL_CMD_LOOK"], { target: tilemap[tile_hovered].ch_nr });
+                    if (doc_mouseheld.right) {
+                        // Look at character
+                        sockClient.send_client_command(cl_cmds["CL_CMD_LOOK"], { target: tilemap[tile_hovered].ch_nr });
+                    }
                 }
             }
         } else {

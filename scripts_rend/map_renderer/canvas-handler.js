@@ -126,10 +126,10 @@ class CanvasHandler {
 
                 return;
             }
+            drawimg = this.loadedImages[img];
         } else {
             drawimg = img;
         }
-        drawimg = this.loadedImages[img];
         this.ctx.drawImage(drawimg, this.drawXOffset + x, this.drawYOffset + y);
     }
 

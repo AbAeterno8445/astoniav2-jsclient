@@ -116,6 +116,8 @@ class SocketClient {
             var csize = len - 2;
             if (csize) buf = this._tickbuf.slice(2);
 
+            this._cmd_dispatcher.lastn = -1; // reset sv_setmap
+            
             var idx = 0;
             while (idx < csize && idx < buf.length) {
                 var ret = this._cmd_dispatcher.sv_cmd(buf.slice(idx));
@@ -128,8 +130,6 @@ class SocketClient {
 
             if (this._tickbuf.length) this._tickbuf = this._tickbuf.slice(len);
         }
-
-        this._cmd_dispatcher.lastn = -1; // reset sv_setmap
     }
 
     send_client_command(cmd, data) {

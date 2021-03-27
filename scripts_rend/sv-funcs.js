@@ -252,6 +252,7 @@ class ServerCMDDispatcher {
     sv_setchar_item(buf) {
         var n = buf.readUInt32LE(1);
         if (n < 0 || n > 39) console.log("WARNING: Invalid setchar item. n:", n);
+        inv_elem[n].style.backgroundImage = "url(" + getNumSpritePath(buf.readInt16LE(5)) + ")";
         //pl.item[n] = buf.readInt16LE(5);
         //pl.item_p[n] = buf.readInt16LE(7);
     }

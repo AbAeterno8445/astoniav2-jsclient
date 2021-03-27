@@ -455,6 +455,18 @@ function renderMap(tilemap) {
     }
 }
 
+/** INVENTORY DISPLAY */
+
+const div_inv = document.getElementById('div-inv');
+var inv_elem = {};
+for (var i = 0; i < 40; i++) {
+    var tmp_invelem = document.createElement('div');
+    tmp_invelem.className = 'div-invitem';
+
+    inv_elem[i] = tmp_invelem;
+    div_inv.appendChild(tmp_invelem);
+}
+
 /** GFX LOADING FUNCS */
 
 /** Returns the sprite path (with appended filter suffix if provided) */

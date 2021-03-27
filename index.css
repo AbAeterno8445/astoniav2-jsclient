@@ -15,4 +15,20 @@ canvas {
     flex: 1;
     color: wheat;
     border: 1px solid white;
+    overflow: auto;
+}
+
+#div-inv {
+    display: flex;
+    flex-wrap: wrap;
+    width: 760px;
+    margin-top: 4px;
+}
+
+.div-invitem {
+    width: 32px;
+    height: 32px;
+    border: 1px solid white;
+    background-color: black;
+    margin: 2px;
 }

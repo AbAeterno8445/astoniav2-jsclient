@@ -250,10 +250,10 @@ function renderMap(tilemap) {
 
     mapCanvas.clearContext();
 
-    var x1 = 0;
-    var x2 = renderdistance;
-    var y1 = 0;
-    var y2 = renderdistance;
+    var x1 = 2;
+    var x2 = renderdistance - 1;
+    var y1 = 2;
+    var y2 = renderdistance - 2;
 
     // Main player offset
     var pl_xoff = 0;

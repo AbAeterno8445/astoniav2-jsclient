@@ -9,8 +9,4 @@ function chat_logmsg(msg) {
     div_chatbox.appendChild(document.createElement('br'));
 
     log_elems.push(span_log);
-    if (log_elems.length > 20) {
-        var rm_span = log_elems.shift();
-        rm_span.parentElement.removeChild(rm_span);
-    }
 }

@@ -156,7 +156,7 @@ class CanvasHandler {
         } else {
             drawimg = img;
         }
-        var drawX = (x + y) * 16 - (drawimg.width - 32) + xoff;
+        var drawX = (x + y) * 16 + xoff - drawimg.width / 2;
         var drawY = (y - x) * 8 - (drawimg.height - 32) + yoff;
         this.ctx.drawImage(drawimg, this.drawXOffset + drawX, this.drawYOffset + drawY);
     }

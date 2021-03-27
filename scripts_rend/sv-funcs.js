@@ -4,6 +4,31 @@ function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
 }
 
+class CharLook {
+    constructor() {
+        this.autoflag = 0;
+        this.worn = [];
+        for (var i = 0; i < 20; i++) this.worn.push(0);
+        this.sprite = 0;
+        this.points = 0;
+        this.name = "";
+        this.hp = 0;
+        this.end = 0;
+        this.mana = 0;
+        this.a_hp = 0;
+        this.a_end = 0;
+        this.a_mana = 0;
+        this.nr = 0;
+        this.id = 0;
+        this.extended = 0;
+        this.item = [];
+        for (var i = 0; i < 62; i++) this.item.push(0);
+        this.price = [];
+        for (var i = 0; i < 62; i++) this.price.push(0);
+        this.pl_price = 0;
+    }
+}
+
 class ServerCMDDispatcher {
 
     _logout_reason = [
@@ -28,12 +53,18 @@ class ServerCMDDispatcher {
         this._render_eng = render_eng;
         this._sfx_player = sfx_player;
 
+        this._svload = 0;
+
         // sv_setmap vars
         this.lastn = 0;
         this.map_cnt = [0, 0, 0, 0, 0, 0, 0, 0];
 
         // sv_log vars
         this._log_text = "";
+
+        // lookup characters
+        this._look_chars = {};
+        this._tmplook = new CharLook();
 
         // Flag to end connection
         this.exit = 0;
@@ -109,12 +140,12 @@ class ServerCMDDispatcher {
                 this.sv_scroll_up();
                 return 1;
     
-            case sv_cmds["SV_LOOK1"]: break;
-            case sv_cmds["SV_LOOK2"]: break;
-            case sv_cmds["SV_LOOK3"]: break;
-            case sv_cmds["SV_LOOK4"]: break;
-            case sv_cmds["SV_LOOK5"]: break;
-            case sv_cmds["SV_LOOK6"]: break;
+            case sv_cmds["SV_LOOK1"]: this.sv_look1(buf); break;
+            case sv_cmds["SV_LOOK2"]: this.sv_look2(buf); break;
+            case sv_cmds["SV_LOOK3"]: this.sv_look3(buf); break;
+            case sv_cmds["SV_LOOK4"]: this.sv_look4(buf); break;
+            case sv_cmds["SV_LOOK5"]: this.sv_look5(buf); break;
+            case sv_cmds["SV_LOOK6"]: this.sv_look6(buf); break;
     
             case sv_cmds["SV_SETTARGET"]: this.sv_settarget(buf); return 13;
     
@@ -122,7 +153,7 @@ class ServerCMDDispatcher {
     
             case sv_cmds["SV_EXIT"]: this.sv_exit(buf); break;
     
-            case sv_cmds["SV_LOAD"]: return 5;
+            case sv_cmds["SV_LOAD"]: this.sv_load(buf); return 5;
     
             case sv_cmds["SV_UNIQUE"]: return 9;
     
@@ -139,6 +170,10 @@ class ServerCMDDispatcher {
 
     sv_tick(buf) {
         this._render_eng.ctick = buf.readUInt8(1);
+    }
+
+    sv_load(buf) {
+        this._svload = buf.readUInt32LE(1);
     }
 
     sv_setorigin(buf) {
@@ -243,6 +278,82 @@ class ServerCMDDispatcher {
     sv_setchar_obj(buf) {
         pl.citem = buf.readInt16LE(1);
         pl.citem_p = buf.readInt16LE(3);
+    }
+
+    sv_look1(buf) {
+        this._tmplook.worn[0] = buf.readUInt16LE(1);
+        this._tmplook.worn[2] = buf.readUInt16LE(3);
+        this._tmplook.worn[3] = buf.readUInt16LE(5);
+        this._tmplook.worn[5] = buf.readUInt16LE(7);
+        this._tmplook.worn[6] = buf.readUInt16LE(9);
+        this._tmplook.worn[7] = buf.readUInt16LE(11);
+        this._tmplook.worn[8] = buf.readUInt16LE(13);
+        this._tmplook.autoflag = buf.readUInt16LE(15);
+    }
+
+    sv_look2(buf) {
+        this._tmplook.worn[9] = buf.readUInt16LE(1);
+        this._tmplook.sprite = buf.readUInt16LE(3);
+        this._tmplook.points = buf.readUInt32LE(5);
+        this._tmplook.hp = buf.readUInt32LE(9);
+        this._tmplook.worn[10] = buf.readUInt16LE(13);
+    }
+
+    sv_look3(buf) {
+        this._tmplook.end = buf.readUInt16LE(1);
+        this._tmplook.a_hp = buf.readUInt16LE(3);
+        this._tmplook.a_end = buf.readUInt16LE(5);
+        this._tmplook.nr = buf.readUInt16LE(7);
+        this._tmplook.id = buf.readUInt16LE(9);
+        this._tmplook.mana = buf.readUInt16LE(11);
+        this._tmplook.a_mana = buf.readUInt16LE(13);
+    }
+
+    sv_look4(buf) {
+        this._tmplook.worn[1] = buf.readUInt16LE(1);
+        this._tmplook.worn[4] = buf.readUInt16LE(3);
+        this._tmplook.extended = buf[5];
+        this._tmplook.pl_price = buf.readUInt32LE(6);
+        this._tmplook.worn[11] = buf.readUInt16LE(10);
+        this._tmplook.worn[12] = buf.readUInt16LE(12);
+        this._tmplook.worn[13] = buf.readUInt16LE(14);
+    }
+
+    sv_look5(buf) {
+        var lookname = buf.slice(1, 16).toString();
+        for (var i = 0; i < lookname.length; i++) {
+            if (lookname[i] == '\0') {
+                lookname = lookname.slice(0, i);
+                break;
+            }
+        }
+        this._tmplook.name = lookname;
+
+        if (!this._tmplook.extended) {
+            if (!this._tmplook.autoflag) {
+                // flag looked-at character for display
+            }
+            var newlook = new CharLook();
+            Object.assign(newlook, this._tmplook);
+            this._look_chars[this._tmplook.nr] = newlook;
+        }
+    }
+
+    sv_look6(buf) {
+        var s = buf[1];
+
+        for (var n = s; n < Math.min(62, s + 2); n++) {
+            this._tmplook.item[n] = buf.readUInt16LE(2 + (n - s) * 6);
+            this._tmplook.price[n] = buf.readUInt32LE(4 + (n - s) * 6);
+        }
+        if (n == 62) {
+            // open shop
+        }
+    }
+
+    lookup_char(ch_nr) {
+        if (!this._look_chars.hasOwnProperty(ch_nr)) return null;
+        return this._look_chars[ch_nr];
     }
 
     sv_setmap(buf, off) {

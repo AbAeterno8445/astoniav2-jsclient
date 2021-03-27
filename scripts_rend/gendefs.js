@@ -155,6 +155,20 @@ const DR_AREABUILD2 = 10;
 
 const SPR_EMPTY = 999;
 
+const FNT_RED = 700;
+const FNT_YELLOW = 701;
+const FNT_GREEN = 702;
+const FNT_BLUE = 703;
+//const FNT_OBFUSCATED = 4;
+const FNT_PURPLE = 1960;
+const FNT_TURQUOISE = 1961;
+const FNT_PINK = 1962;
+const FNT_ORANGE = 1963;
+const FNT_AQUA = 1964;
+const FNT_SILVER = 1965;
+const FNT_EMERALD = 1966;
+const FNT_DEMON = 1967;
+
 const TICKS = 18;
 const TICK = (1000/TICKS);
 const QSIZE = 8;

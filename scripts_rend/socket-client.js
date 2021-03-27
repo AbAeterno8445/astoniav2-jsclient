@@ -141,6 +141,10 @@ class SocketClient {
                 buf.writeInt32LE(this._renderengine.ticker, 1);
             break;
 
+            case cl_cmds["CL_CMD_AUTOLOOK"]:
+                buf.writeInt32LE(data.ch_nr, 1);
+            break;
+
             case cl_cmds["CL_CMD_MOVE"]:
             case cl_cmds["CL_CMD_TURN"]:
             case cl_cmds["CL_CMD_USE"]:
@@ -189,5 +193,9 @@ class SocketClient {
 
     get_tilemap() {
         return this._renderengine.tilemap;
+    }
+
+    lookup_char(ch_nr) {
+        return this._cmd_dispatcher.lookup_char(ch_nr);
     }
 }

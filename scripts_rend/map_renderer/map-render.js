@@ -5,6 +5,10 @@ const mapCanvas = new CanvasHandler(document.getElementById('cv-map'));
 mapCanvas.setDefaultOffset(cv_xoff, cv_yoff, true);
 mapCanvas.setLoadingImage("./gfx/00035.png");
 
+const fontDrawer = new FontDrawer();
+for (var i = 700; i <= 703; i++) fontDrawer.load_font(i, getNumSpritePath(i));
+for (var i = 1960; i <= 1967; i++) fontDrawer.load_font(i, getNumSpritePath(i));
+
 var doc_keyheld = { ctrl: 0, shift: 0, alt: 0 };
 var doc_mouseheld = { left: 0, middle: 0, right: 0 };
 
@@ -36,13 +40,13 @@ function getCursorIso(e) {
     if (mpos.x < 0 || mpos.y < 0 || mpos.x > mapCanvas.cv.width || mpos.y > mapCanvas.cv.height) in_canvas = 0;
 
     var x = mpos.x + 160;
-    var y = mpos.y + 8;
+    var y = mpos.y + 16;
 
     var mx = 2 * y + x - (mapCanvas.drawYOffset * 2) - mapCanvas.drawXOffset + ((renderdistance - 34) / 2 * 32);
     var my = x - 2 * y + (mapCanvas.drawYOffset * 2) - mapCanvas.drawXOffset + ((renderdistance - 34) / 2 * 32);
 
     mx = Math.floor(mx / 32) - 17;
-    my = Math.floor(my / 32) - 13;
+    my = Math.floor(my / 32) - 12;
 
     return { x: mx, y: my, in: in_canvas };
 }
@@ -78,7 +82,12 @@ function scanMapFlag(tilemap, startpos, flag) {
 function mouseCommand(event) {
     var cursor_img = cursor_default;
     var mpos = getCursorIso(event);
-    var tilemap = sockClient.get_tilemap();
+
+    try {
+        var tilemap = sockClient.get_tilemap();
+    } catch (err) { // Catches mouse events firing error before sockClient is loaded
+        return;
+    }
 
     if (mpos.in && mpos.x >= 0 && mpos.y >= 0 && mpos.x < renderdistance && mpos.y < renderdistance) {
         tile_hovered = mpos.x + mpos.y * renderdistance;
@@ -226,7 +235,16 @@ function autohide(x, y)
 // Map rendering
 var char_cv = document.createElement('canvas');
 var char_cv_ctx = char_cv.getContext('2d');
+
 var citem_last = 0;
+
+var charlookup_req = {};
+var charname_imgs = {};
+
+// Canvas source for character health bars
+var char_hbar_cv = document.createElement('canvas');
+char_hbar_cv.height = 1;
+
 function renderMap(tilemap) {
     if (!tilemap) return;
 
@@ -329,14 +347,14 @@ function renderMap(tilemap) {
                     char_cv_ctx.filter = gfx_filter;
                     char_cv_ctx.drawImage(char_img, 0, 0);
 
-                    mapCanvas.drawImageIsometric(char_cv, j, i, pl_xoff + obj_xoff + 16, pl_yoff + obj_yoff, 0);
+                    mapCanvas.drawImageIsometric(char_cv, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff, 0);
                 }
             }
 
             /** PLAYER COMMAND SPRITES */
             // Attack target sprite
             if (pl.attack_cn && pl.attack_cn == tilemap[tile_id].ch_nr)
-                mapCanvas.drawImageIsometric(getNumSpritePath(34), j, i, pl_xoff + tilemap[tile_id].obj_xoff + 16, pl_yoff + tilemap[tile_id].obj_yoff);
+                mapCanvas.drawImageIsometric(getNumSpritePath(34), j, i, pl_xoff + tilemap[tile_id].obj_xoff, pl_yoff + tilemap[tile_id].obj_yoff);
 
             // Give target sprite
             if (pl.misc_action == DR_GIVE && pl.misc_target1 == tilemap[tile_id].ch_nr)
@@ -383,6 +401,47 @@ function renderMap(tilemap) {
                 var grave_sprnum = 240 + ((tilemap[tile_id].flags & TOMB) >> 12) - 1;
                 var grave_spr = loadGFX(getNumSpritePath(grave_sprnum), gfx_filter, fx_suff);
                 mapCanvas.drawImageIsometric(grave_spr, j, i, pl_xoff, pl_yoff);
+            }
+
+            // Character info
+            let ch_nr = tilemap[tile_id].ch_nr;
+            if (ch_nr) {
+                let char_info = sockClient.lookup_char(ch_nr);
+                if (!char_info && !charlookup_req.hasOwnProperty(ch_nr)) {
+                    charlookup_req[ch_nr] = 1;
+                    setTimeout(() => {
+                        delete charlookup_req[ch_nr];
+                    }, 2000);
+                    sockClient.send_client_command(cl_cmds["CL_CMD_AUTOLOOK"], { ch_nr: ch_nr });
+                } else if (char_info) {
+                    // Character name
+                    var chname_img;
+                    var chname_full = char_info.name;
+                    if (tilemap[tile_id].ch_proz) chname_full += " " + tilemap[tile_id].ch_proz + "%";
+
+                    if (!charname_imgs.hasOwnProperty(chname_full)) {
+                        chname_img = fontDrawer.get_text_img(FNT_YELLOW, chname_full);
+                        charname_imgs[chname_full] = chname_img;
+                    }
+                    chname_img = charname_imgs[chname_full];
+
+                    if (chname_img) {
+                        var chname_xoff = Math.round(pl_xoff + tilemap[tile_id].obj_xoff);
+                        var chname_yoff = Math.round(pl_yoff + tilemap[tile_id].obj_yoff - char_cv.height + 4);
+                        mapCanvas.drawImageIsometric(chname_img, j, i, chname_xoff, chname_yoff);
+                    }
+
+                    // Healthbar
+                    if (tilemap[tile_id].ch_proz) {
+                        char_hbar_cv.width = Math.ceil(48 * tilemap[tile_id].ch_proz / 100);
+                        char_hbar_cv.getContext('2d').fillStyle = 'red';
+                        char_hbar_cv.getContext('2d').fillRect(0, 0, char_hbar_cv.width, 1);
+
+                        var hbar_xoff = pl_xoff + tilemap[tile_id].obj_xoff - Math.floor((48 - char_hbar_cv.width) / 2);
+                        var hbar_yoff = pl_yoff + tilemap[tile_id].obj_yoff - char_cv.height + 9;
+                        mapCanvas.drawImageIsometric(char_hbar_cv, j, i, hbar_xoff, hbar_yoff);
+                    }
+                }
             }
         }
     }

@@ -104,27 +104,33 @@ class CanvasHandler {
         this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
     }
 
-    /** If enqueue is 1, will queue given image for loading before drawing it (if it hasn't been loaded before) */
-    drawImage(imgPath, x, y, enqueue = 1) {
-        // Image not loaded yet
-        if (!this.loadedImages[imgPath] && enqueue) {
-            this.loadImage(imgPath);
+    /** If enqueue is 1, will queue given image for loading before drawing it (if it hasn't been loaded before).
+     * img can be a canvas element, which will draw it directly. */
+    drawImage(img, x, y, enqueue = 1) {
+        var drawimg;
+        if (!(img instanceof HTMLCanvasElement)) {
+            // Image not loaded yet
+            if (!this.loadedImages[img] && enqueue) {
+                this.loadImage(img);
 
-            // Queue for re-drawing
-            if (enqueue) {
-                setTimeout(() => {
-                    this.drawImage(imgPath, x, y, enqueue);
-                }, this.redrawTimeout);
-            }
-            
-            if (this.loadingImg) {
-                this.drawImage(this.loadingImg, x, y, 0);
-            }
+                // Queue for re-drawing
+                if (enqueue) {
+                    setTimeout(() => {
+                        this.drawImage(img, x, y, enqueue);
+                    }, this.redrawTimeout);
+                }
+                
+                if (this.loadingImg) {
+                    this.drawImage(this.loadingImg, x, y, 0);
+                }
 
-            return;
+                return;
+            }
+        } else {
+            drawimg = img;
         }
-        var img = this.loadedImages[imgPath];
-        this.ctx.drawImage(img, this.drawXOffset + x, this.drawYOffset + y);
+        drawimg = this.loadedImages[img];
+        this.ctx.drawImage(drawimg, this.drawXOffset + x, this.drawYOffset + y);
     }
 
     /** X and Y in tiles. img can be path to loaded image, or a canvas element to draw directly */

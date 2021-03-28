@@ -817,15 +817,6 @@ class RenderEngine {
                 this.tilemap[n].obj2 = tmp;
             }
         }
-
-        renderMap(this.tilemap);
-    }
-
-    // Gets drawing data to be sent to renderer client
-    eng_getdata() {
-        return {
-            mapdata: this.tilemap
-        }
     }
 
     /** MAP FUNCTIONS **/

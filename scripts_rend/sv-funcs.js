@@ -1,32 +1,5 @@
-//const { sv_cmds, renderdistance } = require("./gendefs");
-
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
-}
-
-class CharLook {
-    constructor() {
-        this.autoflag = 0;
-        this.worn = [];
-        for (var i = 0; i < 20; i++) this.worn.push(0);
-        this.sprite = 0;
-        this.points = 0;
-        this.name = "";
-        this.hp = 0;
-        this.end = 0;
-        this.mana = 0;
-        this.a_hp = 0;
-        this.a_end = 0;
-        this.a_mana = 0;
-        this.nr = 0;
-        this.id = 0;
-        this.extended = 0;
-        this.item = [];
-        for (var i = 0; i < 62; i++) this.item.push(0);
-        this.price = [];
-        for (var i = 0; i < 62; i++) this.price.push(0);
-        this.pl_price = 0;
-    }
 }
 
 class ServerCMDDispatcher {
@@ -49,8 +22,10 @@ class ServerCMDDispatcher {
         "You have been banned for an hour. Enhance your social behaviour before you come back."                 //14
     ];
 
-    constructor(render_eng, sfx_player) {
+    constructor(player, render_eng, game_eng, sfx_player) {
+        this.pl = player;
         this._render_eng = render_eng;
+        this._game_eng = game_eng;
         this._sfx_player = sfx_player;
 
         this._svload = 0;
@@ -63,7 +38,6 @@ class ServerCMDDispatcher {
         this._log_text = "";
 
         // lookup characters
-        this._look_chars = {};
         this._tmplook = new CharLook();
 
         // Flag to end connection
@@ -79,7 +53,7 @@ class ServerCMDDispatcher {
             return this.sv_setmap(buf, buf[0] & ~sv_cmds["SV_SETMAP"]);
         }
     
-        var cmd_name = getKeyByValue(sv_cmds, buf[0]);
+        //var cmd_name = getKeyByValue(sv_cmds, buf[0]);
         //console.log("received", cmd_name, "command");
     
         switch (buf[0]) {
@@ -191,94 +165,93 @@ class ServerCMDDispatcher {
         }
     }
 
-    sv_setchar_name(buf) { pl.name += buf.slice(1, 16).toString(); }
+    sv_setchar_name(buf) { this.pl.name += buf.slice(1, 16).toString(); }
 
     sv_setchar_name_end(buf) {
-        pl.name += buf.slice(1, 11).toString();
-        for (var i = 0; i < pl.name.length; i++) {
-            if (pl.name[i] == '\0') {
-                pl.name = pl.name.slice(0, i);
+        this.pl.name += buf.slice(1, 11).toString();
+        for (var i = 0; i < this.pl.name.length; i++) {
+            if (this.pl.name[i] == '\0') {
+                this.pl.name = this.pl.name.slice(0, i);
                 break;
             }
         }
     }
 
-    sv_setchar_mode(buf) { pl.mode = buf[1]; }
+    sv_setchar_mode(buf) { this.pl.mode = buf[1]; }
 
     sv_setchar_hp(buf) {
-        for (var i = 0; i < 6; i++) pl.hp[i] = buf.readUInt16LE(1 + i * 2);
+        for (var i = 0; i < 6; i++) this.pl.hp[i] = buf.readUInt16LE(1 + i * 2);
     }
 
     sv_setchar_endur(buf) {
-        for (var i = 0; i < 6; i++) pl.end[i] = buf.readInt16LE(1 + i * 2);
+        for (var i = 0; i < 6; i++) this.pl.end[i] = buf.readInt16LE(1 + i * 2);
     }
 
     sv_setchar_mana(buf) {
-        for (var i = 0; i < 6; i++) pl.mana[i] = buf.readInt16LE(1 + i * 2);
+        for (var i = 0; i < 6; i++) this.pl.mana[i] = buf.readInt16LE(1 + i * 2);
     }
 
     sv_setchar_attrib(buf) {
         var n = buf[1];
         if (n < 0 || n > 4) return;
 
-        for (var i = 0; i < 6; i++) pl.attrib[n][i] = buf[2 + i];
+        for (var i = 0; i < 6; i++) this.pl.attrib[n][i] = buf[2 + i];
     }
 
     sv_setchar_skill(buf) {
         var n = buf[1];
         if (n < 0 || n > 49) return;
 
-        for (var i = 0; i < 6; i++) pl.skill[n][i] = buf[2 + i];
+        for (var i = 0; i < 6; i++) this.pl.skill[n][i] = buf[2 + i];
     }
 
-    sv_setchar_ahp(buf) { pl.a_hp = buf.readUInt16LE(1); }
-    sv_setchar_aend(buf) { pl.a_end = buf.readUInt16LE(1); }
-    sv_setchar_amana(buf) { pl.a_mana = buf.readUInt16LE(1); }
+    sv_setchar_ahp(buf) { this.pl.a_hp = buf.readUInt16LE(1); }
+    sv_setchar_aend(buf) { this.pl.a_end = buf.readUInt16LE(1); }
+    sv_setchar_amana(buf) { this.pl.a_mana = buf.readUInt16LE(1); }
     
-    sv_setchar_dir(buf) { pl.dir = buf[1]; }
+    sv_setchar_dir(buf) { this.pl.dir = buf[1]; }
 
     sv_setchar_pts(buf) {
-        pl.points = buf.readUInt32LE(1);
-        pl.points_tot = buf.readUInt32LE(5);
-        pl.kindred = buf.readUInt32LE(9);
+        this.pl.points = buf.readUInt32LE(1);
+        this.pl.points_tot = buf.readUInt32LE(5);
+        this.pl.kindred = buf.readUInt32LE(9);
     }
 
     sv_setchar_gold(buf) {
-        pl.gold = buf.readUInt32LE(1);
-        pl.armor = buf.readUInt32LE(5);
-        pl.weapon = buf.readUInt32LE(9);
+        this.pl.gold = buf.readUInt32LE(1);
+        this.pl.armor = buf.readUInt32LE(5);
+        this.pl.weapon = buf.readUInt32LE(9);
     }
 
     sv_setchar_item(buf) {
         var n = buf.readUInt32LE(1);
         if (n < 0 || n > 39) console.log("WARNING: Invalid setchar item. n:", n);
-        inv_elem[n].style.backgroundImage = "url(" + getNumSpritePath(buf.readInt16LE(5)) + ")";
-        //pl.item[n] = buf.readInt16LE(5);
-        //pl.item_p[n] = buf.readInt16LE(7);
+        this.pl.item[n] = buf.readInt16LE(5);
+        this.pl.item_p[n] = buf.readInt16LE(7);
     }
 
     sv_setchar_worn(buf) {
         var n = buf.readUInt32LE(1);
         if (n < 0 || n > 19) console.log("WARNING: Invalid setchar worn. n:", n);
-        //pl.worn[n] = buf.readInt16LE(5);
-        //pl.worn_p[n] = buf.readInt16LE(7);
+        this.pl.worn[n] = buf.readInt16LE(5);
+        this.pl.worn_p[n] = buf.readInt16LE(7);
     }
 
     sv_setchar_spell(buf) {
         var n = buf.readUInt32LE(1);
         if (n < 0 || n > 19) console.log("WARNING: Invalid setchar spell. n:", n);
-        //pl.spell[n] = buf.readInt16LE(5);
-        //pl.active[n] = buf.readInt16LE(7);
+        this.pl.spell[n] = buf.readInt16LE(5);
+        this.pl.active[n] = buf.readInt16LE(7);
     }
 
     sv_setchar_obj(buf) {
-        pl.citem = buf.readInt16LE(1);
-        pl.citem_p = buf.readInt16LE(3);
+        this.pl.citem = buf.readInt16LE(1);
+        this.pl.citem_p = buf.readInt16LE(3);
     }
 
     sv_setchar_obj(buf) {
-        pl.citem = buf.readInt16LE(1);
-        pl.citem_p = buf.readInt16LE(3);
+        this.pl.citem = buf.readInt16LE(1);
+        this.pl.citem_p = buf.readInt16LE(3);
     }
 
     sv_look1(buf) {
@@ -336,7 +309,7 @@ class ServerCMDDispatcher {
             }
             var newlook = new CharLook();
             Object.assign(newlook, this._tmplook);
-            this._look_chars[this._tmplook.nr] = newlook;
+            this._game_eng.addLookChar(newlook);
         }
     }
 
@@ -350,11 +323,6 @@ class ServerCMDDispatcher {
         if (n == 62) {
             // open shop
         }
-    }
-
-    lookup_char(ch_nr) {
-        if (!this._look_chars.hasOwnProperty(ch_nr)) return null;
-        return this._look_chars[ch_nr];
     }
 
     sv_setmap(buf, off) {
@@ -488,12 +456,12 @@ class ServerCMDDispatcher {
     }
 
     sv_settarget(buf) {
-        pl.attack_cn = buf.readUInt16LE(1);
-        pl.goto_x = buf.readUInt16LE(3);
-        pl.goto_y = buf.readUInt16LE(5);
-        pl.misc_action = buf.readUInt16LE(7);
-        pl.misc_target1 = buf.readUInt16LE(9);
-        pl.misc_target2 = buf.readUInt16LE(11);
+        this.pl.attack_cn = buf.readUInt16LE(1);
+        this.pl.goto_x = buf.readUInt16LE(3);
+        this.pl.goto_y = buf.readUInt16LE(5);
+        this.pl.misc_action = buf.readUInt16LE(7);
+        this.pl.misc_target1 = buf.readUInt16LE(9);
+        this.pl.misc_target2 = buf.readUInt16LE(11);
     }
 
     sv_exit(buf) {

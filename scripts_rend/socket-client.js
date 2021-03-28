@@ -1,13 +1,9 @@
-//const net = require("net");
-//const { ServerCMDDispatcher } = require("../scripts_main/sv-funcs");
-//const { sv_cmds, cl_cmds, renderdistance } = require("../scripts_main/gendefs");
-//const { RenderEngine } = require("../scripts_main/render-engine");
-
 class SocketClient {
-    constructor(sfx_player) {
+    constructor(player, game_eng, sfx_player) {
+        this._game_eng = game_eng;
         this._sfx_player = sfx_player;
         this._renderengine = new RenderEngine();
-        this._cmd_dispatcher = new ServerCMDDispatcher(this._renderengine, this._sfx_player);
+        this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, this._sfx_player);
         this._init();
     }
 
@@ -173,6 +169,13 @@ class SocketClient {
         this._client.write(buf);
     }
 
+    flush_game_commands() {
+        do {
+            var cmd = this._game_eng.popCommand();
+            if (cmd) this.send_client_command(cmd[0], cmd[1]);
+        } while (cmd);
+    }
+
     render_engine_loop() {
         setInterval(() => {
             // Login state
@@ -181,6 +184,8 @@ class SocketClient {
                 return;
             }
 
+            this.flush_game_commands();
+
             if ((this._renderengine.ticker & 15) == 0) {
                 this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
             }
@@ -188,14 +193,7 @@ class SocketClient {
             this._tick_do();
 
             this._renderengine.engine_tick();
+            this._game_eng.renderMap(this._renderengine.tilemap);
         }, TICK);
-    }
-
-    get_tilemap() {
-        return this._renderengine.tilemap;
-    }
-
-    lookup_char(ch_nr) {
-        return this._cmd_dispatcher.lookup_char(ch_nr);
     }
 }

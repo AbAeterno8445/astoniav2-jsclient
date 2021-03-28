@@ -27,7 +27,26 @@ class MainPlayer {
 
         this.gold = 0;
 
-        //TODO items (inventory, worn)
+        this.item = [];
+        this.item_p = [];
+        for (var i = 0; i < 40; i++) {
+            this.item.push(0);
+            this.item_p.push(0);
+        }
+
+        this.worn = [];
+        this.worn_p = [];
+        for (var i = 0; i < 20; i++) {
+            this.worn.push(0);
+            this.worn_p.push(0);
+        }
+
+        this.spell = [];
+        this.active = [];
+        for (var i = 0; i < 20; i++) {
+            this.spell.push(0);
+            this.active.push(0);
+        }
 
         this.armor = 0;
         this.weapon = 0;
@@ -44,5 +63,3 @@ class MainPlayer {
         this.dir = 0;
     }
 }
-
-var pl = new MainPlayer();

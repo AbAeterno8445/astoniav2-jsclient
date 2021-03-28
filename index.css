@@ -2,11 +2,8 @@ body {
     background-color: rgb(40, 40, 40);
 }
 
-canvas {
-    border: 1px solid gray;
-}
-
 #cv-map {
+    border: 1px solid gray;
     width: 1200px;
     height: 720px;
 }
@@ -14,8 +11,25 @@ canvas {
 #div-chatbox {
     flex: 1;
     color: wheat;
+    background-color: black;
     border: 1px solid white;
     overflow: auto;
+    height: 100%;
+    width: 100%;
+    padding-bottom: 4px;
+}
+
+.div-logline {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 6px;
+    margin-top: 2px;
+    margin-left: 2px;
+}
+
+#inp-chatbox {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #div-inv {

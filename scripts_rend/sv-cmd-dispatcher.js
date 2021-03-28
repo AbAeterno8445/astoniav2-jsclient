@@ -36,6 +36,8 @@ class ServerCMDDispatcher {
 
         // sv_log vars
         this._log_text = "";
+        this._log_buffer = [];
+        setInterval(() => this.log_pop(), 20);
 
         // lookup characters
         this._tmplook = new CharLook();
@@ -99,10 +101,10 @@ class ServerCMDDispatcher {
     
             case sv_cmds["SV_TICK"]: this.sv_tick(buf); return 2;
     
-            case sv_cmds["SV_LOG0"]: this.sv_log(buf); break;
-            case sv_cmds["SV_LOG1"]: this.sv_log(buf); break;
-            case sv_cmds["SV_LOG2"]: this.sv_log(buf); break;
-            case sv_cmds["SV_LOG3"]: this.sv_log(buf); break;
+            case sv_cmds["SV_LOG0"]: this.sv_log(buf, 0); break;
+            case sv_cmds["SV_LOG1"]: this.sv_log(buf, 1); break;
+            case sv_cmds["SV_LOG2"]: this.sv_log(buf, 2); break;
+            case sv_cmds["SV_LOG3"]: this.sv_log(buf, 3); break;
     
             case sv_cmds["SV_SCROLL_RIGHT"]: this.sv_scroll_right(); return 1;
             case sv_cmds["SV_SCROLL_LEFT"]: this.sv_scroll_left(); return 1;
@@ -447,18 +449,27 @@ class ServerCMDDispatcher {
     sv_scroll_left() { this._render_eng.map_shift_left(); }
     sv_scroll_right() { this._render_eng.map_shift_right(); }
 
-    sv_log(buf) {
+    sv_log(buf, font) {
         var buf_read = buf.slice(1, 16);
         for (var i = 0; i < buf_read.length; i++) {
             var ch = String.fromCharCode(buf_read[i])
             this._log_text += ch;
             if (ch == String.fromCharCode(10)) {
-                console.log("Received log: < ", this._log_text.trim(), ">");
-                chat_logmsg(this._log_text.trim());
+                this.log_add(this._log_text.trim(), font);
+                //this._game_eng.chatLogger.chat_logmsg_format(this._log_text.trim(), font);
                 this._log_text = "";
                 return;
             }
         }
+    }
+
+    log_add(msg, font) {
+        this._log_buffer.push([msg, font]);
+    }
+
+    log_pop() {
+        var log = this._log_buffer.shift();
+        if (log) this._game_eng.chatLogger.chat_logmsg_format(log[0], log[1]);
     }
 
     sv_playsound(buf) {
@@ -479,7 +490,9 @@ class ServerCMDDispatcher {
     sv_exit(buf) {
         var reason = buf.readUInt32LE(1);
 
-        console.log("EXIT:", this.get_logout_reason(reason));
+        var log = "EXIT: " + this.get_logout_reason(reason);
+        this.log_add(log, FNT_YELLOW);
+        console.log(log);
 
         this.exit = 1;
     }

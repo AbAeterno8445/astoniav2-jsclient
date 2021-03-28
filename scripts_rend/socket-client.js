@@ -151,6 +151,17 @@ class SocketClient {
                 buf.writeInt32LE(data.ch_nr, 1);
             break;
 
+            case cl_cmds["CL_CMD_INPUT1"]:
+            case cl_cmds["CL_CMD_INPUT2"]:
+            case cl_cmds["CL_CMD_INPUT3"]:
+            case cl_cmds["CL_CMD_INPUT4"]:
+            case cl_cmds["CL_CMD_INPUT5"]:
+            case cl_cmds["CL_CMD_INPUT6"]:
+            case cl_cmds["CL_CMD_INPUT7"]:
+            case cl_cmds["CL_CMD_INPUT8"]:
+                buf.write(data.input, 1);
+            break;
+
             case cl_cmds["CL_CMD_MOVE"]:
             case cl_cmds["CL_CMD_TURN"]:
             case cl_cmds["CL_CMD_USE"]:
@@ -174,6 +185,10 @@ class SocketClient {
                 buf.writeUInt32LE(data.target, 1);
                 this._sfx_player.play_sfx("click");
             break;
+
+            default:
+                console.log("WARNING: Unhandled client command", cmd, "- data:", data);
+                return;
         }
 
         this._client.write(buf);

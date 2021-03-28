@@ -13,8 +13,10 @@ class GameRenderer {
         // v2 font text drawer
         this.fontDrawer = new FontDrawer();
         // preload font files
-        for (var i = 700; i <= 703; i++) this.fontDrawer.load_font(i, this.getNumSpritePath(i));
+        for (var i = 0; i <= 3; i++) this.fontDrawer.load_font(i, this.getNumSpritePath(700 + i));
         for (var i = 1960; i <= 1967; i++) this.fontDrawer.load_font(i, this.getNumSpritePath(i));
+
+        this.chatLogger = new ChatLogger(this.fontDrawer, FNT_YELLOW);
 
         // Keys/mouse held
         this.doc_keyheld = { ctrl: 0, shift: 0, alt: 0 };
@@ -86,6 +88,23 @@ class GameRenderer {
                 case "Shift": this.doc_keyheld.shift = 1; break;
                 case "Alt": this.doc_keyheld.alt = 1; break;
                 case "Control": this.doc_keyheld.ctrl = 1; break;
+                case "Enter":
+                    var chat_inp = document.getElementById('inp-chatbox');
+                    if (document.activeElement != chat_inp) {
+                        chat_inp.focus();
+                    } else {
+                        var chat_inpmsg = chat_inp.value.trim();
+                        if (chat_inpmsg.length > 0) {
+                            for (var i = 0; i < 8; i ++) {
+                                this.queueCommand(cl_cmds["CL_CMD_INPUT" + (i + 1)], {
+                                    input: chat_inpmsg.slice(i * 15, i * 15 + 16)
+                                });
+                            }
+                            chat_inp.value = "";
+                        }
+                        chat_inp.blur();
+                    }
+                break;
             }
         });
 

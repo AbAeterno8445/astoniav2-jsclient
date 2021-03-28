@@ -155,10 +155,10 @@ const DR_AREABUILD2 = 10;
 
 const SPR_EMPTY = 999;
 
-const FNT_RED = 700;
-const FNT_YELLOW = 701;
-const FNT_GREEN = 702;
-const FNT_BLUE = 703;
+const FNT_RED = 0;
+const FNT_YELLOW = 1;
+const FNT_GREEN = 2;
+const FNT_BLUE = 3;
 //const FNT_OBFUSCATED = 4;
 const FNT_PURPLE = 1960;
 const FNT_TURQUOISE = 1961;

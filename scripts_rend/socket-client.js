@@ -67,12 +67,15 @@ class SocketClient {
         switch(buf[0]) {
             case sv_cmds["SV_CHALLENGE"]:
                 setTimeout(() => {
-                    console.log("sent challenge.");
+                    var tmp = buf.readUInt32LE(1);
+
                     var buf_ans = Buffer.alloc(16);
                     buf_ans[0] = cl_cmds["CL_CHALLENGE"];
-                    buf_ans.writeUInt8(123, 1);
+                    buf_ans.writeUInt32LE(ServerCMDDispatcher.xcrypt(tmp), 1);
                     buf_ans.writeUInt32LE(this.sv_version, 5);
                     this._client.write(buf_ans);
+
+                    console.log("sent challenge.");
                 }, 500);
             break;
 
@@ -86,9 +89,16 @@ class SocketClient {
                 console.log("logged in.");
             break;
 
-            case sv_cmds["SV_EXIT"]: break;
+            case sv_cmds["SV_EXIT"]:
+                var tmp = buf.readUInt32LE(1);
+                console.log("EXIT:", this._cmd_dispatcher.get_logout_reason(tmp));
+            break;
 
-            case sv_cmds["SV_CAP"]: break;
+            case sv_cmds["SV_CAP"]:
+                var tmp = buf.readUInt32LE(1);
+                var prio = buf.readUInt32LE(5);
+                console.log("Server response: Player limit reached. Your place in queue:", tmp, "Priority:", prio);
+            break;
         }
 
         // All login process packets are 16 bytes - change this if a difference arises

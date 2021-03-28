@@ -44,6 +44,18 @@ class ServerCMDDispatcher {
         this.exit = 0;
     }
 
+    static xcrypt(val) {
+        var secret = "Ifhjf64hH8sa,-#39ddj843tvxcv0434dvsdc40G#34Trefc349534Y5#34trecerr9435#erZt#eA534#5erFtw#Trwec,9345mwrxm gerte-534lMIZDN(/dn8sfn8&DBDB/D&s8efnsd897)DDzD'D'D''Dofs,t0943-rg-gdfg-gdf.t,e95.34u.5retfrh.wretv.569v4#asf.59m(D)/ND/DDLD;gd+dsa,fw9r,x  OD(98snfsfa";
+
+        var res = 0;
+        res += secret.charCodeAt(val & 255);
+        res += secret.charCodeAt((val >> 8) & 255) << 8;
+        res += secret.charCodeAt((val >> 16) & 255) << 16;
+        res += secret.charCodeAt((val >> 24) & 255) << 24;
+        res ^= 0x5a7ce52e;
+        return res;
+    }
+
     sv_cmd(buf_arr) {
         var buf = Buffer.from(buf_arr);
     
@@ -467,9 +479,13 @@ class ServerCMDDispatcher {
     sv_exit(buf) {
         var reason = buf.readUInt32LE(1);
 
-        if (reason < 1 || reason > 12) console.log("EXIT: Reason unknown.");
-        else console.log("EXIT:", this._logout_reason[reason]);
+        console.log("EXIT:", this.get_logout_reason(reason));
 
         this.exit = 1;
+    }
+
+    get_logout_reason(reason_nr) {
+        if (reason_nr < 1 || reason_nr > this._logout_reason.length) return "Reason unknown.";
+        return this._logout_reason[reason_nr];
     }
 }

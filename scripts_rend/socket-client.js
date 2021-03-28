@@ -209,7 +209,7 @@ class SocketClient {
             return;
         }
 
-        var tick_start = new Date().getTime();
+        var tick_start = Date.now();
 
         this.flush_game_commands();
 
@@ -222,7 +222,7 @@ class SocketClient {
         this._renderengine.engine_tick();
         this._game_eng.renderMap(this._renderengine.tilemap);
 
-        var tick_diff = new Date().getTime() - tick_start;
+        var tick_diff = Date.now() - tick_start;
         setTimeout(() => this.render_engine_loop(), TICK - tick_diff);
     }
 }

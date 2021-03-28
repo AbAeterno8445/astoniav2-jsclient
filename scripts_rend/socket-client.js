@@ -202,23 +202,27 @@ class SocketClient {
     }
 
     render_engine_loop() {
-        setInterval(() => {
-            // Login state
-            if (!this.logged) {
-                this._login_proc();
-                return;
-            }
+        // Login state
+        if (!this.logged) {
+            this._login_proc();
+            setTimeout(() => this.render_engine_loop(), TICK);
+            return;
+        }
 
-            this.flush_game_commands();
+        var tick_start = new Date().getTime();
 
-            if ((this._renderengine.ticker & 15) == 0) {
-                this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
-            }
+        this.flush_game_commands();
 
-            this._tick_do();
+        if ((this._renderengine.ticker & 15) == 0) {
+            this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
+        }
 
-            this._renderengine.engine_tick();
-            this._game_eng.renderMap(this._renderengine.tilemap);
-        }, TICK);
+        this._tick_do();
+
+        this._renderengine.engine_tick();
+        this._game_eng.renderMap(this._renderengine.tilemap);
+
+        var tick_diff = new Date().getTime() - tick_start;
+        setTimeout(() => this.render_engine_loop(), TICK - tick_diff);
     }
 }

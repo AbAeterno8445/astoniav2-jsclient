@@ -10,8 +10,9 @@ class CanvasHandler {
         this.drawYOffset = 0;
         this.defaultYoff = 0;
 
-        // If an image that's not loaded tries to be drawn, returns this image instead
+        // Returns loadingImg after non-loaded images take longer than loadingTimeout to load
         this.loadingImg = null;
+        this.loadingTimeout = 1000;
 
         /** Keys are the path to the image, values are the images themselves.        
          *  e.g. loadedImages["/assets/tiles/floors/00950.png"] = Image() */
@@ -38,9 +39,10 @@ class CanvasHandler {
         if (reset) this.resetOffset();
     }
 
-    setLoadingImage(img_path) {
+    setLoadingImage(img_path, timeout = 1000) {
         this.loadImage(img_path);
         this.loadingImg = img_path;
+        this.loadingTimeout = timeout;
     }
 
     /** Load an image for future drawing.
@@ -53,7 +55,8 @@ class CanvasHandler {
             this.loadedImages.hasOwnProperty(altpath) && altpath) {
             return;
         }
-        var newImg = new Image();
+
+        let newImg = new Image();
         if (!asImgData) {
             newImg.onload = () => {
                 if (altpath) path = altpath;
@@ -76,6 +79,13 @@ class CanvasHandler {
         newImg.src = path;
         if (altpath) path = altpath;
         this.loadedImages[path] = null;
+
+        // Loading image if non-loaded after timeout
+        setTimeout(() => {
+            if (this.loadedImages[path] === null) {
+                this.loadedImages[path] = this.loadedImages[this.loadingImg];
+            }
+        }, this.loadingTimeout);
     }
 
     /** Load a list of images for future drawing */
@@ -119,10 +129,6 @@ class CanvasHandler {
                         this.drawImage(img, x, y, enqueue);
                     }, this.redrawTimeout);
                 }
-                
-                if (this.loadingImg) {
-                    this.drawImage(this.loadingImg, x, y, 0);
-                }
 
                 return;
             }
@@ -138,16 +144,13 @@ class CanvasHandler {
         var drawimg;
         if (!(img instanceof HTMLCanvasElement)) {
             // Image not loaded yet
-            if (!this.loadedImages.hasOwnProperty(img) || (this.loadedImages.hasOwnProperty(img) && this.loadedImages[img] === null)) {
+            var img_loaded = this.loadedImages.hasOwnProperty(img);
+            if (!img_loaded || (img_loaded && this.loadedImages[img] === null)) {
                 if (redraw) {
                     this.loadImage(img);
                     setTimeout(() => {
                         this.drawImageIsometric(img, x, y, xoff, yoff, 1);
                     }, this.redrawTimeout);
-                }
-
-                if (this.loadingImg) {
-                    this.drawImageIsometric(this.loadingImg, x, y, xoff, yoff, 0);
                 }
 
                 return;

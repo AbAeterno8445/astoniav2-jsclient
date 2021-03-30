@@ -189,7 +189,7 @@ class ServerCMDDispatcher {
                 break;
             }
         }
-        this.pl.race_num = buf.readInt32LE(11);
+        this.pl.race = buf.readInt32LE(11);
 
         var pl_newfile = './characters/' + this.pl.name + '.json';
         if (this.pl.file != pl_newfile && fs.existsSync(this.pl.file)) {

@@ -1,6 +1,8 @@
 class MainPlayer {
     constructor() {
+        this.file = "";
         this.name = "";
+        this.newname = ""; // New char name
 
         this.mode = 0; // 0: slow, 1: medium, 2: fast
 
@@ -61,5 +63,54 @@ class MainPlayer {
         this.misc_target1 = 0;
         this.misc_target2 = 0;
         this.dir = 0;
+
+        this.usnr = 0;
+        this.pass1 = 0;
+        this.pass2 = 0;
+
+        // Extra savefile data
+        this.description = "";
+        this.race = 0;
+        this.creation = 0;
+    }
+
+    /** Loads character data using the 'file' var (remember to set it before calling this).
+     * Returns 1 on success, 0 on failure */
+    loadfile() {
+        if (!this.file) return 0;
+        if (!fs.existsSync(this.file)) return 0;
+
+        try {
+            var chardata = JSON.parse(fs.readFileSync(this.file));
+            this.name = chardata.name;
+            this.race = chardata.race;
+            this.creation = chardata.creation;
+            this.points_tot = chardata.points;
+            this.description = chardata.description;
+            this.usnr = chardata.usnr;
+            this.pass1 = chardata.pass1;
+            this.pass2 = chardata.pass2;
+        } catch (err) {
+            console.log("ERROR - Reading character file:", err);
+            return 0;
+        }
+        return 1;
+    }
+
+    savefile() {
+        if (!this.name) return;
+        if (!this.file) this.file = './characters/' + this.name + '.json';
+
+        var savedata = {
+            name: this.name,
+            race: this.race,
+            creation: this.creation,
+            points: this.points_tot,
+            description: this.description,
+            usnr: this.usnr,
+            pass1: this.pass1,
+            pass2: this.pass2
+        };
+        fs.writeFileSync(this.file, JSON.stringify(savedata));
     }
 }

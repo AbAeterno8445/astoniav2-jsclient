@@ -1,0 +1,93 @@
+#div-newchar {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#form-newchar {
+    background-color: black;
+    width: 400px;
+    border: 1px solid lightgray;
+    padding: 2px;
+    text-align: center;
+    font-size: 9pt;
+    font-family: arial;
+}
+
+.cl-inp-newchar {
+    box-sizing: border-box;
+    width: 125px;
+}
+
+#inp-newchar-desc {
+    width: 375px;
+    resize: none;
+    margin: 4px;
+}
+
+#div-selectchar-main {
+    background-color: black;
+    border: 1px solid lightgray;
+    width: 100%;
+    height: 100%;
+}
+
+#h2-selectchar-title {
+    width: 100%;
+    height: fit-content;
+    text-align: center;
+    border-bottom: 1px solid lightgray;
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+#div-selectchar {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#div-newchar-radiobox {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.charbox64 {
+    width: 64px;
+    height: 64px;
+    border: 1px solid lightgray;
+    background-color: black;
+    margin: 2px;
+}
+
+.div-charcard {
+    border: 1px solid lightgray;
+    width: 150px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin: 2px;
+    height: fit-content;
+    padding: 2px;
+}
+
+.div-createchar-button {
+    font-size: 32pt;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.div-createchar-button:hover {
+    border: 1px solid white;
+    background-color: gray;
+    cursor: pointer;
+}
+
+#div-newchar {
+    background-color: rgba(50, 50, 50, 0.5);
+}

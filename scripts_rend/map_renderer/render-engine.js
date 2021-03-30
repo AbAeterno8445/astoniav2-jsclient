@@ -56,6 +56,10 @@ class RenderEngine {
         this.ctick = 0;
         this.ticker = 0;
 
+        this.resetTilemap();
+    }
+
+    resetTilemap() {
         this.tilemap = {};
         for (var i = 0; i < renderdistance; i++) {
             for (var j = 0; j < renderdistance; j++) {

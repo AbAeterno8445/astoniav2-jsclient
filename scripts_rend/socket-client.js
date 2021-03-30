@@ -1,43 +1,53 @@
 class SocketClient {
-    constructor(player, game_eng, sfx_player) {
+    constructor(player, game_eng, sfx_player, conn_data) {
+        this.pl = player;
         this._game_eng = game_eng;
         this._sfx_player = sfx_player;
         this._renderengine = new RenderEngine();
         this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, this._sfx_player);
-        this._init();
+        this._init(conn_data.ip, conn_data.port, conn_data.version);
     }
 
-    _init() {
-        this.sv_ip = "0.0.0.0";
-        this.sv_port = 0;
-        this.sv_version = 0;
+    _init(ip, port, version) {
+        this.sv_ip = ip;
+        this.sv_port = port;
+        this.sv_version = version;
 
         this._client = null;
         this._tickbuf = new Array(); // Buffer with received data
 
-        this.quit = 0;
-
-        this._lastn = 0; // used in sv_setmap
+        this._pdata_state = 0; // For sending player data (name, description)
 
         this.logged = false; // Logged-in state
 
         this._cmd_dispatcher.exit = 0;
     }
 
-    connect(ip, port, version, callback) {
-        this.sv_ip = ip;
-        this.sv_port = port;
-        this.sv_version = version;
-
+    /** Existing chardata needs usnr, pass1 & pass2 fields */
+    connect(newchar, chardata, callback) {
+        this._cmd_dispatcher.log_add("Connecting...", FNT_YELLOW);
         this._client = net.createConnection({ host: this.sv_ip, port: this.sv_port }, () => {
             console.log("connected to server.");
+            this._cmd_dispatcher.log_add("Connected to server.", FNT_YELLOW);
+
+            this._pdata_state = 0;
+
+            // TODO: Handle new char creation / existing char login
             var buf = Buffer.alloc(16);
-            buf[0] = cl_cmds["CL_NEWLOGIN"];
+            if (newchar) {
+                buf[0] = cl_cmds["CL_NEWLOGIN"];
+            } else {
+                buf[0] = cl_cmds["CL_LOGIN"];
+                buf.writeUInt32LE(chardata.usnr, 1);
+                buf.writeUInt32LE(chardata.pass1, 5);
+                buf.writeUInt32LE(chardata.pass2, 9);
+            }
             this._client.write(buf);
 
             try {
                 this.render_engine_loop();
             } catch (err) {
+                this._cmd_dispatcher.log_add("Could not connect:" + err, FNT_RED);
                 callback(err);
             }
 
@@ -50,13 +60,15 @@ class SocketClient {
 
         this._client.on('end', () => {
             console.log("disconnected from server.");
-            this._init();
+            this._renderengine.resetTilemap();
+            this._game_eng.mapCanvas.clearContext();
+            this._game_eng.chatLogger.chat_logbutton_retmenu();
+            this._init(this.sv_ip, this.sv_port, this.sv_version);
         });
     }
 
     _recv_data(data) {
         this._tickbuf.push(...data);
-        //this.render_engine_loop();
     }
 
     // Login-process related server commands
@@ -73,6 +85,7 @@ class SocketClient {
                     buf_ans[0] = cl_cmds["CL_CHALLENGE"];
                     buf_ans.writeUInt32LE(ServerCMDDispatcher.xcrypt(tmp), 1);
                     buf_ans.writeUInt32LE(this.sv_version, 5);
+                    buf_ans.writeUInt32LE(this.pl.race, 9);
                     this._client.write(buf_ans);
 
                     console.log("sent challenge.");
@@ -81,6 +94,11 @@ class SocketClient {
 
             case sv_cmds["SV_NEWPLAYER"]:
                 this.logged = true;
+                this.pl.usnr = buf.readUInt32LE(1);
+                this.pl.pass1 = buf.readUInt32LE(5);
+                this.pl.pass2 = buf.readUInt32LE(9);
+                this.pl.savefile();
+
                 console.log("logged in as new character.");
             break;
 
@@ -91,13 +109,19 @@ class SocketClient {
 
             case sv_cmds["SV_EXIT"]:
                 var tmp = buf.readUInt32LE(1);
-                console.log("EXIT:", this._cmd_dispatcher.get_logout_reason(tmp));
+
+                var log = "EXIT: " + this._cmd_dispatcher.get_logout_reason(tmp);
+                this._cmd_dispatcher.log_add(log);
+                console.log(log);
             break;
 
             case sv_cmds["SV_CAP"]:
                 var tmp = buf.readUInt32LE(1);
                 var prio = buf.readUInt32LE(5);
-                console.log("Server response: Player limit reached. Your place in queue:", tmp, "Priority:", prio);
+
+                var log = "Server response: Player limit reached. Your place in queue: " + tmp + "Priority: " + prio;
+                this._cmd_dispatcher.log_add(log);
+                console.log(log);
             break;
         }
 
@@ -143,6 +167,42 @@ class SocketClient {
         buf[0] = cmd;
 
         switch(cmd) {
+            case cl_cmds["CL_CMD_SETUSER"]:
+                if (this._pdata_state < 6) {
+                    // Send player name
+                    var pname = this.pl.name;
+                    if (this.pl.newname) pname = this.pl.newname;
+                    
+                    buf[1] = 0;
+                    buf[2] = 13 * this._pdata_state;
+
+                    for (var i = 0; i < 13; i++) {
+                        var pos = i + 13 * this._pdata_state;
+                        buf[i + 3] = pname.charCodeAt(pos);
+                    }
+                } else if (this._pdata_state < 12) {
+                    // Send player description (part 1)
+                    buf[1] = 1;
+                    buf[2] = 13 * (this._pdata_state - 6);
+
+                    for (var i = 0; i < 13; i++) {
+                        var pos = i + 13 * (this._pdata_state - 6);
+                        buf[i + 3] = this.pl.description.charAt(pos);
+                    }
+                } else if (this._pdata_state < 18) {
+                    // Send player description (part 2)
+                    buf[1] = 2;
+                    buf[2] = 13 * (this._pdata_state - 12);
+
+                    for (var i = 0; i < 13; i++) {
+                        var pos = i + 13 * (this._pdata_state - 6);
+                        buf[i + 3] = this.pl.description.charAt(pos);
+                    }
+
+                    if (this._pdata_state == 17) this._cmd_dispatcher.log_add("Sent user data.", FNT_YELLOW);
+                }
+            break;
+
             case cl_cmds["CL_CMD_CTICK"]:
                 buf.writeInt32LE(this._renderengine.ticker, 1);
             break;
@@ -211,6 +271,11 @@ class SocketClient {
 
         var tick_start = Date.now();
 
+        if (this._pdata_state < 18 && this._renderengine.ticker % 4 == 0) {
+            this.send_client_command(cl_cmds["CL_CMD_SETUSER"]);
+            this._pdata_state++;
+        }
+
         this.flush_game_commands();
 
         if ((this._renderengine.ticker & 15) == 0) {
@@ -222,7 +287,12 @@ class SocketClient {
         this._renderengine.engine_tick();
         this._game_eng.renderMap(this._renderengine.tilemap);
 
-        var tick_diff = Date.now() - tick_start;
-        setTimeout(() => this.render_engine_loop(), TICK - tick_diff);
+        if (!this._cmd_dispatcher.exit) {
+            var tick_diff = Date.now() - tick_start;
+            setTimeout(() => this.render_engine_loop(), TICK - tick_diff);
+        } else {
+            this._cmd_dispatcher.exit = 0;
+            this._client.end();
+        }
     }
 }

@@ -9,11 +9,20 @@ const mainPlayer = new MainPlayer();
 const gameRenderer = new GameRenderer(mainPlayer);
 
 // Init socket client
-const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer);
-
 var svConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), 'utf-8'));
-sockClient.connect(svConfig.ip, svConfig.port, sv_version, (err) => {
-    if (err) throw err;
+const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer, {
+    ip: svConfig.ip,
+    port: svConfig.port,
+    version: sv_version
 });
 
-console.log("Sent connection request.");
+// Login handler (character selection/creation)
+const loginHandler = new LoginHandler(mainPlayer, sockClient);
+loginHandler.updateCharSelect();
+loginHandler.updateNewcharPreview();
+
+/*sockClient.connect(svConfig.ip, svConfig.port, sv_version, (err) => {
+    if (err) throw err;
+});*/
+
+//console.log("Sent connection request.");

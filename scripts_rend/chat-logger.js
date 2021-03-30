@@ -21,6 +21,13 @@ class ChatLogger {
         this.log_elems = [];
     }
 
+    chat_clear() {
+        while (this.div_chatbox.firstChild) {
+            this.div_chatbox.removeChild(this.div_chatbox.firstChild);
+        }
+        this.log_elems = [];
+    }
+
     /** Log the given message and print it into the chatbox. font_dict receives a dictionary where the key is the message
      * index and value is what font to draw from that index onwards. e.g. font_dict = {0: FNT_YELLOW, 15: FNT_EMERALD, ...} */
     chat_logmsg(msg, font_dict = {}) {
@@ -86,5 +93,24 @@ class ChatLogger {
         }
 
         this.chat_logmsg(msg, font_dict);
+    }
+
+    /** Create a button and log it - returns the button element */
+    chat_logbutton(value) {
+        var tmp_button = document.createElement('button');
+        tmp_button.innerHTML = value;
+
+        this.div_chatbox.appendChild(document.createElement('br'));
+        this.div_chatbox.appendChild(tmp_button);
+        return tmp_button;
+    }
+
+    /** Create a button that returns to the character selection menu, and log it */
+    chat_logbutton_retmenu() {
+        var menu_button = this.chat_logbutton("Return to selection");
+        menu_button.onclick = () => {
+            this.chat_clear();
+            loginHandler.returnToLogin();
+        };
     }
 }

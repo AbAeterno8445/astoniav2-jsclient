@@ -1,8 +1,5 @@
-body {
-    background-color: rgb(40, 40, 40);
-}
-
 #cv-map {
+    background-color: black;
     border: 1px solid gray;
     width: 1200px;
     height: 720px;
@@ -17,6 +14,7 @@ body {
     height: 100%;
     width: 100%;
     padding-bottom: 4px;
+    text-align: center;
 }
 
 .div-logline {

@@ -71,7 +71,7 @@ class ServerCMDDispatcher {
         //console.log("received", cmd_name, "command");
     
         switch (buf[0]) {
-            case sv_cmds["SV_SETCHAR_NAME1"]:
+            case sv_cmds["SV_SETCHAR_NAME1"]: this.pl.name = "";
             case sv_cmds["SV_SETCHAR_NAME2"]: this.sv_setchar_name(buf); break;
             case sv_cmds["SV_SETCHAR_NAME3"]: this.sv_setchar_name_end(buf); break;
     
@@ -189,6 +189,17 @@ class ServerCMDDispatcher {
                 break;
             }
         }
+        this.pl.race_num = buf.readInt32LE(11);
+
+        var pl_newfile = './characters/' + this.pl.name + '.json';
+        if (this.pl.file != pl_newfile && fs.existsSync(this.pl.file)) {
+            fs.renameSync(this.pl.file, pl_newfile);
+        }
+
+        this.pl.file = pl_newfile;
+        this.pl.savefile();
+        
+        this._game_eng.removeLookChar(this.pl.usnr);
     }
 
     sv_setchar_mode(buf) { this.pl.mode = buf[1]; }

@@ -5,19 +5,83 @@
     <meta charset="UTF-8">
     <title>v2 Client Test</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="css/index-general.css">
+    <link rel="stylesheet" href="css/index-login.css">
+    <link rel="stylesheet" href="css/index-game.css">
 </head>
 
 <body>
-    <div style="display: flex; height: 720px;">
-        <canvas id="cv-map" oncontextmenu="return false"></canvas>
-        <div style="min-width: 10%">
-            <div id="div-chatbox"></div>
-            <input id="inp-chatbox" type="text" maxlength="119">
+    <!-- Login screen -->
+    <div id="div-loginscreen" style="height: 100%;">
+        <!-- Character choosing div -->
+        <div id="div-selectchar-main">
+            <h2 id="h2-selectchar-title">Character Selection</h2>
+            <div id="div-selectchar"></div>
+        </div>
+
+        <!-- New character div -->
+        <div id="div-newchar" style="display: none;">
+            <form id="form-newchar">
+                <label for="inp-newchar-name">Name: </label>
+                <input id="inp-newchar-name" class="cl-inp-newchar" type="text" maxlength="16">
+
+                <label for="inp-newchar-name" style="margin-left: 6px;">Password: </label>
+                <input id="inp-newchar-pass" class="cl-inp-newchar" type="password" maxlength="25"><br>
+
+                <div style="width: 100%; margin: 8px;">
+                    <label for="inp-newchar-desc">Description:</label><br>
+                    <textarea id="inp-newchar-desc" rows="3" cols="53" maxlength="155"></textarea>
+                    <br><br>
+                </div>
+
+                <div id="div-newchar-radiobox">
+                    <!-- Preview canvas -->
+                    <canvas id="cv-newchar-preview" class="charbox64"></canvas>
+
+                    <!-- Race choice -->
+                    <div style="text-align: left;">
+                        <input id="inp-newchar-rad-templar" type="radio" name="race" onclick="loginHandler.updateNewcharPreview()">
+                        <label for="inp-newchar-rad-templar">Templar</label><br>
+
+                        <input id="inp-newchar-rad-merc" type="radio" name="race" checked="checked" onclick="loginHandler.updateNewcharPreview()">
+                        <label for="inp-newchar-rad-merc">Mercenary</label><br>
+
+                        <input id="inp-newchar-rad-hara" type="radio" name="race" onclick="loginHandler.updateNewcharPreview()">
+                        <label for="inp-newchar-rad-hara">Harakim</label><br>
+                    </div>
+
+                    <!-- Gender choice -->
+                    <div style="text-align: left;">
+                        <input id="inp-newchar-rad-male" type="radio" name="gender" checked="checked" onclick="loginHandler.updateNewcharPreview()">
+                        <label for="inp-newchar-rad-male">Male</label><br>
+
+                        <input id="inp-newchar-rad-female" type="radio" name="gender" onclick="loginHandler.updateNewcharPreview()">
+                        <label for="inp-newchar-rad-female">Female</label>
+                    </div>
+                </div>
+
+                <br>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <input type="button" value="Cancel" onclick="loginHandler.toggleNewChar()">
+                    <input type="button" value="Create new character" onclick="loginHandler.createNewChar()">
+                </div>
+            </form>
         </div>
     </div>
-    <div id="div-inv"></div>
-    <button id="but-togglewalls" style="margin: 4px">Toggle walls</button>
+
+    <!-- Main game -->
+    <div id="div-maingame" style="display: none;">
+        <div style="display: flex; height: 720px;">
+            <canvas id="cv-map" oncontextmenu="return false"></canvas>
+            <div style="min-width: 10%">
+                <div id="div-chatbox"></div>
+                <input id="inp-chatbox" type="text" maxlength="119">
+            </div>
+        </div>
+        <div id="div-inv"></div>
+        <button id="but-togglewalls" style="margin: 4px">Toggle walls</button>
+    </div>
 
     <!-- Misc scripts -->
     <script src="scripts_rend/reqs.js"></script>
@@ -39,6 +103,7 @@
     <script src="scripts_rend/socket-client.js"></script>
 
     <!-- Main -->
+    <script src="scripts_rend/login.js"></script>
     <script src="scripts_rend/main.js"></script>
 </body>
 

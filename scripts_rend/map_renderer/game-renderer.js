@@ -1,3 +1,18 @@
+function padSpriteNum(nr) { return ("00000" + nr).substr(-5); }
+function getNumSpritePath(nr) { return "./gfx/" + padSpriteNum(nr) + ".png"; }
+
+/** Load all of a character's animations (given the first sprite number) into a CanvasHandler object */
+function loadCharGFX(cv_handler, ch_spr) {
+    // Idle sprites
+    for (var i = 0; i < 8; i++) {
+        cv_handler.loadImage(getNumSpritePath(ch_spr + 8 * i));
+    }
+    // Animations
+    for (var i = 0; i < 384; i++) {
+        cv_handler.loadImage(getNumSpritePath(ch_spr + 64 + i));
+    }
+}
+
 class GameRenderer {
     constructor(player) {
         this.pl = player;
@@ -8,13 +23,13 @@ class GameRenderer {
         // Map drawing canvas
         this.mapCanvas = new CanvasHandler(document.getElementById('cv-map'));
         this.mapCanvas.setDefaultOffset(-280, 360, true);
-        this.mapCanvas.setLoadingImage(this.getNumSpritePath(35));
+        this.mapCanvas.setLoadingImage(getNumSpritePath(35));
 
         // v2 font text drawer
         this.fontDrawer = new FontDrawer();
         // preload font files
-        for (var i = 0; i <= 3; i++) this.fontDrawer.load_font(i, this.getNumSpritePath(700 + i));
-        for (var i = 1960; i <= 1967; i++) this.fontDrawer.load_font(i, this.getNumSpritePath(i));
+        for (var i = 0; i <= 3; i++) this.fontDrawer.load_font(i, getNumSpritePath(700 + i));
+        for (var i = 1960; i <= 1967; i++) this.fontDrawer.load_font(i, getNumSpritePath(i));
 
         this.chatLogger = new ChatLogger(this.fontDrawer, FNT_YELLOW);
 
@@ -26,13 +41,13 @@ class GameRenderer {
         this.cursor_default = "./gfx/MOUSE.png";
 
         // Pre-load basic images
-        this.mapCanvas.loadImage(this.getNumSpritePath(31)); // Target tile (player movement)
-        this.mapCanvas.loadImage(this.getNumSpritePath(32)); // Drop at position
-        this.mapCanvas.loadImage(this.getNumSpritePath(33)); // Take from position
-        this.mapCanvas.loadImage(this.getNumSpritePath(34)); // Attack target
-        this.mapCanvas.loadImage(this.getNumSpritePath(45)); // Give target/Use target
+        this.mapCanvas.loadImage(getNumSpritePath(31)); // Target tile (player movement)
+        this.mapCanvas.loadImage(getNumSpritePath(32)); // Drop at position
+        this.mapCanvas.loadImage(getNumSpritePath(33)); // Take from position
+        this.mapCanvas.loadImage(getNumSpritePath(34)); // Attack target
+        this.mapCanvas.loadImage(getNumSpritePath(45)); // Give target/Use target
         for (var i = 1078; i < 1082; i++) {
-            this.mapCanvas.loadImage(this.getNumSpritePath(i)); // Injured char fx
+            this.mapCanvas.loadImage(getNumSpritePath(i)); // Injured char fx
         }
 
         // Hovered tile in map
@@ -136,8 +151,9 @@ class GameRenderer {
         this.look_chars[ch.nr] = ch;
     }
 
-    padSpriteNum(nr) { return ("00000" + nr).substr(-5); }
-    getNumSpritePath(nr) { return "./gfx/" + this.padSpriteNum(nr) + ".png"; }
+    removeLookChar(nr) {
+        if (this.look_chars.hasOwnProperty(nr)) delete this.look_chars[nr];
+    }
 
     setCursorImg(img_path, offset = 0) {
         this.mapCanvas.cv.style.cursor = `url(${img_path}) ${offset} ${offset}, auto`;
@@ -288,18 +304,6 @@ class GameRenderer {
         if (!this.pl.citem) this.setCursorImg(cursor_img);
     }
 
-    /** Load all of a character's animations (given the first sprite number) into the canvas */
-    loadCharGFX(ch_spr) {
-        // Idle sprites
-        for (var i = 0; i < 8; i++) {
-            this.mapCanvas.loadImage(this.getNumSpritePath(ch_spr + 8 * i));
-        }
-        // Animations
-        for (var i = 0; i < 384; i++) {
-            this.mapCanvas.loadImage(this.getNumSpritePath(ch_spr + 64 + i));
-        }
-    }
-
     autohide(x, y) {
         if (x >= renderdistance / 2 || y <= renderdistance / 2) return 0;
         return 1;
@@ -312,7 +316,7 @@ class GameRenderer {
 
     /** Draws the sprite with the given number into the map isometrically */
     mapDrawNum(nr, x, y, xoff, yoff, redraw) {
-        this.mapDraw(this.getNumSpritePath(nr), x, y, xoff, yoff, redraw);
+        this.mapDraw(getNumSpritePath(nr), x, y, xoff, yoff, redraw);
     }
 
     /** Main map rendering function */
@@ -356,8 +360,8 @@ class GameRenderer {
                 }
 
                 if (tile.ba_sprite) {
-                    var spr_suff = this.getNumSpritePath(tile.ba_sprite) + fx_suff;
-                    this.mapCanvas.loadImage(this.getNumSpritePath(tile.ba_sprite), 1, gfx_filter, spr_suff);
+                    var spr_suff = getNumSpritePath(tile.ba_sprite) + fx_suff;
+                    this.mapCanvas.loadImage(getNumSpritePath(tile.ba_sprite), 1, gfx_filter, spr_suff);
                     this.mapDraw(spr_suff, j, i, pl_xoff, pl_yoff, 0);
                 }
 
@@ -380,8 +384,8 @@ class GameRenderer {
                 var gfx_filter = gfx_filter_first;
 
                 // Load new character sprite sets
-                if (tile.ch_sprite && !this.mapCanvas.getImage(this.getNumSpritePath(tile.ch_sprite))) {
-                    this.loadCharGFX(tile.ch_sprite);
+                if (tile.ch_sprite && !this.mapCanvas.getImage(getNumSpritePath(tile.ch_sprite))) {
+                    loadCharGFX(this.mapCanvas, tile.ch_sprite);
                 }
 
                 // Item
@@ -395,9 +399,9 @@ class GameRenderer {
                         gfx_filter = "brightness(200%)";
                         fx_suff = "hover";
                     }
-                    var it_spr_suff = this.getNumSpritePath(it) + fx_suff;
+                    var it_spr_suff = getNumSpritePath(it) + fx_suff;
 
-                    this.mapCanvas.loadImage(this.getNumSpritePath(it), 1, gfx_filter, it_spr_suff);
+                    this.mapCanvas.loadImage(getNumSpritePath(it), 1, gfx_filter, it_spr_suff);
                     this.mapDraw(it_spr_suff, j, i, pl_xoff, pl_yoff, 0);
                 }
 
@@ -415,7 +419,7 @@ class GameRenderer {
                     }
 
                     // Draw characters into a temporary canvas, apply filter, then print it (makes filtering characters more efficient)
-                    var char_img = this.mapCanvas.getImage(this.getNumSpritePath(tile.obj2));
+                    var char_img = this.mapCanvas.getImage(getNumSpritePath(tile.obj2));
                     if (char_img) {
                         this.char_cv.width = char_img.width;
                         this.char_cv.height = char_img.height;
@@ -476,8 +480,8 @@ class GameRenderer {
                 // Grave
                 if (tilemap[tile_id].flags & TOMB) {
                     var grave_sprnum = 240 + ((tilemap[tile_id].flags & TOMB) >> 12) - 1;
-                    var grave_spr_suff = this.getNumSpritePath(grave_sprnum) + fx_suff;
-                    this.mapCanvas.loadImage(this.getNumSpritePath(grave_sprnum), 1, gfx_filter, grave_spr_suff);
+                    var grave_spr_suff = getNumSpritePath(grave_sprnum) + fx_suff;
+                    this.mapCanvas.loadImage(getNumSpritePath(grave_sprnum), 1, gfx_filter, grave_spr_suff);
                     this.mapDraw(grave_spr_suff, j, i, pl_xoff, pl_yoff);
                 }
 
@@ -531,7 +535,7 @@ class GameRenderer {
         }
 
         if (this.pl.citem) {
-            this.setCursorImg(this.getNumSpritePath(this.pl.citem), 16);
+            this.setCursorImg(getNumSpritePath(this.pl.citem), 16);
             this.citem_last = this.pl.citem;
         } else if (this.citem_last) {
             this.setCursorImg(this.cursor_default);
@@ -541,7 +545,7 @@ class GameRenderer {
         // Update inventory items
         for (var i = 0; i < 40; i++) {
             if (this.pl.item[i]) {
-                this.inv_elems[i].style.backgroundImage = "url(" + this.getNumSpritePath(this.pl.item[i]) + ")";
+                this.inv_elems[i].style.backgroundImage = "url(" + getNumSpritePath(this.pl.item[i]) + ")";
             } else {
                 this.inv_elems[i].style.backgroundImage = "none";
             }

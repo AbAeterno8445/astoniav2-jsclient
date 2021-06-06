@@ -1,4 +1,5 @@
 node_modules
-gfx
+gfx/*.png
+gfx/*.bmp
 sfx
 characters/*

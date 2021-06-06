@@ -11,8 +11,6 @@
     background-color: black;
     border: 1px solid white;
     overflow: auto;
-    height: 100%;
-    width: 100%;
     padding-bottom: 4px;
     text-align: center;
 }

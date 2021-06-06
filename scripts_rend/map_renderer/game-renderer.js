@@ -98,6 +98,33 @@ class GameRenderer {
             this.div_inv.appendChild(tmp_invelem);
         }
 
+        // Equipment display functionality (slot # must match server-side)
+        this.equip_slot_elems = {
+            0: { elem: document.getElementById('eq-helmet') },
+            1: { elem: document.getElementById('eq-amulet') },
+            1: { elem: document.getElementById('eq-amulet') },
+            2: { elem: document.getElementById('eq-armor') },
+            3: { elem: document.getElementById('eq-sleeves') },
+            4: { elem: document.getElementById('eq-belt') },
+            5: { elem: document.getElementById('eq-legs') },
+            6: { elem: document.getElementById('eq-boots') },
+            7: { elem: document.getElementById('eq-offhand') },
+            8: { elem: document.getElementById('eq-weapon') },
+            9: { elem: document.getElementById('eq-cloak') },
+            10: { elem: document.getElementById('eq-right-ring') },
+            11: { elem: document.getElementById('eq-left-ring') }
+        }
+
+        for (let i in this.equip_slot_elems) {
+            this.equip_slot_elems[i].default_img = this.equip_slot_elems[i].elem.style.backgroundImage;
+            this.equip_slot_elems[i].elem.onclick = () => {
+                var d1 = 5;
+                if (this.doc_keyheld.shift) d1 = 1;
+                this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: this.selected_char });
+            }
+            this.equip_slot_elems[i].elem.oncontextmenu = () => this.queueCommand(cl_cmds.CL_CMD_INV, { data1: 7, data2: i, data3: this.selected_char });
+        }
+
         // Associate canvas & document events
         this.last_tilemap = null;
         this.mapCanvas.cv.addEventListener('mousemove', (e) => { this.mouseCommand(e); });
@@ -144,6 +171,7 @@ class GameRenderer {
                     }
                 break;
                 case "ArrowUp":
+                    // Chat input history cycle up
                     var chat_inp = document.getElementById('inp-chatbox');
                     if (document.activeElement == chat_inp && this.chat_history.length > 0) {
                         if (this.chat_history_sel < this.chat_history.length) this.chat_history_sel++;
@@ -152,6 +180,7 @@ class GameRenderer {
                     }
                 break;
                 case "ArrowDown":
+                    // Chat input history cycle down
                     var chat_inp = document.getElementById('inp-chatbox');
                     if (document.activeElement == chat_inp && this.chat_history.length > 0) {
                         if (this.chat_history_sel > 1) this.chat_history_sel--;
@@ -609,6 +638,16 @@ class GameRenderer {
                 this.inv_elems[i].style.backgroundImage = "url(" + getNumSpritePath(this.pl.item[i]) + ")";
             } else {
                 this.inv_elems[i].style.backgroundImage = "none";
+            }
+        }
+
+        // Update equipped items
+        for (var i = 0; i < 20; i++) {
+            if (!this.equip_slot_elems.hasOwnProperty(i)) continue;
+            if (this.pl.worn[i]) {
+                this.equip_slot_elems[i].elem.style.backgroundImage = "url(" + getNumSpritePath(this.pl.worn[i]) + ")";
+            } else {
+                this.equip_slot_elems[i].elem.style.backgroundImage = this.equip_slot_elems[i].default_img;
             }
         }
     }

@@ -102,7 +102,6 @@ class GameRenderer {
         this.equip_slot_elems = {
             0: { elem: document.getElementById('eq-helmet') },
             1: { elem: document.getElementById('eq-amulet') },
-            1: { elem: document.getElementById('eq-amulet') },
             2: { elem: document.getElementById('eq-armor') },
             3: { elem: document.getElementById('eq-sleeves') },
             4: { elem: document.getElementById('eq-belt') },

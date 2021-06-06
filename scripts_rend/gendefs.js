@@ -1,3 +1,5 @@
+const gameConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), 'utf-8'));
+
 const sv_cmds = {
     "SV_EMPTY": 0,
     "SV_CHALLENGE": 1,
@@ -173,6 +175,6 @@ const TICKS = 18;
 const TICK = (1000/TICKS);
 const QSIZE = 8;
 
-const renderdistance = 54;
+const renderdistance = gameConfig.GFX.render_distance;
 
 const sv_version = 0x020E07;

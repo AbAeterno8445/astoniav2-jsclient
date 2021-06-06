@@ -367,6 +367,7 @@ class ServerCMDDispatcher {
     
         if (n < 0 || n > renderdistance * renderdistance) {
             console.log("WARNING: corrupt setmap!");
+            this.log_add("WARNING: corrupt setmap!", FNT_RED);
             console.log("Received n:", n, "= x:", n % renderdistance, "y:", Math.floor(n / renderdistance));
             return -1;
         }
@@ -376,6 +377,7 @@ class ServerCMDDispatcher {
         if (!flags) {
             console.log(buf);
             console.log("WARNING: no flags in setmap!");
+            this.log_add("WARNING: no flags in setmap!", FNT_RED);
             return -1;
         }
     
@@ -437,6 +439,7 @@ class ServerCMDDispatcher {
         var p = 6;
         if (n < 0 || n >= renderdistance * renderdistance) {
             console.log("WARNING: corrupt setmap3!");
+            this.log_add("WARNING: corrupt setmap3!", FNT_RED);
             return -1;
         }
 

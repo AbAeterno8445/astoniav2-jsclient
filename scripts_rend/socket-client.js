@@ -60,6 +60,8 @@ class SocketClient {
 
         this._client.on('end', () => {
             console.log("disconnected from server.");
+
+            this._cmd_dispatcher.log_add("Disconnected from server.", FNT_RED);
             this._renderengine.resetTilemap();
             this._game_eng.mapCanvas.clearContext();
             this._game_eng.chatLogger.chat_logbutton_retmenu();

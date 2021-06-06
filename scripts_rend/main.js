@@ -9,10 +9,9 @@ const mainPlayer = new MainPlayer();
 const gameRenderer = new GameRenderer(mainPlayer);
 
 // Init socket client
-var svConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), 'utf-8'));
 const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer, {
-    ip: svConfig.ip,
-    port: svConfig.port,
+    ip: gameConfig.ip,
+    port: gameConfig.port,
     version: sv_version
 });
 
@@ -20,9 +19,3 @@ const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer, {
 const loginHandler = new LoginHandler(mainPlayer, sockClient);
 loginHandler.updateCharSelect();
 loginHandler.updateNewcharPreview();
-
-/*sockClient.connect(svConfig.ip, svConfig.port, sv_version, (err) => {
-    if (err) throw err;
-});*/
-
-//console.log("Sent connection request.");

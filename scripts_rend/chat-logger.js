@@ -107,10 +107,12 @@ class ChatLogger {
 
     /** Create a button that returns to the character selection menu, and log it */
     chat_logbutton_retmenu() {
-        var menu_button = this.chat_logbutton("Return to selection");
-        menu_button.onclick = () => {
-            this.chat_clear();
-            loginHandler.returnToLogin();
-        };
+        setTimeout(() => {
+            var menu_button = this.chat_logbutton("Return to selection");
+            menu_button.onclick = () => {
+                this.chat_clear();
+                loginHandler.returnToLogin();
+            };
+        }, 1000);
     }
 }

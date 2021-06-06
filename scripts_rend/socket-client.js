@@ -248,6 +248,14 @@ class SocketClient {
                 this._sfx_player.play_sfx("click");
             break;
 
+            case cl_cmds["CL_CMD_INV"]:
+            case cl_cmds["CL_CMD_INV_LOOK"]:
+                buf.writeUInt32LE(data.data1, 1);
+                buf.writeUInt32LE(data.data2, 5);
+                buf.writeUInt32LE(data.data3, 9);
+                this._sfx_player.play_sfx("click");
+            break;
+
             default:
                 console.log("WARNING: Unhandled client command", cmd, "- data:", data);
                 return;

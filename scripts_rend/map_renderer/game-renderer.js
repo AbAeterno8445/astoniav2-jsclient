@@ -72,11 +72,24 @@ class GameRenderer {
         // Inventory display
         this.div_inv = document.getElementById('div-inv');
         this.inv_elems = {};
-        for (var i = 0; i < 40; i++) {
+        for (let i = 0; i < 40; i++) {
             var tmp_invelem = document.createElement('div');
             tmp_invelem.className = 'div-invitem';
 
             this.inv_elems[i] = tmp_invelem;
+
+            // Inv slot click
+            tmp_invelem.onclick = () => {
+                var d1 = 6;
+                if (this.doc_keyheld.shift) d1 = 0;
+                this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: 0 });
+            };
+
+            // Inv slot right click
+            tmp_invelem.oncontextmenu = () => {
+                this.queueCommand(cl_cmds.CL_CMD_INV_LOOK, { data1: i, data2: 0, data3: 0 });
+            };
+
             this.div_inv.appendChild(tmp_invelem);
         }
 
@@ -157,6 +170,7 @@ class GameRenderer {
 
     setCursorImg(img_path, offset = 0) {
         this.mapCanvas.cv.style.cursor = `url(${img_path}) ${offset} ${offset}, auto`;
+        document.body.style.cursor = `url(${img_path}) ${offset} ${offset}, auto`;
     }
 
     /** Get isometric tile position of cursor within map canvas. Receives mouse event */
@@ -227,35 +241,42 @@ class GameRenderer {
 
         if (this.tile_hovered > -1) {
             if (this.doc_keyheld.shift) {
-                var scan = this.scanMapFlag(tilemap, this.tile_hovered, ISITEM);
-                if (scan.length > 0) {
-                    this.tile_hovered = scan[0].m;
-                    mpos.x = scan[0].x;
-                    mpos.y = scan[0].y;
-                    if (tilemap[this.tile_hovered].flags & ISUSABLE) {
-                        //cursor_img = getNumSpritePath();
+                if (!this.pl.citem) {
+                    var scan = this.scanMapFlag(tilemap, this.tile_hovered, ISITEM);
+                    if (scan.length > 0) {
+                        this.tile_hovered = scan[0].m;
+                        mpos.x = scan[0].x;
+                        mpos.y = scan[0].y;
+                        if (tilemap[this.tile_hovered].flags & ISUSABLE) {
+                            //cursor_img = getNumSpritePath();
 
-                        if (this.doc_mouseheld.left) {
-                            // Use item
-                            this.queueCommand(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
-                        } else if (this.doc_mouseheld.right) {
-                            // Look at item
-                            this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
-                        }
-                    } else {
-                        //cursor_img = getNumSpritePath();
+                            if (this.doc_mouseheld.left) {
+                                // Use item
+                                this.queueCommand(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
+                            } else if (this.doc_mouseheld.right) {
+                                // Look at item
+                                this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                            }
+                        } else {
+                            //cursor_img = getNumSpritePath();
 
-                        if (this.doc_mouseheld.left) {
-                            // Pick up item
-                            this.queueCommand(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
-                        } else if (this.doc_mouseheld.right) {
-                            // Look at item
-                            this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                            if (this.doc_mouseheld.left) {
+                                // Pick up item
+                                this.queueCommand(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
+                            } else if (this.doc_mouseheld.right) {
+                                // Look at item
+                                this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                            }
                         }
                     }
-                } else if (this.pl.citem && this.doc_mouseheld.left) {
-                    // Drop item
-                    this.queueCommand(cl_cmds["CL_CMD_DROP"], { x: mpos.x, y: mpos.y });
+                } else if (this.doc_mouseheld.left) {
+                    if (tilemap[this.tile_hovered].flags & ISUSABLE) {
+                        // Use citem on hovered item
+                        this.queueCommand(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
+                    } else {
+                        // Drop item
+                        this.queueCommand(cl_cmds["CL_CMD_DROP"], { x: mpos.x, y: mpos.y });
+                    }
                 }
             } else if (this.doc_keyheld.ctrl || this.doc_keyheld.alt) {
                 var scan = this.scanMapFlag(tilemap, this.tile_hovered, ISCHAR);

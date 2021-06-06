@@ -44,3 +44,8 @@
     background-color: black;
     margin: 2px;
 }
+
+.div-invitem:hover {
+    border: 1px solid gray;
+    background-color: rgb(10, 10, 10);
+}

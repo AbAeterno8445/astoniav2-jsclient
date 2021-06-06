@@ -1,14 +1,6 @@
 const { app, BrowserWindow } = require('electron');
-//const path = require("path");
-//const fs = require("fs");
-//const sock = require("./scripts_rend/socket-client");
-//const { renderdistance, cl_cmds } = require('./scripts_main/gendefs');
 
 let win;
-
-// Global vars
-//const sockClient = new sock.SocketClient();
-//const sv_version = 0x020E07;
 
 function createWindow() {
   win = new BrowserWindow({

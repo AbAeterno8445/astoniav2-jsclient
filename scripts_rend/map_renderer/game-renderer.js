@@ -87,12 +87,12 @@ class GameRenderer {
             tmp_invelem.onclick = () => {
                 var d1 = 6;
                 if (this.doc_keyheld.shift) d1 = 0;
-                this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: 0 });
+                this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: this.selected_char });
             };
 
             // Inv slot right click
             tmp_invelem.oncontextmenu = () => {
-                this.queueCommand(cl_cmds.CL_CMD_INV_LOOK, { data1: i, data2: 0, data3: 0 });
+                this.queueCommand(cl_cmds.CL_CMD_INV_LOOK, { data1: i, data2: 0, data3: this.selected_char });
             };
 
             this.div_inv.appendChild(tmp_invelem);
@@ -339,6 +339,9 @@ class GameRenderer {
                             this.queueCommand(cl_cmds["CL_CMD_LOOK"], { target: tilemap[this.tile_hovered].ch_nr });
                         }
                     }
+                } else if (this.doc_mouseheld.left && this.doc_keyheld.alt && this.selected_char) {
+                    // Deselect character when alt-clicking away
+                    this.selected_char = 0;
                 }
             } else {
                 if (this.doc_mouseheld.left) {

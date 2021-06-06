@@ -71,6 +71,9 @@ class GameRenderer {
 
         this.charname_imgs = {};
 
+        this.chat_history = [];
+        this.chat_history_sel = 0;
+
         // Inventory display
         this.div_inv = document.getElementById('div-inv');
         this.inv_elems = {};
@@ -124,6 +127,10 @@ class GameRenderer {
                         chat_inp.focus();
                     } else {
                         var chat_inpmsg = chat_inp.value.trim();
+
+                        this.chat_history.unshift(chat_inpmsg);
+                        if (this.chat_history.length > 100) this.chat_history.pop();
+
                         if (chat_inpmsg.length > 0) {
                             for (var i = 0; i < 8; i ++) {
                                 this.queueCommand(cl_cmds["CL_CMD_INPUT" + (i + 1)], {
@@ -132,7 +139,24 @@ class GameRenderer {
                             }
                             chat_inp.value = "";
                         }
+                        this.chat_history_sel = 0;
                         chat_inp.blur();
+                    }
+                break;
+                case "ArrowUp":
+                    var chat_inp = document.getElementById('inp-chatbox');
+                    if (document.activeElement == chat_inp && this.chat_history.length > 0) {
+                        if (this.chat_history_sel < this.chat_history.length) this.chat_history_sel++;
+
+                        chat_inp.value = this.chat_history[this.chat_history_sel - 1];
+                    }
+                break;
+                case "ArrowDown":
+                    var chat_inp = document.getElementById('inp-chatbox');
+                    if (document.activeElement == chat_inp && this.chat_history.length > 0) {
+                        if (this.chat_history_sel > 1) this.chat_history_sel--;
+
+                        chat_inp.value = this.chat_history[this.chat_history_sel - 1];
                     }
                 break;
             }

@@ -43,6 +43,7 @@ class ChatLogger {
             let char_img = document.createElement('img');
             char_img.width = 6;
             char_img.height = 10;
+            char_img.className = 'unselectable';
 
             var char_img_src = this.font_drawer.get_char_imgsrc(font, msg[i]);
             char_img.src = char_img_src;

@@ -99,6 +99,7 @@ class GameRenderer {
         }
 
         // Equipment display functionality (slot # must match server-side)
+        // Each slot # will contain object: { elem: <equip slot element>, default_img: <path to placeholder empty slot image> }
         this.equip_slot_elems = {
             0: { elem: document.getElementById('eq-helmet') },
             1: { elem: document.getElementById('eq-amulet') },
@@ -123,6 +124,21 @@ class GameRenderer {
             }
             this.equip_slot_elems[i].elem.oncontextmenu = () => this.queueCommand(cl_cmds.CL_CMD_INV, { data1: 7, data2: i, data3: this.selected_char });
         }
+
+        // Character display elements
+        this.cdisp_span_charname = document.getElementById('span-charname');
+        this.cdisp_span_rankname = document.getElementById('span-rankname');
+        this.cdisp_span_money = document.getElementById('span-money');
+
+        this.cdisp_img_rank = document.getElementById('img-rank-display');
+        this.cdisp_bar_hp = document.getElementById('span-displaybar-hp');
+        this.cdisp_bar_end = document.getElementById('span-displaybar-end');
+        this.cdisp_bar_mana = document.getElementById('span-displaybar-mana');
+
+        this.cdisp_charcv = document.getElementById('cv-char-display');
+        this.cdisp_charcv.width = 64;
+        this.cdisp_charcv.height = 64;
+        this.cdisp_charcv_ctx = this.cdisp_charcv.getContext('2d');
 
         // Associate canvas & document events
         this.last_tilemap = null;
@@ -517,6 +533,12 @@ class GameRenderer {
                         this.char_cv_ctx.filter = gfx_filter;
                         this.char_cv_ctx.drawImage(char_img, 0, 0);
 
+                        // Draw main character on display canvas as well
+                        if (tile_id == plr_tile_id) {
+                            this.cdisp_charcv_ctx.clearRect(0, 0, char_img.width, char_img.height);
+                            this.cdisp_charcv_ctx.drawImage(char_img, 0, 0);
+                        }
+
                         this.mapDraw(this.char_cv, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff, 0);
                     }
                 }
@@ -630,7 +652,9 @@ class GameRenderer {
             this.setCursorImg(this.cursor_default);
             this.citem_last = 0;
         }
+    }
 
+    updateMaincharData() {
         // Update inventory items
         for (var i = 0; i < 40; i++) {
             if (this.pl.item[i]) {
@@ -649,5 +673,15 @@ class GameRenderer {
                 this.equip_slot_elems[i].elem.style.backgroundImage = this.equip_slot_elems[i].default_img;
             }
         }
+
+        // Update character display
+        this.cdisp_span_charname.innerHTML = this.pl.name;
+        this.cdisp_span_rankname.innerHTML = rank_names[points2rank(this.pl.points_tot)];
+        this.cdisp_span_money.innerHTML = `Money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
+        this.cdisp_img_rank.src = getNumSpritePath(11 + points2rank(this.pl.points_tot));
+
+        this.cdisp_bar_hp.style.width = Math.floor((this.pl.a_hp / this.pl.hp[5]) * 80) + "px";
+        this.cdisp_bar_end.style.width = Math.floor((this.pl.a_end / this.pl.end[5]) * 80) + "px";
+        this.cdisp_bar_mana.style.width = Math.floor((this.pl.a_mana / this.pl.mana[5]) * 80) + "px";
     }
 }

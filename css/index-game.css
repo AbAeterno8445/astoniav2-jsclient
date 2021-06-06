@@ -5,6 +5,39 @@
     height: 720px;
 }
 
+#div-char-display {
+    margin-top: 2px;
+    background-color: black;
+    border: 1px solid white;
+    width: 128px;
+    height: 128px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.span-displaydata {
+    display: block;
+    width: 100%;
+    border: 1px solid white;
+    background-color: black;
+    border-top: 0;
+}
+
+.span-hpbar {
+    display: block;
+    width: 80px;
+    height: 6px;
+    background-color: green;
+}
+
+#img-rank-display {
+    width: 32px;
+    height: 96px;
+    position: relative;
+    left: 48px;
+}
+
 #div-chatbox {
     flex: 1;
     color: wheat;

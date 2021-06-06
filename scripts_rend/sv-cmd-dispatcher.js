@@ -150,6 +150,7 @@ class ServerCMDDispatcher {
             default:
                 console.log(buf);
                 console.log("WARNING: unknown SV", buf[0]);
+                this.log_add("WARNING: Received unknown SV command " + buf[0], FNT_RED);
                 return -1;
         }
     
@@ -200,20 +201,28 @@ class ServerCMDDispatcher {
         this.pl.savefile();
         
         this._game_eng.removeLookChar(this.pl.usnr);
+
+        this._game_eng.updateMaincharData();
     }
 
-    sv_setchar_mode(buf) { this.pl.mode = buf[1]; }
+    sv_setchar_mode(buf) {
+        this.pl.mode = buf[1];
+        this._game_eng.updateMaincharData();
+    }
 
     sv_setchar_hp(buf) {
         for (var i = 0; i < 6; i++) this.pl.hp[i] = buf.readUInt16LE(1 + i * 2);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_endur(buf) {
         for (var i = 0; i < 6; i++) this.pl.end[i] = buf.readInt16LE(1 + i * 2);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_mana(buf) {
         for (var i = 0; i < 6; i++) this.pl.mana[i] = buf.readInt16LE(1 + i * 2);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_attrib(buf) {
@@ -221,6 +230,7 @@ class ServerCMDDispatcher {
         if (n < 0 || n > 4) return;
 
         for (var i = 0; i < 6; i++) this.pl.attrib[n][i] = buf[2 + i];
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_skill(buf) {
@@ -228,11 +238,12 @@ class ServerCMDDispatcher {
         if (n < 0 || n > 49) return;
 
         for (var i = 0; i < 6; i++) this.pl.skill[n][i] = buf[2 + i];
+        this._game_eng.updateMaincharData();
     }
 
-    sv_setchar_ahp(buf) { this.pl.a_hp = buf.readUInt16LE(1); }
-    sv_setchar_aend(buf) { this.pl.a_end = buf.readUInt16LE(1); }
-    sv_setchar_amana(buf) { this.pl.a_mana = buf.readUInt16LE(1); }
+    sv_setchar_ahp(buf) { this.pl.a_hp = buf.readUInt16LE(1); this._game_eng.updateMaincharData(); }
+    sv_setchar_aend(buf) { this.pl.a_end = buf.readUInt16LE(1); this._game_eng.updateMaincharData(); }
+    sv_setchar_amana(buf) { this.pl.a_mana = buf.readUInt16LE(1); this._game_eng.updateMaincharData(); }
     
     sv_setchar_dir(buf) { this.pl.dir = buf[1]; }
 
@@ -240,12 +251,14 @@ class ServerCMDDispatcher {
         this.pl.points = buf.readUInt32LE(1);
         this.pl.points_tot = buf.readUInt32LE(5);
         this.pl.kindred = buf.readUInt32LE(9);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_gold(buf) {
         this.pl.gold = buf.readUInt32LE(1);
         this.pl.armor = buf.readUInt32LE(5);
         this.pl.weapon = buf.readUInt32LE(9);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_item(buf) {
@@ -253,6 +266,7 @@ class ServerCMDDispatcher {
         if (n < 0 || n > 39) console.log("WARNING: Invalid setchar item. n:", n);
         this.pl.item[n] = buf.readInt16LE(5);
         this.pl.item_p[n] = buf.readInt16LE(7);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_worn(buf) {
@@ -260,6 +274,7 @@ class ServerCMDDispatcher {
         if (n < 0 || n > 19) console.log("WARNING: Invalid setchar worn. n:", n);
         this.pl.worn[n] = buf.readInt16LE(5);
         this.pl.worn_p[n] = buf.readInt16LE(7);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_spell(buf) {
@@ -267,16 +282,19 @@ class ServerCMDDispatcher {
         if (n < 0 || n > 19) console.log("WARNING: Invalid setchar spell. n:", n);
         this.pl.spell[n] = buf.readInt16LE(5);
         this.pl.active[n] = buf.readInt16LE(7);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_obj(buf) {
         this.pl.citem = buf.readInt16LE(1);
         this.pl.citem_p = buf.readInt16LE(3);
+        this._game_eng.updateMaincharData();
     }
 
     sv_setchar_obj(buf) {
         this.pl.citem = buf.readInt16LE(1);
         this.pl.citem_p = buf.readInt16LE(3);
+        this._game_eng.updateMaincharData();
     }
 
     sv_look1(buf) {

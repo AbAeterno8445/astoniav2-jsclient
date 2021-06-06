@@ -56,6 +56,8 @@ class GameRenderer {
         // Map rendering variables
         this.hide_walls = true;
 
+        this.selected_char = 0;
+
         this.char_cv = document.createElement('canvas');
         this.char_cv_ctx = this.char_cv.getContext('2d');
 
@@ -302,7 +304,13 @@ class GameRenderer {
                     } else {
                         //cursor_img = getNumSpritePath();
 
-                        if (this.doc_mouseheld.right) {
+                        if (this.doc_mouseheld.left) {
+                            // Select character
+                            var tgt_nr = tilemap[this.tile_hovered].ch_nr;
+                            if (this.selected_char != tgt_nr) this.selected_char = tgt_nr;
+                            else this.selected_char = 0;
+
+                        } else if (this.doc_mouseheld.right) {
                             // Look at character
                             this.queueCommand(cl_cmds["CL_CMD_LOOK"], { target: tilemap[this.tile_hovered].ch_nr });
                         }
@@ -434,9 +442,14 @@ class GameRenderer {
                 var obj_yoff = Math.round(tilemap[tile_id].obj_yoff);
 
                 if (tile.obj2) {
+                    // Selected char effect
+                    if (this.selected_char == tilemap[tile_id].ch_nr) {
+                        gfx_filter += " sepia(90%) hue-rotate(90deg) saturate(4)";
+                    }
+
                     // Ctrl / Alt hover effect
                     if ((this.doc_keyheld.ctrl || this.doc_keyheld.alt) && this.tile_hovered == tile_id) {
-                        gfx_filter = "brightness(200%)";
+                        gfx_filter += " brightness(200%)";
                     }
 
                     // Draw characters into a temporary canvas, apply filter, then print it (makes filtering characters more efficient)

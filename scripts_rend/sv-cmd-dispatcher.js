@@ -335,6 +335,9 @@ class ServerCMDDispatcher {
         this._tmplook.worn[11] = buf.readUInt16LE(10);
         this._tmplook.worn[12] = buf.readUInt16LE(12);
         this._tmplook.worn[13] = buf.readUInt16LE(14);
+
+        // Shop item in hand value
+        this._game_eng.updateShopSellval(this._tmplook.nr, this._tmplook.pl_price);
     }
 
     sv_look5(buf) {
@@ -372,7 +375,7 @@ class ServerCMDDispatcher {
                     this._game_eng.addShopItem(i, this._tmplook.nr, getNumSpritePath(this._tmplook.item[i]), this._tmplook.price[i]);
                 }
             }
-            this._game_eng.toggleShop(true);
+            this._game_eng.toggleShop(true, this._tmplook.nr);
             Object.assign(this._shop, this._tmplook);
         }
     }

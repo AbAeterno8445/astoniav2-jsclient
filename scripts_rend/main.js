@@ -6,10 +6,10 @@ const sfxPlayer = new SFXPlayer(audioContext);
 const mainPlayer = new MainPlayer();
 
 // Init game renderer
-const gameRenderer = new GameRenderer(mainPlayer);
+const gameRenderer = new GameRenderer(mainPlayer, sfxPlayer);
 
 // Init socket client
-const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer, {
+const sockClient = new SocketClient(mainPlayer, gameRenderer, {
     ip: gameConfig.ip,
     port: gameConfig.port,
     version: sv_version

@@ -1,8 +1,7 @@
 class SocketClient {
-    constructor(player, game_eng, sfx_player, conn_data) {
+    constructor(player, game_eng, conn_data) {
         this.pl = player;
         this._game_eng = game_eng;
-        this._sfx_player = sfx_player;
         this._renderengine = new RenderEngine();
         this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, this._sfx_player);
         this._init(conn_data.ip, conn_data.port, conn_data.version);
@@ -237,15 +236,12 @@ class SocketClient {
 
                 buf.writeUInt16LE(tcoords.x, 1);
                 buf.writeUInt16LE(tcoords.y, 3);
-
-                this._sfx_player.play_sfx("click");
             break;
 
             case cl_cmds["CL_CMD_GIVE"]:
             case cl_cmds["CL_CMD_ATTACK"]:
             case cl_cmds["CL_CMD_LOOK"]:
                 buf.writeUInt32LE(data.target, 1);
-                this._sfx_player.play_sfx("click");
             break;
 
             case cl_cmds["CL_CMD_INV"]:
@@ -253,13 +249,11 @@ class SocketClient {
                 buf.writeUInt32LE(data.data1, 1);
                 buf.writeUInt32LE(data.data2, 5);
                 buf.writeUInt32LE(data.data3, 9);
-                this._sfx_player.play_sfx("click");
             break;
 
             case cl_cmds["CL_CMD_SHOP"]:
                 buf.writeUInt16LE(data.shop_nr, 1);
                 buf.writeUInt32LE(data.item, 3);
-                this._sfx_player.play_sfx("click");
             break;
 
             default:

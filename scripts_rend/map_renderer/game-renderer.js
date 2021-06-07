@@ -14,8 +14,9 @@ function loadCharGFX(cv_handler, ch_spr) {
 }
 
 class GameRenderer {
-    constructor(player) {
+    constructor(player, sfxPlayer) {
         this.pl = player;
+        this.sfxPlayer = sfxPlayer;
 
         // Command queue
         this.cmdQueue = [];
@@ -88,11 +89,13 @@ class GameRenderer {
                 var d1 = 6;
                 if (this.doc_keyheld.shift) d1 = 0;
                 this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: this.selected_char });
+                this.sfxPlayer.play_sfx("click");
             };
 
             // Inv slot right click
             tmp_invelem.oncontextmenu = () => {
                 this.queueCommand(cl_cmds.CL_CMD_INV_LOOK, { data1: i, data2: 0, data3: this.selected_char });
+                this.sfxPlayer.play_sfx("click");
             };
 
             this.div_inv.appendChild(tmp_invelem);
@@ -121,8 +124,12 @@ class GameRenderer {
                 var d1 = 5;
                 if (this.doc_keyheld.shift) d1 = 1;
                 this.queueCommand(cl_cmds.CL_CMD_INV, { data1: d1, data2: i, data3: this.selected_char });
-            }
-            this.equip_slot_elems[i].elem.oncontextmenu = () => this.queueCommand(cl_cmds.CL_CMD_INV, { data1: 7, data2: i, data3: this.selected_char });
+                this.sfxPlayer.play_sfx("click");
+            };
+            this.equip_slot_elems[i].elem.oncontextmenu = () => {
+                this.queueCommand(cl_cmds.CL_CMD_INV, { data1: 7, data2: i, data3: this.selected_char });
+                this.sfxPlayer.play_sfx("click");
+            };
         }
 
         // Character display elements
@@ -144,6 +151,9 @@ class GameRenderer {
         this.shop_screen = document.getElementById('div-shop');
         this.shop_div_items = document.getElementById('div-shopitems');
         this.shop_span_money = document.getElementById('span-money-shop');
+        this.shop_intv = null;
+        this.shop_id = 0;
+        this.shop_sellval = 0;
 
         // Associate canvas & document events
         this.last_tilemap = null;
@@ -246,9 +256,28 @@ class GameRenderer {
         if (this.look_chars.hasOwnProperty(nr)) delete this.look_chars[nr];
     }
 
-    toggleShop(tog) {
-        if (tog) this.shop_screen.style.display = "block";
-        else this.shop_screen.style.display = "none";
+    toggleShop(tog, shop_id=0) {
+        if (this.shop_intv) clearInterval(this.shop_intv);
+
+        if (tog) {
+            this.shop_screen.style.display = "block";
+
+            if (shop_id) {
+                this.shop_id = shop_id;
+                this.shop_intv = setInterval(() => {
+                    this.queueCommand(cl_cmds.CL_CMD_LOOK, { target: shop_id });
+                }, 500);
+            }
+        } else {
+            this.shop_id = 0;
+            this.shop_screen.style.display = "none";
+        }
+    }
+
+    updateShopSellval(shop_id, val) {
+        if (shop_id != this.shop_id) return;
+        this.shop_sellval = val;
+        this.updateMaincharData();
     }
 
     clearShop() {
@@ -260,8 +289,14 @@ class GameRenderer {
     addShopItem(item_id, shop_id, item_img, item_price) {
         var div_shopitem = document.createElement('div');
         div_shopitem.className = "div-shopitem";
-        div_shopitem.onclick = () => this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id });
-        div_shopitem.oncontextmenu = () => this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id + 62 });
+        div_shopitem.onclick = () => {
+            this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id });
+            this.sfxPlayer.play_sfx("click");
+        };
+        div_shopitem.oncontextmenu = () => {
+            this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id + 62 });
+            this.sfxPlayer.play_sfx("click");
+        };
 
         var img_shopitem = document.createElement('img');
         img_shopitem.className = "img-shopitem";
@@ -361,9 +396,11 @@ class GameRenderer {
                             if (this.doc_mouseheld.left) {
                                 // Use item
                                 this.queueCommand(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
+                                this.sfxPlayer.play_sfx("click");
                             } else if (this.doc_mouseheld.right) {
                                 // Look at item
                                 this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                                this.sfxPlayer.play_sfx("click");
                             }
                         } else {
                             //cursor_img = getNumSpritePath();
@@ -371,9 +408,11 @@ class GameRenderer {
                             if (this.doc_mouseheld.left) {
                                 // Pick up item
                                 this.queueCommand(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
+                                this.sfxPlayer.play_sfx("click");
                             } else if (this.doc_mouseheld.right) {
                                 // Look at item
                                 this.queueCommand(cl_cmds["CL_CMD_LOOK_ITEM"], { x: mpos.x, y: mpos.y });
+                                this.sfxPlayer.play_sfx("click");
                             }
                         }
                     }
@@ -381,9 +420,11 @@ class GameRenderer {
                     if (tilemap[this.tile_hovered].flags & ISUSABLE) {
                         // Use citem on hovered item
                         this.queueCommand(cl_cmds["CL_CMD_USE"], { x: mpos.x, y: mpos.y });
+                        this.sfxPlayer.play_sfx("click");
                     } else {
                         // Drop item
                         this.queueCommand(cl_cmds["CL_CMD_DROP"], { x: mpos.x, y: mpos.y });
+                        this.sfxPlayer.play_sfx("click");
                     }
                 }
             } else if (this.doc_keyheld.ctrl || this.doc_keyheld.alt) {
@@ -399,13 +440,16 @@ class GameRenderer {
                             if (this.pl.citem) {
                                 // Give character
                                 this.queueCommand(cl_cmds["CL_CMD_GIVE"], { target: tilemap[this.tile_hovered].ch_nr });
+                                this.sfxPlayer.play_sfx("click");
                             } else {
                                 // Attack character
                                 this.queueCommand(cl_cmds["CL_CMD_ATTACK"], { target: tilemap[this.tile_hovered].ch_nr });
+                                this.sfxPlayer.play_sfx("click");
                             }
                         } else if (this.doc_mouseheld.right) {
                             // Look at character
                             this.queueCommand(cl_cmds["CL_CMD_LOOK"], { target: tilemap[this.tile_hovered].ch_nr });
+                            this.sfxPlayer.play_sfx("click");
                         }
                     } else {
                         //cursor_img = getNumSpritePath();
@@ -419,6 +463,7 @@ class GameRenderer {
                         } else if (this.doc_mouseheld.right) {
                             // Look at character
                             this.queueCommand(cl_cmds["CL_CMD_LOOK"], { target: tilemap[this.tile_hovered].ch_nr });
+                            this.sfxPlayer.play_sfx("click");
                         }
                     }
                 } else if (this.doc_mouseheld.left && this.doc_keyheld.alt && this.selected_char) {
@@ -429,9 +474,11 @@ class GameRenderer {
                 if (this.doc_mouseheld.left) {
                     // Move to position
                     this.queueCommand(cl_cmds["CL_CMD_MOVE"], { x: mpos.x, y: mpos.y });
+                    this.sfxPlayer.play_sfx("click");
                 } else if (this.doc_mouseheld.right) {
                     // Look at position
                     this.queueCommand(cl_cmds["CL_CMD_TURN"], { x: mpos.x, y: mpos.y });
+                    this.sfxPlayer.play_sfx("click");
                 }
             }
         }
@@ -716,8 +763,13 @@ class GameRenderer {
         this.cdisp_span_charname.innerHTML = this.pl.name;
         this.cdisp_span_rankname.innerHTML = rank_names[points2rank(this.pl.points_tot)];
         this.cdisp_span_money.innerHTML = `Money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
-        this.shop_span_money.innerHTML = `Your money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
         this.cdisp_img_rank.src = getNumSpritePath(11 + points2rank(this.pl.points_tot));
+
+        // Shop money display
+        this.shop_span_money.innerHTML = `Your money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
+        if (this.shop_sellval) {
+            this.shop_span_money.innerHTML += ` - Item in hand value: ${Math.floor(this.shop_sellval / 100)}G ${this.shop_sellval % 100}S`;
+        }
 
         this.cdisp_bar_hp.style.width = Math.floor((this.pl.a_hp / this.pl.hp[5]) * 80) + "px";
         this.cdisp_bar_end.style.width = Math.floor((this.pl.a_end / this.pl.end[5]) * 80) + "px";

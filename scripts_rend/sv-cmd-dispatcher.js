@@ -41,6 +41,7 @@ class ServerCMDDispatcher {
 
         // lookup characters
         this._tmplook = new CharLook();
+        this._shop = new CharLook();
 
         // Flag to end connection
         this.exit = 0;
@@ -365,6 +366,14 @@ class ServerCMDDispatcher {
         }
         if (n == 62) {
             // open shop
+            this._game_eng.clearShop();
+            for (var i = 0; i < 62; i++) {
+                if (this._tmplook.item[i] > 0) {
+                    this._game_eng.addShopItem(i, this._tmplook.nr, getNumSpritePath(this._tmplook.item[i]), this._tmplook.price[i]);
+                }
+            }
+            this._game_eng.toggleShop(true);
+            Object.assign(this._shop, this._tmplook);
         }
     }
 

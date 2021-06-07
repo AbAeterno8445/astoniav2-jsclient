@@ -140,6 +140,10 @@ class GameRenderer {
         this.cdisp_charcv.height = 64;
         this.cdisp_charcv_ctx = this.cdisp_charcv.getContext('2d');
 
+        // Shop screen
+        this.shop_screen = document.getElementById('div-shop');
+        this.shop_div_items = document.getElementById('div-shopitems');
+
         // Associate canvas & document events
         this.last_tilemap = null;
         this.mapCanvas.cv.addEventListener('mousemove', (e) => { this.mouseCommand(e); });
@@ -203,6 +207,9 @@ class GameRenderer {
                         chat_inp.value = this.chat_history[this.chat_history_sel - 1];
                     }
                 break;
+                case "Escape":
+                    this.toggleShop(false);
+                break;
             }
         });
 
@@ -236,6 +243,36 @@ class GameRenderer {
 
     removeLookChar(nr) {
         if (this.look_chars.hasOwnProperty(nr)) delete this.look_chars[nr];
+    }
+
+    toggleShop(tog) {
+        if (tog) this.shop_screen.style.display = "block";
+        else this.shop_screen.style.display = "none";
+    }
+
+    clearShop() {
+        while (this.shop_div_items.firstChild) {
+            this.shop_div_items.removeChild(this.shop_div_items.firstChild);
+        }
+    }
+
+    addShopItem(item_id, shop_id, item_img, item_price) {
+        var div_shopitem = document.createElement('div');
+        div_shopitem.className = "div-shopitem";
+        div_shopitem.onclick = () => this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id });
+        div_shopitem.oncontextmenu = () => this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id + 62 });
+
+        var img_shopitem = document.createElement('img');
+        img_shopitem.className = "img-shopitem";
+        img_shopitem.src = item_img;
+        div_shopitem.appendChild(img_shopitem);
+
+        var span_itemprice = document.createElement('span');
+        span_itemprice.style.display = "block";
+        span_itemprice.innerHTML = `${Math.floor(item_price / 100)}G ${item_price % 100}S`;
+        div_shopitem.appendChild(span_itemprice);
+
+        this.shop_div_items.appendChild(div_shopitem);
     }
 
     setCursorImg(img_path, offset = 0) {

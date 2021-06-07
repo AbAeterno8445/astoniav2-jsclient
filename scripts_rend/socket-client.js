@@ -256,6 +256,12 @@ class SocketClient {
                 this._sfx_player.play_sfx("click");
             break;
 
+            case cl_cmds["CL_CMD_SHOP"]:
+                buf.writeUInt16LE(data.shop_nr, 1);
+                buf.writeUInt32LE(data.item, 3);
+                this._sfx_player.play_sfx("click");
+            break;
+
             default:
                 console.log("WARNING: Unhandled client command", cmd, "- data:", data);
                 return;

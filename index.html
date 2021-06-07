@@ -112,16 +112,16 @@
                         <div style="text-align: center;">
                             <div id="div-char-display">
                                 <canvas id="cv-char-display" style="position: fixed;"></canvas>
-                                <img id="img-rank-display">
+                                <img id="img-rank-display" class="unselectable">
                             </div>
-                            <span id="span-displaybars" class="span-displaydata" style="padding: 1px;">
-                                <span class="span-hpbar" id="span-displaybar-hp" style="margin-top: 1px;"></span>
-                                <span class="span-hpbar" id="span-displaybar-end" style="margin-top: 1px;"></span>
-                                <span class="span-hpbar" id="span-displaybar-mana" style="margin-top: 1px; margin-bottom: 2px;"></span>
+                            <span id="span-displaybars" class="span-displaydata unselectable" style="padding: 1px;">
+                                <span class="span-hpbar unselectable" id="span-displaybar-hp" style="margin-top: 1px;"></span>
+                                <span class="span-hpbar unselectable" id="span-displaybar-end" style="margin-top: 1px;"></span>
+                                <span class="span-hpbar unselectable" id="span-displaybar-mana" style="margin-top: 1px; margin-bottom: 2px;"></span>
                             </span>
-                            <span id="span-charname" class="span-displaydata"></span>
-                            <span id="span-rankname" class="span-displaydata"></span>
-                            <span id="span-money" class="span-displaydata"></span>
+                            <span id="span-charname" class="span-displaydata unselectable"></span>
+                            <span id="span-rankname" class="span-displaydata unselectable"></span>
+                            <span id="span-money" class="span-displaydata unselectable"></span>
                         </div>
                     </div>
                 </div>
@@ -129,6 +129,12 @@
         </div>
         <div id="div-inv"></div>
         <button id="but-togglewalls" style="margin: 4px">Toggle walls</button>
+    </div>
+
+    <!-- Shop screen -->
+    <div id="div-shop">
+        <h2>Shop</h2>
+        <div id="div-shopitems"></div>
     </div>
 
     <!-- Misc scripts -->

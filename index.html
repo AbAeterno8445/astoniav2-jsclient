@@ -73,7 +73,12 @@
     <!-- Main game -->
     <div id="div-maingame" style="display: none;">
         <div style="display: flex; height: 720px;">
-            <canvas id="cv-map" oncontextmenu="return false"></canvas>
+            <div>
+                <canvas id="cv-map" oncontextmenu="return false"></canvas>
+                <span id="span-xpbar-bg">
+                    <span id="span-xpbar"></span>
+                </span>
+            </div>
             <div style="min-width: 10%; display: flex; flex-direction: column;">
                 <div id="div-chatbox"></div>
                 <input id="inp-chatbox" type="text" maxlength="119">
@@ -124,6 +129,11 @@
                             <span id="span-money" class="span-displaydata unselectable"></span>
                         </div>
                     </div>
+                    <div style="width: max-content; margin: 2px;">
+                        <span id="span-weaponvalue" class="span-displaydata unselectable" style="border-top: 1px solid white; padding: 2px;">Weapon value: 0</span>
+                        <span id="span-armorvalue" class="span-displaydata unselectable" style="padding: 2px;">Armor value: 0</span>
+                        <span id="span-experience" class="span-displaydata unselectable" style="padding: 2px;">Experience: 0</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,7 +143,7 @@
 
     <!-- Shop screen -->
     <div id="div-shop">
-        <h2>Shop</h2>
+        <h2 class="unselectable">Shop</h2>
         <span id="span-money-shop" class="unselectable" style="display: block;"></span>
         <div id="div-shopitems"></div>
     </div>

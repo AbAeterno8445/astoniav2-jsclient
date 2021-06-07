@@ -142,6 +142,11 @@ class GameRenderer {
         this.cdisp_bar_end = document.getElementById('span-displaybar-end');
         this.cdisp_bar_mana = document.getElementById('span-displaybar-mana');
 
+        this.cdisp_wv = document.getElementById('span-weaponvalue');
+        this.cdisp_av = document.getElementById('span-armorvalue');
+        this.cdisp_exp = document.getElementById('span-experience');
+        this.cdisp_xpbar = document.getElementById('span-xpbar');
+
         this.cdisp_charcv = document.getElementById('cv-char-display');
         this.cdisp_charcv.width = 64;
         this.cdisp_charcv.height = 64;
@@ -299,11 +304,12 @@ class GameRenderer {
         };
 
         var img_shopitem = document.createElement('img');
-        img_shopitem.className = "img-shopitem";
+        img_shopitem.className = "img-shopitem unselectable";
         img_shopitem.src = item_img;
         div_shopitem.appendChild(img_shopitem);
 
         var span_itemprice = document.createElement('span');
+        span_itemprice.className = "unselectable";
         span_itemprice.style.display = "block";
         span_itemprice.innerHTML = `${Math.floor(item_price / 100)}G ${item_price % 100}S`;
         div_shopitem.appendChild(span_itemprice);
@@ -314,6 +320,10 @@ class GameRenderer {
     setCursorImg(img_path, offset = 0) {
         this.mapCanvas.cv.style.cursor = `url(${img_path}) ${offset} ${offset}, auto`;
         document.body.style.cursor = `url(${img_path}) ${offset} ${offset}, auto`;
+    }
+
+    resetCursor() {
+        this.setCursorImg(this.cursor_default);
     }
 
     /** Get isometric tile position of cursor within map canvas. Receives mouse event */
@@ -764,6 +774,15 @@ class GameRenderer {
         this.cdisp_span_rankname.innerHTML = rank_names[points2rank(this.pl.points_tot)];
         this.cdisp_span_money.innerHTML = `Money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
         this.cdisp_img_rank.src = getNumSpritePath(11 + points2rank(this.pl.points_tot));
+        this.cdisp_wv.innerHTML = `Weapon value: ${this.pl.weapon}`;
+        this.cdisp_av.innerHTML = `Armor value: ${this.pl.armor}`;
+        this.cdisp_exp.innerHTML = `Experience: ${this.pl.points_tot}`;
+
+        // Exp bar
+        var prevrank_xpreq = rank2points(points2rank(this.pl.points_tot) - 1);
+        var xp_wid = ((this.pl.points_tot - prevrank_xpreq) / (rank2points(points2rank(this.pl.points_tot)) - prevrank_xpreq)) * 100;
+        if (points2rank(this.pl.points_tot) == 23) xp_wid = 100;
+        this.cdisp_xpbar.style.width = `${xp_wid}%`;
 
         // Shop money display
         this.shop_span_money.innerHTML = `Your money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;

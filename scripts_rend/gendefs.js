@@ -143,33 +143,42 @@ const rank_names = [
 	"Warlord"
 ];
 
+const rank_xptable = [
+    50,         // 0
+    850,        // 1
+    4900,       // 2
+    17700,      // 3
+    48950,      // 4
+    113750,     // 5
+    233800,     // 6
+    438600,     // 7
+    766650,     // 8
+    1266650,    // 9
+    1998700,    // 10
+    3035500,    // 11
+    4463550,    // 12
+    6384350,    // 13
+    8915600,    // 14
+    12192400,   // 15
+    16368450,   // 16
+    21617250,   // 17
+    28133300,   // 18
+    36133300,   // 19
+    49014500,   // 20
+    63000600,   // 21
+    80977100    // 22
+];
+
 function points2rank (v) {
-    if (v<      50) return 0;
-	if (v<     850) return 1;
-	if (v<    4900) return 2;
-	if (v<   17700) return 3;
-	if (v<   48950) return 4;
-	if (v<  113750) return 5;
-	if (v<  233800) return 6;
-	if (v<  438600) return 7;
-	if (v<  766650) return 8;
-	if (v< 1266650) return 9;
-	if (v< 1998700) return 10;
-	if (v< 3035500) return 11;
-	if (v< 4463550) return 12;
-	if (v< 6384350) return 13;
-	if (v< 8915600) return 14;
-	if (v<12192400) return 15;
-	if (v<16368450) return 16;
-	if (v<21617250) return 17;
-	if (v<28133300) return 18;
-	if (v<36133300) return 19;
+    for (var i = 0; i < rank_xptable.length; i++) {
+        if (v < rank_xptable[i]) return i;
+    }
+    return rank_xptable.length;
+}
 
-	if (v<49014500) return 20;
-	if (v<63000600) return 21;
-	if (v<80977100) return 22;
-
-	return 23;
+function rank2points (v) {
+    if (v < 0 || v >= rank_xptable.length) return 0;
+    return rank_xptable[v];
 }
 
 const INJURED = (1<<0) >>> 0;

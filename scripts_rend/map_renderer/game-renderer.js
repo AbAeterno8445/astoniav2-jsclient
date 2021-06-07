@@ -26,6 +26,9 @@ class GameRenderer {
         this.mapCanvas.setDefaultOffset(-280, 360, true);
         this.mapCanvas.setLoadingImage(getNumSpritePath(35));
 
+        // Minimap renderer
+        this.minimapRenderer = new MinimapRenderer();
+
         // v2 font text drawer
         this.fontDrawer = new FontDrawer();
         // preload font files
@@ -530,10 +533,14 @@ class GameRenderer {
         var pl_xoff = 0;
         var pl_yoff = 0;
         var plr_tile_id = (renderdistance / 2) + (renderdistance / 2) * renderdistance;
+        var plr_xpos = 0;
+        var plr_ypos = 0;
 
         if (tilemap[plr_tile_id]) {
             pl_xoff = -Math.round(tilemap[plr_tile_id].obj_xoff);
             pl_yoff = -Math.round(tilemap[plr_tile_id].obj_yoff);
+            plr_xpos = tilemap[plr_tile_id].x;
+            plr_ypos = tilemap[plr_tile_id].y;
         }
 
         // Draw all floors first
@@ -747,6 +754,8 @@ class GameRenderer {
             this.setCursorImg(this.cursor_default);
             this.citem_last = 0;
         }
+
+        this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos);
     }
 
     updateMaincharData() {

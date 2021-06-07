@@ -5,6 +5,17 @@
     height: 720px;
 }
 
+#cv-minimap {
+    width: 128px;
+    height: 128px;
+    background-color: black;
+    border: 1px solid white;
+    position: relative;
+    left: 100%;
+    transform: translateX(-100%);
+    bottom: 140px;
+}
+
 #div-char-display {
     margin-top: 2px;
     background-color: black;

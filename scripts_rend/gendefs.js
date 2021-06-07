@@ -240,6 +240,9 @@ const TICKS = 18;
 const TICK = (1000/TICKS);
 const QSIZE = 8;
 
+const MAPX = 1024;
+const MAPY = 1024;
+
 const renderdistance = gameConfig.GFX.render_distance;
 
 const sv_version = 0x020E07;

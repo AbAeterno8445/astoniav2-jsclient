@@ -207,14 +207,16 @@ class LoginHandler {
             this.div_loginscreen.style.display = "none";
 
             this.sockClient.connect(newchar, chardata, (err) => {
-                if (err) console.log("ERROR - Connecting to server:", err);
+                if (err) {
+                    console.log("ERROR - Connecting to server:", err);
+                    this.sockClient.log_failure("ERROR - Connecting to server: " + err.message, FNT_RED);
+                }
             });
 
             this.div_maingame.style.display = "block";
         } catch (err) {
             console.log("ERROR - Trying to log in:", err, "- used chardata:", chardata);
-            this.div_loginscreen.style.display = "block";
-            this.div_maingame.style.display = "none";
+            this.sockClient.log_failure("ERROR - Trying to log in: " + err.message, FNT_RED);
         }
     }
 

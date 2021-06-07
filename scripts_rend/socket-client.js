@@ -1,9 +1,9 @@
 class SocketClient {
-    constructor(player, game_eng, conn_data) {
+    constructor(player, game_eng, sfx_player, conn_data) {
         this.pl = player;
         this._game_eng = game_eng;
         this._renderengine = new RenderEngine();
-        this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, this._sfx_player);
+        this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, sfx_player);
         this._init(conn_data.ip, conn_data.port, conn_data.version);
     }
 
@@ -22,12 +22,22 @@ class SocketClient {
         this._cmd_dispatcher.exit = 0;
     }
 
+    log_add(msg, font) {
+        this._cmd_dispatcher.log_add(msg, font);
+    }
+
+    /** Logs a message then displays the 'return to selection' button - useful for errors */
+    log_failure(msg, font) {
+        this.log_add(msg, font);
+        this._game_eng.chatLogger.chat_logbutton_retmenu();
+    }
+
     /** Existing chardata needs usnr, pass1 & pass2 fields */
     connect(newchar, chardata, callback) {
-        this._cmd_dispatcher.log_add("Connecting...", FNT_YELLOW);
+        this.log_add("Connecting...", FNT_YELLOW);
         this._client = net.createConnection({ host: this.sv_ip, port: this.sv_port }, () => {
             console.log("connected to server.");
-            this._cmd_dispatcher.log_add("Connected to server.", FNT_YELLOW);
+            this.log_add("Connected to server.", FNT_YELLOW);
 
             this._pdata_state = 0;
 
@@ -46,7 +56,7 @@ class SocketClient {
             try {
                 this.render_engine_loop();
             } catch (err) {
-                this._cmd_dispatcher.log_add("Could not connect:" + err, FNT_RED);
+                this.log_add("Could not connect:" + err, FNT_RED);
                 callback(err);
             }
 
@@ -60,7 +70,7 @@ class SocketClient {
         this._client.on('end', () => {
             console.log("disconnected from server.");
 
-            this._cmd_dispatcher.log_add("Disconnected from server.", FNT_RED);
+            this.log_add("Disconnected from server.", FNT_RED);
             this._renderengine.resetTilemap();
             this._game_eng.mapCanvas.clearContext();
             this._game_eng.chatLogger.chat_logbutton_retmenu();
@@ -112,7 +122,7 @@ class SocketClient {
                 var tmp = buf.readUInt32LE(1);
 
                 var log = "EXIT: " + this._cmd_dispatcher.get_logout_reason(tmp);
-                this._cmd_dispatcher.log_add(log);
+                this.log_add(log);
                 console.log(log);
             break;
 
@@ -121,7 +131,7 @@ class SocketClient {
                 var prio = buf.readUInt32LE(5);
 
                 var log = "Server response: Player limit reached. Your place in queue: " + tmp + "Priority: " + prio;
-                this._cmd_dispatcher.log_add(log);
+                this.log_add(log);
                 console.log(log);
             break;
         }
@@ -200,7 +210,7 @@ class SocketClient {
                         buf[i + 3] = this.pl.description.charAt(pos);
                     }
 
-                    if (this._pdata_state == 17) this._cmd_dispatcher.log_add("Sent user data.", FNT_YELLOW);
+                    if (this._pdata_state == 17) this.log_add("Sent user data.", FNT_YELLOW);
                 }
             break;
 

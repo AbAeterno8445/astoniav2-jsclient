@@ -9,7 +9,7 @@ const mainPlayer = new MainPlayer();
 const gameRenderer = new GameRenderer(mainPlayer, sfxPlayer);
 
 // Init socket client
-const sockClient = new SocketClient(mainPlayer, gameRenderer, {
+const sockClient = new SocketClient(mainPlayer, gameRenderer, sfxPlayer, {
     ip: gameConfig.ip,
     port: gameConfig.port,
     version: sv_version

@@ -143,6 +143,7 @@ class GameRenderer {
         // Shop screen
         this.shop_screen = document.getElementById('div-shop');
         this.shop_div_items = document.getElementById('div-shopitems');
+        this.shop_span_money = document.getElementById('span-money-shop');
 
         // Associate canvas & document events
         this.last_tilemap = null;
@@ -715,6 +716,7 @@ class GameRenderer {
         this.cdisp_span_charname.innerHTML = this.pl.name;
         this.cdisp_span_rankname.innerHTML = rank_names[points2rank(this.pl.points_tot)];
         this.cdisp_span_money.innerHTML = `Money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
+        this.shop_span_money.innerHTML = `Your money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
         this.cdisp_img_rank.src = getNumSpritePath(11 + points2rank(this.pl.points_tot));
 
         this.cdisp_bar_hp.style.width = Math.floor((this.pl.a_hp / this.pl.hp[5]) * 80) + "px";

@@ -103,6 +103,7 @@ class ChatLogger {
 
         this.div_chatbox.appendChild(document.createElement('br'));
         this.div_chatbox.appendChild(tmp_button);
+        if (!this.chat_scrolled) this.div_chatbox.scrollTop = this.div_chatbox.scrollHeight;
         return tmp_button;
     }
 

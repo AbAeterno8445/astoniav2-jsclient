@@ -5,6 +5,17 @@
     height: 720px;
 }
 
+.but-toggle {
+    background-color: black;
+    border: 1px solid white;
+    color: wheat;
+    margin: 2px;
+}
+
+.but-toggle:focus {
+    outline: none;
+}
+
 #div-char-display {
     margin-top: 2px;
     background-color: black;

@@ -77,6 +77,28 @@ class GameRenderer {
 
         // Map rendering variables
         this.hide_walls = true;
+        this.hide_hpbars = false;
+        this.hide_hp = false;
+        this.hide_names = false;
+
+        // Character speed buttons
+        this.but_speed_slow = document.getElementById('but-speed-slow');
+        this.but_speed_slow.onclick = () => {
+            this.queueCommand(cl_cmds.CL_CMD_MODE, { x1: 0, x2: 0 });
+            this.sfxPlayer.play_sfx("click");
+        };
+
+        this.but_speed_normal = document.getElementById('but-speed-normal');
+        this.but_speed_normal.onclick = () => {
+            this.queueCommand(cl_cmds.CL_CMD_MODE, { x1: 1, x2: 0 });
+            this.sfxPlayer.play_sfx("click");
+        };
+
+        this.but_speed_fast = document.getElementById('but-speed-fast');
+        this.but_speed_fast.onclick = () => {
+            this.queueCommand(cl_cmds.CL_CMD_MODE, { x1: 2, x2: 0 });
+            this.sfxPlayer.play_sfx("click");
+        };
 
         this.selected_char = 0;
 
@@ -244,9 +266,12 @@ class GameRenderer {
                         chat_inp.value = this.chat_history[this.chat_history_sel - 1];
                     }
                 break;
-                case "Escape":
-                    this.toggleShop(false);
-                break;
+
+                case "Escape": this.toggleShop(false); break;
+
+                case "F1": this.but_speed_slow.click(); break;
+                case "F2": this.but_speed_normal.click(); break;
+                case "F3": this.but_speed_fast.click(); break;
             }
         });
 
@@ -258,8 +283,34 @@ class GameRenderer {
             }
         });
 
-        // Toggle walls button
-        document.getElementById('but-togglewalls').onclick = () => { this.hide_walls = !this.hide_walls; };
+        // Toggle buttons
+        var but_hw = document.getElementById('but-togglewalls');
+        but_hw.onclick = () => {
+            this.hide_walls = !this.hide_walls;
+            if (this.hide_walls) but_hw.style.border = "1px solid red";
+            else but_hw.style.border = "1px solid white";
+        };
+
+        var but_hp = document.getElementById('but-togglehp');
+        but_hp.onclick = () => {
+            this.hide_hp = !this.hide_hp;
+            if (this.hide_hp) but_hp.style.border = "1px solid red";
+            else but_hp.style.border = "1px solid white";
+        };
+
+        var but_hpb = document.getElementById('but-togglehpbars');
+        but_hpb.onclick = () => {
+            this.hide_hpbars = !this.hide_hpbars;
+            if (this.hide_hpbars) but_hpb.style.border = "1px solid red";
+            else but_hpb.style.border = "1px solid white";
+        };
+
+        var but_n = document.getElementById('but-togglenames');
+        but_n.onclick = () => {
+            this.hide_names = !this.hide_names;
+            if (this.hide_names) but_n.style.border = "1px solid red";
+            else but_n.style.border = "1px solid white";
+        };
     }
 
     /** Queue a server command */
@@ -316,11 +367,11 @@ class GameRenderer {
         var div_shopitem = document.createElement('div');
         div_shopitem.className = "div-shopitem";
         div_shopitem.onclick = () => {
-            this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id });
+            this.queueCommand(cl_cmds.CL_CMD_SHOP, { x1: shop_id, x2: item_id });
             this.sfxPlayer.play_sfx("click");
         };
         div_shopitem.oncontextmenu = () => {
-            this.queueCommand(cl_cmds.CL_CMD_SHOP, { shop_nr: shop_id, item: item_id + 62 });
+            this.queueCommand(cl_cmds.CL_CMD_SHOP, { x1: shop_id, x2: item_id + 62 });
             this.sfxPlayer.play_sfx("click");
         };
 
@@ -746,31 +797,35 @@ class GameRenderer {
 
                     } else if (char_info) {
                         // Character name
-                        var chname_img;
-                        var chname_full = char_info.name;
-                        if (tilemap[tile_id].ch_proz) chname_full += " " + tilemap[tile_id].ch_proz + "%";
+                        if (!this.hide_names) {
+                            var chname_img;
+                            var chname_full = char_info.name;
+                            if (tilemap[tile_id].ch_proz && !this.hide_hp) chname_full += " " + tilemap[tile_id].ch_proz + "%";
 
-                        if (!this.charname_imgs.hasOwnProperty(chname_full)) {
-                            chname_img = this.fontDrawer.get_text_img(FNT_YELLOW, chname_full);
-                            this.charname_imgs[chname_full] = chname_img;
-                        }
-                        chname_img = this.charname_imgs[chname_full];
+                            if (!this.charname_imgs.hasOwnProperty(chname_full)) {
+                                chname_img = this.fontDrawer.get_text_img(FNT_YELLOW, chname_full);
+                                this.charname_imgs[chname_full] = chname_img;
+                            }
+                            chname_img = this.charname_imgs[chname_full];
 
-                        if (chname_img) {
-                            var chname_xoff = Math.round(pl_xoff + obj_xoff);
-                            var chname_yoff = Math.round(pl_yoff + obj_yoff - this.char_cv.height + 4);
-                            this.mapDraw(chname_img, j, i, chname_xoff, chname_yoff);
+                            if (chname_img) {
+                                var chname_xoff = Math.round(pl_xoff + obj_xoff);
+                                var chname_yoff = Math.round(pl_yoff + obj_yoff - this.char_cv.height + 4);
+                                this.mapDraw(chname_img, j, i, chname_xoff, chname_yoff);
+                            }
                         }
 
                         // Healthbar
-                        if (tilemap[tile_id].ch_proz) {
-                            this.char_hbar_cv.width = Math.ceil(48 * tilemap[tile_id].ch_proz / 100);
-                            this.char_hbar_cv.getContext('2d').fillStyle = 'red';
-                            this.char_hbar_cv.getContext('2d').fillRect(0, 0, this.char_hbar_cv.width, 1);
+                        if (!this.hide_hpbars) {
+                            if (tilemap[tile_id].ch_proz) {
+                                this.char_hbar_cv.width = Math.ceil(48 * tilemap[tile_id].ch_proz / 100);
+                                this.char_hbar_cv.getContext('2d').fillStyle = 'red';
+                                this.char_hbar_cv.getContext('2d').fillRect(0, 0, this.char_hbar_cv.width, 1);
 
-                            var hbar_xoff = pl_xoff + obj_xoff - Math.floor((48 - this.char_hbar_cv.width) / 2);
-                            var hbar_yoff = pl_yoff + obj_yoff - this.char_cv.height + 9;
-                            this.mapDraw(this.char_hbar_cv, j, i, hbar_xoff, hbar_yoff);
+                                var hbar_xoff = pl_xoff + obj_xoff - Math.floor((48 - this.char_hbar_cv.width) / 2);
+                                var hbar_yoff = pl_yoff + obj_yoff - this.char_cv.height + 9;
+                                this.mapDraw(this.char_hbar_cv, j, i, hbar_xoff, hbar_yoff);
+                            }
                         }
                     }
                 }
@@ -816,6 +871,25 @@ class GameRenderer {
         this.cdisp_wv.innerHTML = `Weapon value: ${this.pl.weapon}`;
         this.cdisp_av.innerHTML = `Armor value: ${this.pl.armor}`;
         this.cdisp_exp.innerHTML = `Experience: ${this.pl.points_tot}`;
+
+        // Speed
+        switch(this.pl.mode) {
+            case 0: // Slow
+                this.but_speed_slow.style.borderColor = "red";
+                this.but_speed_normal.style.borderColor = null;
+                this.but_speed_fast.style.borderColor = null;
+            break;
+            case 1: // Normal
+                this.but_speed_slow.style.borderColor = null;
+                this.but_speed_normal.style.borderColor = "red";
+                this.but_speed_fast.style.borderColor = null;
+            break;
+            case 2: // Fast
+                this.but_speed_slow.style.borderColor = null;
+                this.but_speed_normal.style.borderColor = null;
+                this.but_speed_fast.style.borderColor = "red";
+            break;
+        }
 
         // Exp bar
         var prevrank_xpreq = rank2points(points2rank(this.pl.points_tot) - 1);

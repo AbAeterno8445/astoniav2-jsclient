@@ -262,8 +262,9 @@ class SocketClient {
             break;
 
             case cl_cmds["CL_CMD_SHOP"]:
-                buf.writeUInt16LE(data.shop_nr, 1);
-                buf.writeUInt32LE(data.item, 3);
+            case cl_cmds["CL_CMD_MODE"]:
+                buf.writeUInt16LE(data.x1, 1);
+                buf.writeUInt32LE(data.x2, 3);
             break;
 
             default:

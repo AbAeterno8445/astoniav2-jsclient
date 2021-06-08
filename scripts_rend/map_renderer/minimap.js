@@ -10,7 +10,7 @@ class MinimapRenderer {
         this.tilemap = {};
     }
 
-    updateMinimap(mapdata, pl_x, pl_y) {
+    updateMinimap(mapdata, pl_x, pl_y, zoom=1) {
         if (!pl_x && !pl_y) return;
 
         this.minimapCanvasCtx.clearRect(0, 0, 128, 128);
@@ -35,12 +35,12 @@ class MinimapRenderer {
                 if (!this.tilemap[tile_id]) continue;
 
                 this.minimapCanvasCtx.fillStyle = this.tilemap[tile_id];
-                this.minimapCanvasCtx.fillRect(i, j, 1, 1);
+                this.minimapCanvasCtx.fillRect(i * zoom - 64 * (zoom - 1), j * zoom - 64 * (zoom - 1), zoom, zoom);
             }
         }
 
         // Player - yellow pixel
         this.minimapCanvasCtx.fillStyle = "#ffff00";
-        this.minimapCanvasCtx.fillRect(64, 64, 1, 1);
+        this.minimapCanvasCtx.fillRect(64, 64, zoom, zoom);
     }
 }

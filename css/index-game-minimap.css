@@ -1,0 +1,33 @@
+#cv-minimap {
+    width: 128px;
+    height: 128px;
+    background-color: black;
+    border: 1px solid white;
+}
+
+#div-minimap {
+    position: relative;
+    width: max-content;
+    left: 100%;
+    transform: translateX(-100%);
+    bottom: 140px;
+    display: flex;
+}
+
+#div-minimap-buttons {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.span-minimap-button {
+    width: 16px;
+    height: 16px;
+    background-color: black;
+    border: 1px solid white;
+}
+
+.span-minimap-button:hover {
+    background-color: rgb(10, 10, 10);
+    border: 1px solid gray;
+}

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/index-general.css">
     <link rel="stylesheet" href="css/index-login.css">
     <link rel="stylesheet" href="css/index-game.css">
+    <link rel="stylesheet" href="css/index-game-minimap.css">
 </head>
 
 <body>
@@ -74,11 +75,22 @@
     <div id="div-maingame" style="display: none;">
         <div style="display: flex; height: 720px;">
             <div>
+                <!-- Main game/map canvas -->
                 <canvas id="cv-map" oncontextmenu="return false"></canvas>
+
+                <!-- Exp bar -->
                 <span id="span-xpbar-bg">
                     <span id="span-xpbar"></span>
                 </span>
-                <canvas id="cv-minimap" oncontextmenu="return false"></canvas>
+
+                <!-- Minimap & associated buttons -->
+                <div id="div-minimap">
+                    <div id="div-minimap-buttons">
+                        <span id="span-minimap-buttonplus" class="span-minimap-button unselectable">+</span>
+                        <span id="span-minimap-buttonminus" class="span-minimap-button unselectable" style="border-top: 0;">-</span>
+                    </div>
+                    <canvas id="cv-minimap" oncontextmenu="return false"></canvas>
+                </div>
             </div>
             <div style="min-width: 10%; display: flex; flex-direction: column;">
                 <div id="div-chatbox"></div>

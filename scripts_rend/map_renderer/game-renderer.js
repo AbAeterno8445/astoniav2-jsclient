@@ -28,6 +28,15 @@ class GameRenderer {
 
         // Minimap renderer
         this.minimapRenderer = new MinimapRenderer();
+        this.minimap_zoom = 1;
+
+        // Minimap buttons
+        document.getElementById("span-minimap-buttonplus").onclick = () => {   // Zoom in
+            if (this.minimap_zoom < 4) this.minimap_zoom++;
+        }
+        document.getElementById("span-minimap-buttonminus").onclick = () => {  // Zoom out
+            if (this.minimap_zoom > 1) this.minimap_zoom--;
+        }
 
         // Load minimap color data
         this.mapCanvas.loadAvgcolors("./data/minimap/color_data.json");
@@ -776,7 +785,7 @@ class GameRenderer {
             this.citem_last = 0;
         }
 
-        this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos);
+        this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
     }
 
     updateMaincharData() {

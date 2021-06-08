@@ -81,6 +81,36 @@ class GameRenderer {
         this.hide_hp = false;
         this.hide_names = false;
 
+        // Skills
+        this.div_skills = document.getElementById('div-skills');
+        this.stat_points_used = 0;
+        this.stat_raised = [];
+        for (var i = 0; i < 108; i++) this.stat_raised.push(0);
+
+        this.createSkillSlots();
+
+        // Skill update button
+        var skill_updbutton = document.getElementById('span-skill-updatebutton');
+        skill_updbutton.onclick = () => {
+            this.sfxPlayer.play_sfx("click");
+            
+            this.stat_points_used = 0;
+
+            var m;
+            for (let n = 0; n < this.stat_raised.length; n++) {
+                if (this.stat_raised[n]) {
+                    if (n > 7) {
+                        m = skilltab[n-8].nr + 8;
+                    } else m = n;
+                    this.queueCommand(cl_cmds.CL_CMD_STAT, { x1: m, x2: this.stat_raised[n] });
+                }
+                this.stat_raised[n] = 0;
+            }
+        };
+        skill_updbutton.oncontextmenu = () => {
+            this.chatLogger.chat_logmsg_format("Make the changes permanent.", FNT_YELLOW);
+        };
+
         // Character speed buttons
         this.but_speed_slow = document.getElementById('but-speed-slow');
         this.but_speed_slow.onclick = () => {
@@ -312,6 +342,17 @@ class GameRenderer {
             if (this.hide_names) but_n.style.border = "1px solid red";
             else but_n.style.border = "1px solid white";
         };
+    }
+
+    /** Reset relevant variables, for exiting current character session */
+    resetVars() {
+        this.resetCursor();
+
+        // Raised skills
+        for (var i = 0; i < this.stat_raised.length; i++) {
+            this.stat_raised[i] = 0;
+        }
+        this.stat_points_used = 0;
     }
 
     /** Queue a server command */
@@ -849,6 +890,120 @@ class GameRenderer {
         this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
     }
 
+    createSkillSlots() {
+        // Attribute slots
+        for (let i = 0; i < 5; i++) {
+            var div_skillslot = document.createElement('div');
+            div_skillslot.className = "div-skillslot";
+            div_skillslot.style.borderTop = "0";
+
+            // Attrib name
+            var span_skillname = document.createElement('span');
+            span_skillname.className = "span-skill span-skill-title unselectable";
+            span_skillname.innerHTML = at_name[i];
+            div_skillslot.appendChild(span_skillname);
+
+            // Attrib value div
+            var div_skill_val = document.createElement('div');
+            div_skill_val.className = "span-skill div-skill-val unselectable";
+            
+            // Attrib value display
+            var span_skill_val = document.createElement('span');
+            span_skill_val.id = `span-attrib${i}-value`;
+            span_skill_val.innerHTML = "0";
+            div_skill_val.appendChild(span_skill_val);
+
+            // Attrib value '-' button
+            var span_skill_button_upgminus = document.createElement('span');
+            span_skill_button_upgminus.id = `span-attrib${i}-button-upgminus`;
+            span_skill_button_upgminus.className = "span-skill-upgbutton unselectable";
+            div_skill_val.appendChild(span_skill_button_upgminus);
+
+            span_skill_button_upgminus.onclick = () => {
+                var rep = 1;
+                if (this.doc_keyheld.shift) rep = 10;
+                else if (this.doc_keyheld.ctrl) rep = 90;
+
+                for (var r = 0; r < rep; r++) {
+                    if (!this.stat_raised[i]) break;
+
+                    this.stat_raised[i]--;
+                    this.stat_points_used -= this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+                }
+                this.updateSkills();
+            };
+
+            // Attrib value '+' button
+            var span_skill_button_upgplus = document.createElement('span');
+            span_skill_button_upgplus.id = `span-attrib${i}-button-upgplus`;
+            span_skill_button_upgplus.className = "span-skill-upgbutton unselectable";
+            div_skill_val.appendChild(span_skill_button_upgplus);
+
+            span_skill_button_upgplus.onclick = () => {
+                var rep = 1;
+                if (this.doc_keyheld.shift) rep = 10;
+                else if (this.doc_keyheld.ctrl) rep = 90;
+
+                for (var r = 0; r < rep; r++) {
+                    var needed = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+                    if (needed > this.pl.points - this.stat_points_used) break;
+                
+                    this.stat_points_used += needed;
+                    this.stat_raised[i]++;
+                }
+                this.updateSkills();
+            };
+
+            div_skillslot.appendChild(div_skill_val);
+
+            // Attrib upgrade requirement display
+            var span_skill_upgval = document.createElement('span');
+            span_skill_upgval.id = `span-attrib${i}-upg`;
+            span_skill_upgval.className = "span-skill span-skill-upg unselectable";
+            div_skillslot.appendChild(span_skill_upgval);
+
+            this.div_skills.appendChild(div_skillslot);
+        }
+    }
+
+    updateSkills() {
+        let elem;
+        // Attributes
+        for (var i = 0; i < 5; i++) {
+            // Value display
+            elem = document.getElementById(`span-attrib${i}-value`);
+            elem.innerHTML = this.pl.attrib[i][5] + this.stat_raised[i];
+
+            // Raise skill '+' button
+            elem = document.getElementById(`span-attrib${i}-button-upgplus`);
+            if (this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used) {
+                elem.innerHTML = "+";
+            } else {
+                elem.innerHTML = "";
+            }
+
+            // Lower skill '-' button
+            elem = document.getElementById(`span-attrib${i}-button-upgminus`);
+            if (this.stat_raised[i] > 0) {
+                elem.innerHTML = "-";
+            } else {
+                elem.innerHTML = "";
+            }
+
+            // Attribute upgrade requirement display
+            elem = document.getElementById(`span-attrib${i}-upg`);
+            if (this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) != HIGH_VAL) {
+                elem.innerHTML = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+            } else {
+                elem.innerHTML = "";
+            }
+        }
+
+        // Update value
+        elem = document.getElementById('span-skill-updatevalue');
+        elem.innerHTML = this.pl.points - this.stat_points_used;
+    }
+
     updateMaincharData() {
         // Update inventory items
         for (var i = 0; i < 40; i++) {
@@ -912,5 +1067,7 @@ class GameRenderer {
         this.cdisp_bar_hp.style.width = Math.floor((this.pl.a_hp / this.pl.hp[5]) * 80) + "px";
         this.cdisp_bar_end.style.width = Math.floor((this.pl.a_end / this.pl.end[5]) * 80) + "px";
         this.cdisp_bar_mana.style.width = Math.floor((this.pl.a_mana / this.pl.mana[5]) * 80) + "px";
+
+        this.updateSkills();
     }
 }

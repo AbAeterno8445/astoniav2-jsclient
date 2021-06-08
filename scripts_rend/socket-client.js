@@ -263,6 +263,7 @@ class SocketClient {
 
             case cl_cmds["CL_CMD_SHOP"]:
             case cl_cmds["CL_CMD_MODE"]:
+            case cl_cmds["CL_CMD_STAT"]:
                 buf.writeUInt16LE(data.x1, 1);
                 buf.writeUInt32LE(data.x2, 3);
             break;

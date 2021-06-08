@@ -181,6 +181,70 @@ function rank2points (v) {
     return rank_xptable[v];
 }
 
+const HIGH_VAL = (1<<30) >>> 0;
+
+const at_name = [
+	"Braveness",
+	"Willpower",
+	"Intuition",
+	"Agility",
+	"Strength"
+];
+
+const AT_BRAVE = 0;
+const AT_WILL = 1;
+const AT_INT = 2;
+const AT_AGIL = 3;
+const AT_STREN = 4;
+
+const skills = [
+    {nr: 0, sortkey: 'C', name: "Hand to Hand", desc: "Fighting without weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+    {nr: 1, sortkey: 'C', name: "Karate", desc: "Fighting without weapons and doing damage.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 2, sortkey: 'C', name: "Dagger", desc: "Fighting with daggers or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_INT]},
+	{nr: 3, sortkey: 'C', name: "Sword", desc: "Fighting with swords or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 4, sortkey: 'C', name: "Axe", desc: "Fighting with axes or similar weapons.", attrib: [AT_BRAVE, AT_STREN, AT_STREN]},
+	{nr: 5, sortkey: 'C', name: "Staff", desc: "Fighting with staves or similar weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
+	{nr: 6, sortkey: 'C', name: "Two-Handed", desc: "Fighting with two-handed weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
+
+    {nr: 7, sortkey: 'G', name: "Lock-Picking", desc: "Opening doors without keys.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+	{nr: 8, sortkey: 'G', name: "Stealth", desc: "Moving without being seen or heard.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+    {nr: 9, sortkey: 'G', name: "Perception", desc: "Seeing and hearing.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+
+    {nr: 10, sortkey: 'M', name: "Swimming", desc: "Moving through water without drowning.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+	{nr: 11, sortkey: 'R', name: "Magic Shield", desc: "Spell: Create a magic shield (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+
+    {nr: 12, sortkey: 'G', name: "Bartering", desc: "Getting good prices from merchants.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 13, sortkey: 'G', name: "Repair", desc: "Repairing items.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+
+    {nr: 14, sortkey: 'R', name: "Light", desc: "Spell: Create light (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 15, sortkey: 'R', name: "Recall", desc: "Spell: Teleport to temple (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 16, sortkey: 'R', name: "Guardian Angel", desc: "Spell: Avoid loss of HPs and items on death.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 17, sortkey: 'R', name: "Protection", desc: "Spell: Enhance Armor of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 18, sortkey: 'R', name: "Enhance Weapon", desc: "Spell: Enhance Weapon of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 19, sortkey: 'R', name: "Stun", desc: "Spell: Make target motionless (Cost: 20 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 20, sortkey: 'R', name: "Curse", desc: "Spell: Decrease attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 21, sortkey: 'R', name: "Bless", desc: "Spell: Increase attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 22, sortkey: 'R', name: "Identify", desc: "Spell: Read stats of item/character (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+
+    {nr: 23, sortkey: 'G', name: "Resistance", desc: "Resist against magic.", attrib: [AT_INT, AT_WILL, AT_STREN]},
+
+    {nr: 24, sortkey: 'R', name: "Blast", desc: "Spell: Inflict injuries to target (Cost: varies).", attrib: [AT_INT, AT_WILL, AT_STREN]},
+	{nr: 25, sortkey: 'R', name: "Dispel Magic", desc: "Spell: Removes curse magic from target (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+
+    {nr: 26, sortkey: 'R', name: "Heal", desc: "Spell: Heal injuries (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 27, sortkey: 'R', name: "Ghost Companion", desc: "Spell: Create a ghost to attack an enemy.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+
+    {nr: 28, sortkey: 'B', name: "Regenerate", desc: "Regenerate Hitpoints faster.", attrib: [AT_STREN, AT_STREN, AT_STREN]},
+	{nr: 29, sortkey: 'B', name: "Rest", desc: "Regenerate Endurance faster.", attrib: [AT_AGIL, AT_AGIL, AT_AGIL]},
+	{nr: 30, sortkey: 'B', name: "Meditate", desc: "Regenerate Mana faster.", attrib: [AT_INT, AT_WILL, AT_WILL]},
+
+    {nr: 31, sortkey: 'G', name: "Sense Magic", desc: "Find out who casts what at you.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 32, sortkey: 'G', name: "Immunity", desc: "Partial immunity against negative magic.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 33, sortkey: 'G', name: "Surround Hit", desc: "Hit all your enemies at once.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 34, sortkey: 'G', name: "Concentrate", desc: "Reduces mana cost for all spells.", attrib: [AT_WILL, AT_WILL, AT_WILL]},
+	{nr: 35, sortkey: 'G', name: "Warcry", desc: "Frighten all enemies in hearing distance.", attrib: [AT_BRAVE, AT_BRAVE, AT_STREN]}
+];
+
 const INJURED = (1<<0) >>> 0;
 const INJURED1 = (1<<1) >>> 0;
 const INJURED2 = (1<<2) >>> 0;

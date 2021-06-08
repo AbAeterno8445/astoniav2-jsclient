@@ -1,0 +1,38 @@
+#div-skills {
+    background-color: black;
+    width: 100%;
+    margin-left: 2px;
+}
+
+.div-skillslot {
+    display: flex;
+    border: 1px solid white;
+    width: 100%;
+}
+
+.span-skill {
+    display: block;
+    padding: 1px;
+}
+
+.span-skill-title {
+    flex: 2;
+}
+
+.div-skill-val {
+    flex: 1;
+    border-left: 1px solid white;
+}
+
+.span-skill-upg {
+    flex: 1;
+    border-left: 1px solid white;
+}
+
+.span-skill-upgbutton {
+    display: block;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    float: right;
+}

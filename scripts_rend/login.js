@@ -226,7 +226,7 @@ class LoginHandler {
             this.div_maingame.style.display = "none";
             this.div_loginscreen.style.display = "block";
 
-            gameRenderer.resetCursor();
+            gameRenderer.resetVars();
         }
     }
 }

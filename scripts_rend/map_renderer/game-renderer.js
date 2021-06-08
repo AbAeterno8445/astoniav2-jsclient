@@ -198,6 +198,7 @@ class GameRenderer {
         // Shop screen
         this.shop_screen = document.getElementById('div-shop');
         this.shop_div_items = document.getElementById('div-shopitems');
+        this.shop_title = document.getElementById('h2-shoptitle');
         this.shop_span_money = document.getElementById('span-money-shop');
         this.shop_intv = null;
         this.shop_id = 0;
@@ -333,10 +334,13 @@ class GameRenderer {
         if (this.look_chars.hasOwnProperty(nr)) delete this.look_chars[nr];
     }
 
-    toggleShop(tog, shop_id=0) {
+    toggleShop(tog, shop_id=0, is_shop=false) {
         if (this.shop_intv) clearInterval(this.shop_intv);
 
         if (tog) {
+            if (is_shop) this.shop_title.innerHTML = "Shop";
+            else this.shop_title.innerHTML = "Grave";
+
             this.shop_screen.style.display = "block";
 
             if (shop_id) {
@@ -380,11 +384,13 @@ class GameRenderer {
         img_shopitem.src = item_img;
         div_shopitem.appendChild(img_shopitem);
 
-        var span_itemprice = document.createElement('span');
-        span_itemprice.className = "unselectable";
-        span_itemprice.style.display = "block";
-        span_itemprice.innerHTML = `${Math.floor(item_price / 100)}G ${item_price % 100}S`;
-        div_shopitem.appendChild(span_itemprice);
+        if (item_price != 0) {
+            var span_itemprice = document.createElement('span');
+            span_itemprice.className = "unselectable";
+            span_itemprice.style.display = "block";
+            span_itemprice.innerHTML = `${Math.floor(item_price / 100)}G ${item_price % 100}S`;
+            div_shopitem.appendChild(span_itemprice);
+        }
 
         this.shop_div_items.appendChild(div_shopitem);
     }

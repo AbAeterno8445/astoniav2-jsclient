@@ -41,7 +41,6 @@ class ServerCMDDispatcher {
 
         // lookup characters
         this._tmplook = new CharLook();
-        this._shop = new CharLook();
 
         // Flag to end connection
         this.exit = 0;
@@ -368,15 +367,19 @@ class ServerCMDDispatcher {
             this._tmplook.price[n] = buf.readUInt32LE(4 + (n - s) * 6);
         }
         if (n == 62) {
-            // open shop
+            // open shop / loot grave
             this._game_eng.clearShop();
+
+            var is_shop = false; // Becomes true if any of the received items have a price, otherwise consider it a grave
             for (var i = 0; i < 62; i++) {
                 if (this._tmplook.item[i] > 0) {
+                    if (this._tmplook.price[i] > 0) is_shop = true;
+                    
                     this._game_eng.addShopItem(i, this._tmplook.nr, getNumSpritePath(this._tmplook.item[i]), this._tmplook.price[i]);
                 }
             }
-            this._game_eng.toggleShop(true, this._tmplook.nr);
-            Object.assign(this._shop, this._tmplook);
+            if (is_shop) this._game_eng.toggleShop(true, this._tmplook.nr, is_shop);
+            else this._game_eng.toggleShop(true, 0, is_shop);
         }
     }
 

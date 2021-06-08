@@ -7,6 +7,8 @@ class MapTile {
         this.it_sprite = item;  // Sprite # of item
         this.it_status = 0;     // For items with animations
 
+        this.avgcol = null;
+
         this.ch_sprite = 0;
         this.ch_status = 0;     // What the character is doing, animation-wise
         this.ch_stat_off = 0;

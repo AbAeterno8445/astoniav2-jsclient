@@ -5,11 +5,11 @@ function getNumSpritePath(nr) { return "./gfx/" + padSpriteNum(nr) + ".png"; }
 function loadCharGFX(cv_handler, ch_spr) {
     // Idle sprites
     for (var i = 0; i < 8; i++) {
-        cv_handler.loadImage(getNumSpritePath(ch_spr + 8 * i));
+        cv_handler.loadImage(getNumSpritePath(ch_spr + 8 * i), 1, "none", null, false);
     }
     // Animations
     for (var i = 0; i < 384; i++) {
-        cv_handler.loadImage(getNumSpritePath(ch_spr + 64 + i));
+        cv_handler.loadImage(getNumSpritePath(ch_spr + 64 + i), 1, "none", null, false);
     }
 }
 
@@ -28,6 +28,15 @@ class GameRenderer {
 
         // Minimap renderer
         this.minimapRenderer = new MinimapRenderer();
+
+        // Load minimap color data
+        this.mapCanvas.loadAvgcolors("./data/minimap/color_data.json");
+        // Minimap autosave color data
+        setInterval(() => {
+            fs.writeFile("./data/minimap/color_data.json", JSON.stringify(this.mapCanvas.avgColors), (err) => {
+                if (err) console.log(err);
+            });
+        }, 30000);
 
         // v2 font text drawer
         this.fontDrawer = new FontDrawer();
@@ -562,9 +571,20 @@ class GameRenderer {
                 }
 
                 if (tile.ba_sprite) {
-                    var spr_suff = getNumSpritePath(tile.ba_sprite) + fx_suff;
-                    this.mapCanvas.loadImage(getNumSpritePath(tile.ba_sprite), 1, gfx_filter, spr_suff);
+                    var spr_path = getNumSpritePath(tile.ba_sprite);
+                    var spr_suff = spr_path + fx_suff;
+                    this.mapCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
+
                     this.mapDraw(spr_suff, j, i, pl_xoff, pl_yoff, 0);
+
+                    // Assign average color to tile
+                    if (tile.it_sprite) {
+                        var avgcol = this.mapCanvas.getImageAvgcol(getNumSpritePath(tile.it_sprite));
+                        if (avgcol) tile.avgcol = avgcol.slice();
+                    } else {
+                        var avgcol = this.mapCanvas.getImageAvgcol(spr_path);
+                        if (avgcol) tile.avgcol = avgcol.slice();
+                    }
                 }
 
                 // Target position image
@@ -601,9 +621,10 @@ class GameRenderer {
                         gfx_filter = "brightness(200%)";
                         fx_suff = "hover";
                     }
-                    var it_spr_suff = getNumSpritePath(it) + fx_suff;
+                    var it_spr_path = getNumSpritePath(it);
+                    var it_spr_suff = it_spr_path + fx_suff;
 
-                    this.mapCanvas.loadImage(getNumSpritePath(it), 1, gfx_filter, it_spr_suff);
+                    this.mapCanvas.loadImage(it_spr_path, 1, gfx_filter, it_spr_suff);
                     this.mapDraw(it_spr_suff, j, i, pl_xoff, pl_yoff, 0);
                 }
 

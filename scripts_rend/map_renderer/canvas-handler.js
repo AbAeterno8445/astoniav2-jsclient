@@ -17,6 +17,7 @@ class CanvasHandler {
         /** Keys are the path to the image, values are the images themselves.        
          *  e.g. loadedImages["/assets/tiles/floors/00950.png"] = Image() */
         this.loadedImages = {};
+        this.avgColors = {};
         this.redrawTimeout = 100;
     }
 
@@ -49,13 +50,15 @@ class CanvasHandler {
      * If asImgData is 1, loads a canvas object with the given filter applied,
      * then draws the image into it.
      * altpath lets you store the given image with a different name - useful
-     * to make more versions of the same image with different filters */
-    loadImage(path, asImgData = 1, filter = "none", altpath = null) {
+     * to make more versions of the same image with different filters.              
+     * avgcol = true will store average image color in avgColors[<img path>] (default true) */
+    loadImage(path, asImgData = 1, filter = "none", altpath = null, avgcol = true) {
         if (this.loadedImages.hasOwnProperty(path) && !altpath ||
             this.loadedImages.hasOwnProperty(altpath) && altpath) {
             return;
         }
 
+        var orig_path = path;
         let newImg = new Image();
         if (!asImgData) {
             newImg.onload = () => {
@@ -74,6 +77,12 @@ class CanvasHandler {
 
                 if (altpath) path = altpath;
                 this.loadedImages[path] = cv_tmp;
+
+                // Load average color using colorthief
+                if (avgcol && !this.avgColors.hasOwnProperty(orig_path)) {
+                    var ct = new ColorThief();
+                    this.avgColors[orig_path] = ct.getColor(newImg);
+                }
             };
         }
         newImg.src = path;
@@ -100,6 +109,23 @@ class CanvasHandler {
             return null;
         }
         return this.loadedImages[path];
+    }
+
+    loadAvgcolors(file_path) {
+        fs.readFile(file_path, 'utf-8', (err, data) => {
+            if (err) return console.log(err);
+
+            this.avgColors = JSON.parse(data);
+            console.log("Minimap color data: loaded", Object.keys(this.avgColors).length, "entries.");
+        });
+    }
+
+    /** Average color is returned as list: [r, g, b] */
+    getImageAvgcol(path) {
+        if (!this.avgColors.hasOwnProperty(path)) {
+            return null;
+        }
+        return this.avgColors[path];
     }
 
     clearLoadedImages() {

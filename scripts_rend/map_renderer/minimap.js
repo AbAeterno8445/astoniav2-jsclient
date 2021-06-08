@@ -8,16 +8,10 @@ class MinimapRenderer {
         // "x/y": "<color code>"
         // example: "512/500": "#ff00cc"
         this.tilemap = {};
-
-        this.origin_x = 0;
-        this.origin_y = 0;
     }
 
     updateMinimap(mapdata, pl_x, pl_y) {
         if (!pl_x && !pl_y) return;
-
-        this.origin_x = pl_x;
-        this.origin_y = pl_y;
 
         this.minimapCanvasCtx.clearRect(0, 0, 128, 128);
 
@@ -26,13 +20,9 @@ class MinimapRenderer {
                 var tile_id = i + j * renderdistance;
                 var tile = mapdata[tile_id];
                 if (!tile) continue;
+                if (!tile.avgcol || tile.ba_sprite == SPR_EMPTY) continue;
 
-                // Wall - white pixel
-                if (tile.obj1 && !(mapdata[tile_id].flags & ISITEM)) {
-                    this.tilemap[tile.x + "/" + tile.y] = "#ffffff";
-                } else {
-                    this.tilemap[tile_id] = null;
-                }
+                this.tilemap[tile.x + "/" + tile.y] = `rgb(${tile.avgcol[0]},${tile.avgcol[1]},${tile.avgcol[2]})`;
             }
         }
 

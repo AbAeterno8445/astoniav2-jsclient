@@ -1,5 +1,6 @@
 node_modules
 gfx/*.png
 gfx/*.bmp
+data/minimap/*
 sfx
 characters/*

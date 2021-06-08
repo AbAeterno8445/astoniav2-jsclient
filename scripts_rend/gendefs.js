@@ -1,4 +1,4 @@
-const gameConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), 'utf-8'));
+const gameConfig = JSON.parse(fs.readFileSync("./config.json"), 'utf-8');
 
 const sv_cmds = {
     "SV_EMPTY": 0,

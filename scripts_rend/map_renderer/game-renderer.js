@@ -347,6 +347,8 @@ class GameRenderer {
     /** Reset relevant variables, for exiting current character session */
     resetVars() {
         this.resetCursor();
+        this.pl.reset();
+        this.updateMaincharData();
 
         // Raised skills
         for (var i = 0; i < this.stat_raised.length; i++) {
@@ -1002,6 +1004,7 @@ class GameRenderer {
         div_skillslot.appendChild(span_skill_upgval);
 
         this.div_skills.appendChild(div_skillslot);
+        return div_skillslot;
     }
 
     createSkillSlots() {
@@ -1019,7 +1022,11 @@ class GameRenderer {
 
         // Skill slots
         for (let i = 0; i < skilltab.length; i++) {
-            this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
+            var elem_skillslot = this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
+            elem_skillslot.onclick = () => {
+                this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skilltab[i].nr , data2: this.selected_char , data3: skilltab[i].attrib[0] });
+                this.sfxPlayer.play_sfx("click");
+            }
         }
     }
 

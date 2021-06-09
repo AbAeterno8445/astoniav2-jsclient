@@ -256,6 +256,7 @@ class SocketClient {
 
             case cl_cmds["CL_CMD_INV"]:
             case cl_cmds["CL_CMD_INV_LOOK"]:
+            case cl_cmds["CL_CMD_SKILL"]:
                 buf.writeUInt32LE(data.data1, 1);
                 buf.writeUInt32LE(data.data2, 5);
                 buf.writeUInt32LE(data.data3, 9);

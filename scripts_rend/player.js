@@ -1,5 +1,9 @@
 class MainPlayer {
     constructor() {
+        this.reset();
+    }
+
+    reset() {
         this.file = "";
         this.name = "";
         this.newname = ""; // New char name

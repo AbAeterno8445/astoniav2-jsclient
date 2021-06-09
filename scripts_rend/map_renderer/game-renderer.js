@@ -1026,6 +1026,9 @@ class GameRenderer {
             elem_skillslot.onclick = () => {
                 this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skilltab[i].nr , data2: this.selected_char , data3: skilltab[i].attrib[0] });
                 this.sfxPlayer.play_sfx("click");
+            };
+            elem_skillslot.oncontextmenu = () => {
+                this.chatLogger.chat_logmsg_format(skilltab[i].desc, FNT_YELLOW);
             }
         }
     }

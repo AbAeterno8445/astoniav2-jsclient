@@ -890,117 +890,215 @@ class GameRenderer {
         this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
     }
 
+    raiseSkill(i) {
+        var rep = 1;
+        if (this.doc_keyheld.shift) rep = 10;
+        else if (this.doc_keyheld.ctrl) rep = 90;
+
+        for (var r = 0; r < rep; r++) {
+            if (i < 5) {
+                // Raise attribute
+                var needed = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+                if (needed > this.pl.points - this.stat_points_used) break;
+            } else if (i == 5) {
+                // Raise hitpoints
+                var needed = this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]);
+                if (needed > this.pl.points - this.stat_points_used) break;
+            } else if (i == 6) {
+                // Raise endurance
+                var needed = this.pl.end_needed(this.pl.end[0] + this.stat_raised[i]);
+                if (needed > this.pl.points - this.stat_points_used) break;
+            } else if (i == 7) {
+                // Raise mana
+                var needed = this.pl.mana_needed(this.pl.mana[0] + this.stat_raised[i]);
+                if (needed > this.pl.points - this.stat_points_used) break;
+            } else {
+                // Raise skill
+                var m = skilltab[i - 8].nr;
+                var needed = this.pl.skill_needed(m, this.pl.skill[m][0] + this.stat_raised[i]);
+                if (needed > this.pl.points - this.stat_points_used) break;
+            }
+
+            this.stat_points_used += needed;
+            this.stat_raised[i]++;
+        }
+        this.updateSkills();
+    }
+
+    lowerSkill(i) {
+        var rep = 1;
+        if (this.doc_keyheld.shift) rep = 10;
+        else if (this.doc_keyheld.ctrl) rep = 90;
+
+        for (var r = 0; r < rep; r++) {
+            if (!this.stat_raised[i]) break;
+
+            this.stat_raised[i]--;
+            if (i < 5) {
+                // Lower attribute
+                this.stat_points_used -= this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+            } else if (i == 5) {
+                // Lower hitpoints
+                this.stat_points_used -= this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]);
+            } else if (i == 6) {
+                // Lower endurance
+                this.stat_points_used -= this.pl.end_needed(this.pl.end[0] + this.stat_raised[i]);
+            } else if (i == 7) {
+                // Lower mana
+                this.stat_points_used -= this.pl.mana_needed(this.pl.mana[0] + this.stat_raised[i]);
+            } else {
+                // Lower skill
+                var m = skilltab[i - 8].nr;
+                this.stat_points_used -= this.pl.skill_needed(m, this.pl.skill[m][0] + this.stat_raised[i]);
+            }
+        }
+        this.updateSkills();
+    }
+
+    createSkillSlot(id_name, skill_name, upgplus_func, upgminus_func) {
+        var div_skillslot = document.createElement('div');
+        div_skillslot.id = `div-skillslot-${id_name}`;
+        div_skillslot.className = "div-skillslot";
+        div_skillslot.style.borderTop = "0";
+
+        // Attrib name
+        var span_skillname = document.createElement('span');
+        span_skillname.className = "span-skill span-skill-title unselectable";
+        span_skillname.innerHTML = skill_name;
+        div_skillslot.appendChild(span_skillname);
+
+        // Attrib value div
+        var div_skill_val = document.createElement('div');
+        div_skill_val.className = "span-skill div-skill-val unselectable";
+        
+        // Attrib value display
+        var span_skill_val = document.createElement('span');
+        span_skill_val.id = `span-${id_name}-value`;
+        span_skill_val.innerHTML = "0";
+        div_skill_val.appendChild(span_skill_val);
+
+        // Attrib value '-' button
+        var span_skill_button_upgminus = document.createElement('span');
+        span_skill_button_upgminus.id = `span-${id_name}-button-upgminus`;
+        span_skill_button_upgminus.className = "span-skill-upgbutton unselectable";
+        div_skill_val.appendChild(span_skill_button_upgminus);
+
+        span_skill_button_upgminus.onclick = upgminus_func;
+
+        // Attrib value '+' button
+        var span_skill_button_upgplus = document.createElement('span');
+        span_skill_button_upgplus.id = `span-${id_name}-button-upgplus`;
+        span_skill_button_upgplus.className = "span-skill-upgbutton unselectable";
+        div_skill_val.appendChild(span_skill_button_upgplus);
+
+        span_skill_button_upgplus.onclick = upgplus_func;
+
+        div_skillslot.appendChild(div_skill_val);
+
+        // Attrib upgrade requirement display
+        var span_skill_upgval = document.createElement('span');
+        span_skill_upgval.id = `span-${id_name}-upg`;
+        span_skill_upgval.className = "span-skill span-skill-upg unselectable";
+        div_skillslot.appendChild(span_skill_upgval);
+
+        this.div_skills.appendChild(div_skillslot);
+    }
+
     createSkillSlots() {
         // Attribute slots
         for (let i = 0; i < 5; i++) {
-            var div_skillslot = document.createElement('div');
-            div_skillslot.className = "div-skillslot";
-            div_skillslot.style.borderTop = "0";
+            this.createSkillSlot(`attrib${i}`, at_name[i], () => this.raiseSkill(i), () => this.lowerSkill(i));
+        }
 
-            // Attrib name
-            var span_skillname = document.createElement('span');
-            span_skillname.className = "span-skill span-skill-title unselectable";
-            span_skillname.innerHTML = at_name[i];
-            div_skillslot.appendChild(span_skillname);
+        // Health
+        this.createSkillSlot("hp", "Hitpoints", () => this.raiseSkill(5), () => this.lowerSkill(5));
+        // Endurance
+        this.createSkillSlot("end", "Endurance", () => this.raiseSkill(6), () => this.lowerSkill(6));
+        // Mana
+        this.createSkillSlot("mana", "Mana", () => this.raiseSkill(7), () => this.lowerSkill(7));
 
-            // Attrib value div
-            var div_skill_val = document.createElement('div');
-            div_skill_val.className = "span-skill div-skill-val unselectable";
-            
-            // Attrib value display
-            var span_skill_val = document.createElement('span');
-            span_skill_val.id = `span-attrib${i}-value`;
-            span_skill_val.innerHTML = "0";
-            div_skill_val.appendChild(span_skill_val);
-
-            // Attrib value '-' button
-            var span_skill_button_upgminus = document.createElement('span');
-            span_skill_button_upgminus.id = `span-attrib${i}-button-upgminus`;
-            span_skill_button_upgminus.className = "span-skill-upgbutton unselectable";
-            div_skill_val.appendChild(span_skill_button_upgminus);
-
-            span_skill_button_upgminus.onclick = () => {
-                var rep = 1;
-                if (this.doc_keyheld.shift) rep = 10;
-                else if (this.doc_keyheld.ctrl) rep = 90;
-
-                for (var r = 0; r < rep; r++) {
-                    if (!this.stat_raised[i]) break;
-
-                    this.stat_raised[i]--;
-                    this.stat_points_used -= this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
-                }
-                this.updateSkills();
-            };
-
-            // Attrib value '+' button
-            var span_skill_button_upgplus = document.createElement('span');
-            span_skill_button_upgplus.id = `span-attrib${i}-button-upgplus`;
-            span_skill_button_upgplus.className = "span-skill-upgbutton unselectable";
-            div_skill_val.appendChild(span_skill_button_upgplus);
-
-            span_skill_button_upgplus.onclick = () => {
-                var rep = 1;
-                if (this.doc_keyheld.shift) rep = 10;
-                else if (this.doc_keyheld.ctrl) rep = 90;
-
-                for (var r = 0; r < rep; r++) {
-                    var needed = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
-                    if (needed > this.pl.points - this.stat_points_used) break;
-                
-                    this.stat_points_used += needed;
-                    this.stat_raised[i]++;
-                }
-                this.updateSkills();
-            };
-
-            div_skillslot.appendChild(div_skill_val);
-
-            // Attrib upgrade requirement display
-            var span_skill_upgval = document.createElement('span');
-            span_skill_upgval.id = `span-attrib${i}-upg`;
-            span_skill_upgval.className = "span-skill span-skill-upg unselectable";
-            div_skillslot.appendChild(span_skill_upgval);
-
-            this.div_skills.appendChild(div_skillslot);
+        // Skill slots
+        for (let i = 0; i < skilltab.length; i++) {
+            this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
         }
     }
 
+    updateSkill(id_name, value, can_raise, can_lower, upgreq_val) {
+        let elem = document.getElementById(`span-${id_name}-value`);
+        elem.innerHTML = value;
+
+        elem = document.getElementById(`span-${id_name}-button-upgplus`);
+        if (can_raise) elem.innerHTML = "+";
+        else elem.innerHTML = "";
+
+        elem = document.getElementById(`span-${id_name}-button-upgminus`);
+        if (can_lower) elem.innerHTML = "-";
+        else elem.innerHTML = "";
+
+        elem = document.getElementById(`span-${id_name}-upg`);
+        elem.innerHTML = upgreq_val;
+    }
+
     updateSkills() {
-        let elem;
-        // Attributes
-        for (var i = 0; i < 5; i++) {
-            // Value display
-            elem = document.getElementById(`span-attrib${i}-value`);
-            elem.innerHTML = this.pl.attrib[i][5] + this.stat_raised[i];
+        for (var i = 0; i < 8 + skilltab.length; i++) {
+            var id_name, val, can_raise, upgreq_val;
+            if (i < 5) {
+                // Update attributes
+                id_name = `attrib${i}`;
+                val = this.pl.attrib[i][5] + this.stat_raised[i];
+                can_raise = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
+                upgreq_val = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
+                if (this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
 
-            // Raise skill '+' button
-            elem = document.getElementById(`span-attrib${i}-button-upgplus`);
-            if (this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used) {
-                elem.innerHTML = "+";
+            } else if (i == 5) {
+                // Update hitpoints
+                id_name = "hp";
+                val = this.pl.hp[5] + this.stat_raised[i];
+                can_raise = this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
+                upgreq_val = this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]);
+                if (this.pl.hp_needed(i, this.pl.hp[0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
+
+            } else if (i == 6) {
+                // Update endurance
+                id_name = "end";
+                val = this.pl.end[5] + this.stat_raised[i];
+                can_raise = this.pl.end_needed(this.pl.end[0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
+                upgreq_val = this.pl.end_needed(this.pl.end[0] + this.stat_raised[i]);
+                if (this.pl.end_needed(i, this.pl.end[0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
+
+            } else if (i == 7) {
+                // Update mana
+                id_name = "mana";
+                val = this.pl.mana[5] + this.stat_raised[i];
+                can_raise = this.pl.mana_needed(this.pl.mana[0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
+                upgreq_val = this.pl.mana_needed(this.pl.mana[0] + this.stat_raised[i]);
+                if (this.pl.mana_needed(i, this.pl.mana[0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
+
             } else {
-                elem.innerHTML = "";
+                // Update skill
+                id_name = `skill${i - 8}`;
+
+                var m = skilltab[i - 8].nr;
+                if (!this.pl.skill[m][0]) {
+                    document.getElementById(`div-skillslot-${id_name}`).style.display = "none";
+                    continue;
+                } else {
+                    document.getElementById(`div-skillslot-${id_name}`).style.display = null;
+                }
+
+                val = this.pl.skill[m][5] + this.stat_raised[i];
+                can_raise = this.pl.skill_needed(m, this.pl.skill[m][0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
+                upgreq_val = this.pl.skill_needed(m, this.pl.skill[m][0] + this.stat_raised[i]);
+                if (this.pl.skill_needed(m, this.pl.skill[m][0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
             }
 
-            // Lower skill '-' button
-            elem = document.getElementById(`span-attrib${i}-button-upgminus`);
-            if (this.stat_raised[i] > 0) {
-                elem.innerHTML = "-";
-            } else {
-                elem.innerHTML = "";
-            }
+            var can_lower = this.stat_raised[i] > 0;
 
-            // Attribute upgrade requirement display
-            elem = document.getElementById(`span-attrib${i}-upg`);
-            if (this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]) != HIGH_VAL) {
-                elem.innerHTML = this.pl.attrib_needed(i, this.pl.attrib[i][0] + this.stat_raised[i]);
-            } else {
-                elem.innerHTML = "";
-            }
+            this.updateSkill(id_name, val, can_raise, can_lower, upgreq_val);
         }
 
         // Update value
-        elem = document.getElementById('span-skill-updatevalue');
+        var elem = document.getElementById('span-skill-updatevalue');
         elem.innerHTML = this.pl.points - this.stat_points_used;
     }
 

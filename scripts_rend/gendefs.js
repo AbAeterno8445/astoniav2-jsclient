@@ -197,7 +197,7 @@ const AT_INT = 2;
 const AT_AGIL = 3;
 const AT_STREN = 4;
 
-const skills = [
+const skilltab = [
     {nr: 0, sortkey: 'C', name: "Hand to Hand", desc: "Fighting without weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
     {nr: 1, sortkey: 'C', name: "Karate", desc: "Fighting without weapons and doing damage.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
 	{nr: 2, sortkey: 'C', name: "Dagger", desc: "Fighting with daggers or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_INT]},

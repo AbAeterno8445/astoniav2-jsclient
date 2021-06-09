@@ -1,13 +1,19 @@
 #div-skills {
     background-color: black;
-    width: 100%;
+    margin-left: 2px;
+    overflow-y: overlay;
+    overflow-x: hidden;
+    flex: 1;
+}
+
+#div-skills-update {
+    background-color: black;
     margin-left: 2px;
 }
 
 .div-skillslot {
     display: flex;
     border: 1px solid white;
-    width: 100%;
 }
 
 .span-skill {

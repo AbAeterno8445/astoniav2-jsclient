@@ -144,6 +144,6 @@ class MainPlayer {
     {
         if (v >= this.skill[n][2]) return HIGH_VAL;
 
-        return Math.floor(max(v, v * v * v * this.skill[n][3] / 40));
+        return Math.floor(Math.max(v, v * v * v * this.skill[n][3] / 40));
     }
 }

@@ -75,6 +75,10 @@ class LoginHandler {
         var tmp_chardiv = document.createElement('div');
         tmp_chardiv.className = "div-charcard";
 
+        var tmp_chardiv_imgdiv = document.createElement('div');
+        tmp_chardiv_imgdiv.style.display = "flex";
+        tmp_chardiv_imgdiv.style.alignItems = "center";
+
         var tmp_chardiv_img = document.createElement('div');
         tmp_chardiv_img.className = 'charbox64';
 
@@ -89,7 +93,16 @@ class LoginHandler {
         }
         
         tmp_chardiv_img.style.backgroundImage = "url(" + getNumSpritePath(char_sprite) + ")";
-        tmp_chardiv.appendChild(tmp_chardiv_img);
+        tmp_chardiv_imgdiv.appendChild(tmp_chardiv_img);
+
+        var pl_rank = points2rank(chardata.points);
+        var tmp_chardiv_rankimg = document.createElement('div');
+        tmp_chardiv_rankimg.style.width = "32px";
+        tmp_chardiv_rankimg.style.height = "96px";
+        if (pl_rank > 0) tmp_chardiv_rankimg.style.backgroundImage = "url(" + getNumSpritePath(10 + pl_rank) + ")";
+        tmp_chardiv_imgdiv.appendChild(tmp_chardiv_rankimg);
+
+        tmp_chardiv.appendChild(tmp_chardiv_imgdiv);
 
         var tmp_charname = document.createElement('span');
         tmp_charname.innerHTML = chardata.name;

@@ -1,5 +1,6 @@
 class MainPlayer {
     constructor() {
+        this.autosave_intv = null;
         this.reset();
     }
 
@@ -76,6 +77,8 @@ class MainPlayer {
         this.description = "";
         this.race = 0;
         this.creation = 0;
+
+        if (this.autosave_intv) clearInterval(this.autosave_intv);
     }
 
     /** Loads character data using the 'file' var (remember to set it before calling this).
@@ -116,6 +119,16 @@ class MainPlayer {
             pass2: this.pass2
         };
         fs.writeFileSync(this.file, JSON.stringify(savedata));
+    }
+
+    toggleAutosave(tog, delay=10000) {
+        if (this.autosave_intv) clearInterval(this.autosave_intv);
+
+        if (tog) {
+            this.autosave_intv = setInterval(() => {
+                this.savefile();
+            }, delay);
+        }
     }
 
     attrib_needed(n, v) {

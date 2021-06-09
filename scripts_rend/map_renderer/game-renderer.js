@@ -1133,13 +1133,22 @@ class GameRenderer {
         }
 
         // Update character display
+        var pl_rank = points2rank(this.pl.points_tot)
+
         this.cdisp_span_charname.innerHTML = this.pl.name;
-        this.cdisp_span_rankname.innerHTML = rank_names[points2rank(this.pl.points_tot)];
+        this.cdisp_span_rankname.innerHTML = rank_names[pl_rank];
         this.cdisp_span_money.innerHTML = `Money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
-        this.cdisp_img_rank.src = getNumSpritePath(11 + points2rank(this.pl.points_tot));
         this.cdisp_wv.innerHTML = `Weapon value: ${this.pl.weapon}`;
         this.cdisp_av.innerHTML = `Armor value: ${this.pl.armor}`;
         this.cdisp_exp.innerHTML = `Experience: ${this.pl.points_tot}`;
+
+        // Rank img
+        if (pl_rank > 0) {
+            this.cdisp_img_rank.src = getNumSpritePath(10 + pl_rank);
+            this.cdisp_img_rank.style.display = "block";
+        } else {
+            this.cdisp_img_rank.style.display = "none";
+        }
 
         // Speed
         switch(this.pl.mode) {
@@ -1161,9 +1170,9 @@ class GameRenderer {
         }
 
         // Exp bar
-        var prevrank_xpreq = rank2points(points2rank(this.pl.points_tot) - 1);
-        var xp_wid = ((this.pl.points_tot - prevrank_xpreq) / (rank2points(points2rank(this.pl.points_tot)) - prevrank_xpreq)) * 100;
-        if (points2rank(this.pl.points_tot) == 23) xp_wid = 100;
+        var prevrank_xpreq = rank2points(pl_rank - 1);
+        var xp_wid = 100;
+        if (pl_rank < 23) xp_wid = ((this.pl.points_tot - prevrank_xpreq) / (rank2points(pl_rank) - prevrank_xpreq)) * 100;
         this.cdisp_xpbar.style.width = `${xp_wid}%`;
 
         // Shop money display

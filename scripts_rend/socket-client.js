@@ -109,12 +109,14 @@ class SocketClient {
                 this.pl.pass1 = buf.readUInt32LE(5);
                 this.pl.pass2 = buf.readUInt32LE(9);
                 this.pl.savefile();
+                this.pl.toggleAutosave(true);
 
                 console.log("logged in as new character.");
             break;
 
             case sv_cmds["SV_LOGIN_OK"]:
                 this.logged = true;
+                this.pl.toggleAutosave(true);
                 console.log("logged in.");
             break;
 

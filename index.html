@@ -22,12 +22,12 @@
         </div>
 
         <!-- New character div -->
-        <div id="div-newchar" style="display: none;">
-            <form id="form-newchar">
+        <div id="div-newchar" class="div-wholescreen" style="display: none;">
+            <form id="form-newchar" class="form-400px">
                 <label for="inp-newchar-name">Name: </label>
                 <input id="inp-newchar-name" class="cl-inp-newchar" type="text" maxlength="16">
 
-                <label for="inp-newchar-name" style="margin-left: 6px;">Password: </label>
+                <label for="inp-newchar-pass" style="margin-left: 6px;">Password: </label>
                 <input id="inp-newchar-pass" class="cl-inp-newchar" type="password" maxlength="25"><br>
 
                 <div style="width: 100%; margin: 8px;">
@@ -65,10 +65,22 @@
                 <br>
 
                 <div style="display: flex; justify-content: space-between;">
-                    <input type="button" value="Cancel" onclick="loginHandler.toggleNewChar()">
+                    <input type="button" value="Cancel" onclick="loginHandler.toggleScreen(loginHandler.div_newchar)">
                     <input type="button" value="Create new character" onclick="loginHandler.createNewChar()">
                 </div>
             </form>
+        </div>
+
+        <!-- Password entry div -->
+        <div id="div-password" class="div-wholescreen" style="display: none;">
+            <div class="form-400px">
+                <h2>Enter password:</h2>
+                <input id="inp-login-password" style="margin: 4px;" type="password" maxlength="25"><br>
+                <div style="display: flex; justify-content: space-between; width: 25%;"></div>
+                    <input type="button" value="Cancel" onclick="loginHandler.toggleScreen(loginHandler.div_password)">
+                    <input id="button-pass-enter" type="button" value="Enter" onclick="return">
+                </div>
+            </div>
         </div>
     </div>
 

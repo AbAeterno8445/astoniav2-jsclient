@@ -7,6 +7,9 @@ class LoginHandler {
         this.div_maingame = document.getElementById('div-maingame');
         this.div_selectchar = document.getElementById('div-selectchar');
         this.div_newchar = document.getElementById('div-newchar');
+        this.div_password = document.getElementById('div-password');
+        this.inp_login_password = document.getElementById('inp-login-password');
+        this.but_pass_enter = document.getElementById('button-pass-enter');
 
         this.elems_newchar = {
             cv_newcharprev: new CanvasHandler(document.getElementById('cv-newchar-preview')),
@@ -62,11 +65,11 @@ class LoginHandler {
         }, TICK);
     }
 
-    toggleNewChar() {
-        if (this.div_newchar.style.display == "flex") {
-            this.div_newchar.style.display = "none";
+    toggleScreen(screen_div) {
+        if (screen_div.style.display == "flex") {
+            screen_div.style.display = "none";
         } else {
-            this.div_newchar.style.display = "flex";
+            screen_div.style.display = "flex";
         }
     }
 
@@ -122,12 +125,18 @@ class LoginHandler {
         var tmp_selbutton = document.createElement('button');
         tmp_selbutton.innerHTML = "Select";
         tmp_selbutton.onclick = () => {
-            this.pl.file = './characters/' + chardata.name + '.json';
-            if (this.pl.loadfile() == 0) {
-                console.log("Could not load selected character data.");
-                return;
-            }
-            this.loginCharacter(false, chardata);
+            this.inp_login_password.value = "";
+            this.toggleScreen(this.div_password);
+
+            this.but_pass_enter.onclick = () => {
+                this.toggleScreen(this.div_password);
+                this.pl.file = './characters/' + chardata.name + '.json';
+                if (this.pl.loadfile() == 0) {
+                    console.log("Could not load selected character data.");
+                    return;
+                }
+                this.loginCharacter(false, chardata);
+            };
         };
         tmp_chardiv.appendChild(tmp_selbutton);
 
@@ -155,7 +164,7 @@ class LoginHandler {
         // New character button
         var newchar_button = document.createElement('div');
         newchar_button.className = "charbox64 div-createchar-button";
-        newchar_button.onclick = () => this.toggleNewChar();
+        newchar_button.onclick = () => this.toggleScreen(this.div_newchar);
 
         var newchar_plus = document.createElement('span');
         newchar_plus.className = "unselectable";
@@ -169,9 +178,9 @@ class LoginHandler {
         var charname = this.elems_newchar.inp_newcharname.value.trim();
         var char_time = new Date();
 
-        if (!charname) {
-            return;
-        }
+        this.updateCharSelect();
+        this.toggleScreen(this.div_newchar);
+        this.loginCharacter(true, this.pl);
 
         var tmp_race = "";
         var tmp_gender = "";
@@ -194,10 +203,6 @@ class LoginHandler {
         this.elems_newchar.inp_newcharname.value = "";
         this.elems_newchar.inp_newcharpass.value = "";
         this.elems_newchar.inp_newchardesc.value = "";
-
-        this.updateCharSelect();
-        this.toggleNewChar();
-        this.loginCharacter(true, this.pl);
     }
 
     getRaceNum(race, gender) {
@@ -219,7 +224,10 @@ class LoginHandler {
         try {
             this.div_loginscreen.style.display = "none";
 
-            this.sockClient.connect(newchar, chardata, (err) => {
+            var pass_str = this.inp_login_password.value;
+            if (newchar) pass_str = this.elems_newchar.inp_newcharpass.value;
+
+            this.sockClient.connect(newchar, chardata, pass_str, (err) => {
                 if (err) {
                     console.log("ERROR - Connecting to server:", err);
                     this.sockClient.log_failure("ERROR - Connecting to server: " + err.message, FNT_RED);

@@ -1,4 +1,5 @@
-#div-newchar {
+.div-wholescreen {
+    background-color: rgba(50, 50, 50, 0.5);
     width: 100%;
     height: 100%;
     position: absolute;
@@ -9,7 +10,7 @@
     align-items: center;
 }
 
-#form-newchar {
+.form-400px {
     background-color: black;
     width: 400px;
     border: 1px solid lightgray;
@@ -86,8 +87,4 @@
     border: 1px solid white;
     background-color: gray;
     cursor: pointer;
-}
-
-#div-newchar {
-    background-color: rgba(50, 50, 50, 0.5);
 }

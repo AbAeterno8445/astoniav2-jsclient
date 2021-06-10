@@ -33,7 +33,7 @@ class SocketClient {
     }
 
     /** Existing chardata needs usnr, pass1 & pass2 fields */
-    connect(newchar, chardata, callback) {
+    connect(newchar, chardata, password, callback) {
         this.log_add("Connecting...", FNT_YELLOW);
         this._client = net.createConnection({ host: this.sv_ip, port: this.sv_port }, () => {
             console.log("connected to server.");
@@ -42,6 +42,13 @@ class SocketClient {
             this._pdata_state = 0;
 
             var buf = Buffer.alloc(16);
+            if (password) {
+                buf[0] = cl_cmds["CL_PASSWD"];
+                buf.write(password.substring(0, 15), 1);
+                this._client.write(buf);
+            }
+
+            buf = Buffer.alloc(16);
             if (newchar) {
                 buf[0] = cl_cmds["CL_NEWLOGIN"];
             } else {
@@ -125,6 +132,7 @@ class SocketClient {
                 var log = "EXIT: " + this._cmd_dispatcher.get_logout_reason(tmp);
                 this.log_add(log);
                 console.log(log);
+                this._client.end();
             break;
 
             case sv_cmds["SV_CAP"]:
@@ -143,11 +151,6 @@ class SocketClient {
 
     _tick_do() {
         if (this._tickbuf.length < 2) return 0;
-
-        if (!this.logged) {
-            this._login_proc();
-            return 0;
-        }
 
         while(this._tickbuf.length >= 2) {
             var data = Buffer.from(this._tickbuf);

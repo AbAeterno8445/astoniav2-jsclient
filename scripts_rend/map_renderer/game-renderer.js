@@ -63,14 +63,15 @@ class GameRenderer {
         this.cursor_default = "./gfx/MOUSE.png";
 
         // Pre-load basic images
-        this.mapCanvas.loadImage(getNumSpritePath(31)); // Target tile (player movement)
-        this.mapCanvas.loadImage(getNumSpritePath(32)); // Drop at position
-        this.mapCanvas.loadImage(getNumSpritePath(33)); // Take from position
-        this.mapCanvas.loadImage(getNumSpritePath(34)); // Attack target
-        this.mapCanvas.loadImage(getNumSpritePath(45)); // Give target/Use target
-        for (var i = 1078; i < 1082; i++) {
-            this.mapCanvas.loadImage(getNumSpritePath(i)); // Injured char fx
-        }
+        this.mapCanvas.loadImage(getNumSpritePath(31), 1, "none", null, false); // Target tile (player movement)
+        this.mapCanvas.loadImage(getNumSpritePath(32), 1, "none", null, false); // Drop at position
+        this.mapCanvas.loadImage(getNumSpritePath(33), 1, "none", null, false); // Take from position
+        this.mapCanvas.loadImage(getNumSpritePath(34), 1, "none", null, false); // Attack target
+        this.mapCanvas.loadImage(getNumSpritePath(45), 1, "none", null, false); // Give target/Use target
+        for (var i = 1078; i < 1082; i++)
+            this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Injured char fx
+        for (var i = 0; i < 8; i++)
+            this.mapCanvas.loadImage(`./gfx/misc/spell_fx${i}.png`, 1, "none", null, false); // Spell fx
 
         // Hovered tile in map
         this.tile_hovered = -1;
@@ -137,6 +138,11 @@ class GameRenderer {
 
         this.char_hbar_cv = document.createElement('canvas');
         this.char_hbar_cv.height = 1;
+
+        this.spellfx_cv = document.createElement('canvas');
+        this.spellfx_cv.width = 64;
+        this.spellfx_cv.height = 64;
+        this.spellfx_cv_ctx = this.spellfx_cv.getContext('2d');
 
         this.citem_last = 0;
 
@@ -826,6 +832,35 @@ class GameRenderer {
                     var grave_spr_suff = getNumSpritePath(grave_sprnum) + fx_suff;
                     this.mapCanvas.loadImage(getNumSpritePath(grave_sprnum), 1, gfx_filter, grave_spr_suff);
                     this.mapDraw(grave_spr_suff, j, i, pl_xoff, pl_yoff);
+                }
+
+                // Spell magic effect
+                var spell_color = [0, 0, 0];
+                var fx_str = 0;
+                if (tile.flags & EMAGIC) {
+                    spell_color[0] = 255;
+                    fx_str = ((tile.flags & EMAGIC) >> 22) >>> 0;
+                }
+                if (tile.flags & GMAGIC) {
+                    spell_color[1] = 255;
+                    fx_str = ((tile.flags & GMAGIC) >> 25) >>> 0;
+                }
+                if (tile.flags & CMAGIC) {
+                    spell_color[2] = 255;
+                    fx_str = ((tile.flags & CMAGIC) >> 28) >>> 0;
+                }
+
+                if (spell_color[0] != 0 || spell_color[1] != 0 || spell_color[2] != 0) {
+                    var spellfx_img = this.mapCanvas.getImage("./gfx/misc/spell_fx" + (fx_str - 1) + ".png");
+                    if (spellfx_img) {
+                        var hue = Math.floor(rgbToHsl(spell_color[0], spell_color[1], spell_color[2])[0] * 360);
+
+                        this.spellfx_cv_ctx.clearRect(0, 0, 64, 64);
+                        this.spellfx_cv_ctx.filter = `brightness(0.7) sepia(1) saturate(10000%) hue-rotate(${hue}deg)`;
+                        this.spellfx_cv_ctx.drawImage(spellfx_img, 0, 0);
+
+                        this.mapDraw(this.spellfx_cv, j, i, pl_xoff, pl_yoff);
+                    }
                 }
 
                 // Character info

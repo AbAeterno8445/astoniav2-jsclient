@@ -297,6 +297,21 @@ const CMAGIC1 = (1<<28) >>> 0;
 
 const TPURPLE = (1<<31) >>> 0;
 
+const MF_MOVEBLOCK = (1<<0) >>> 0;
+const MF_SIGHTBLOCK = (1<<1) >>> 0;
+const MF_INDOORS = (1<<2) >>> 0;
+const MF_UWATER = (1<<3) >>> 0;
+const MF_NOLAG = (1<<4) >>> 0;
+const MF_NOMONST = (1<<5) >>> 0;
+const MF_BANK = (1<<6) >>> 0;
+const MF_TAVERN = (1<<7) >>> 0;
+const MF_NOMAGIC = (1<<8) >>> 0;
+const MF_DEATHTRAP = (1<<9) >>> 0;
+
+const MF_ARENA = (1<<11) >>> 0;
+
+const MF_NOEXPIRE = (1<<13) >>> 0;
+
 const DR_IDLE = 0;
 const DR_DROP = 1;
 const DR_PICKUP = 2;

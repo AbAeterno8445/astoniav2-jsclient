@@ -68,6 +68,10 @@ class GameRenderer {
         this.mapCanvas.loadImage(getNumSpritePath(33), 1, "none", null, false); // Take from position
         this.mapCanvas.loadImage(getNumSpritePath(34), 1, "none", null, false); // Attack target
         this.mapCanvas.loadImage(getNumSpritePath(45), 1, "none", null, false); // Give target/Use target
+        for (var i = 47; i < 63; i++)
+            this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Build flags
+        for (var i = 72; i < 85; i++)
+            this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Build flags
         for (var i = 1078; i < 1082; i++)
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Injured char fx
         for (var i = 0; i < 8; i++)
@@ -809,12 +813,12 @@ class GameRenderer {
                 gfx_brightness = tile_light;
 
                 // Character
-                var obj_xoff = Math.round(tilemap[tile_id].obj_xoff);
-                var obj_yoff = Math.round(tilemap[tile_id].obj_yoff);
+                var obj_xoff = Math.round(tile.obj_xoff);
+                var obj_yoff = Math.round(tile.obj_yoff);
 
                 if (tile.obj2) {
                     // Selected char effect
-                    if (this.selected_char == tilemap[tile_id].ch_nr) {
+                    if (this.selected_char == tile.ch_nr) {
                         if (!first_fx) {
                             first_fx = true;
                             gfx_filter_fx += " sepia(90%) saturate(2)";
@@ -862,43 +866,60 @@ class GameRenderer {
 
                 /** PLAYER COMMAND SPRITES */
                 // Attack target sprite
-                if (this.pl.attack_cn && this.pl.attack_cn == tilemap[tile_id].ch_nr)
+                if (this.pl.attack_cn && this.pl.attack_cn == tile.ch_nr)
                     this.mapDrawNum(34, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
 
                 // Give target sprite
-                if (this.pl.misc_action == DR_GIVE && this.pl.misc_target1 == tilemap[tile_id].ch_nr)
+                if (this.pl.misc_action == DR_GIVE && this.pl.misc_target1 == tile.ch_nr)
                     this.mapDrawNum(45, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
                 
                 // Drop at position
-                if (this.pl.misc_action == DR_DROP && this.pl.misc_target1 == tilemap[tile_id].x && this.pl.misc_target2 == tilemap[tile_id].y)
+                if (this.pl.misc_action == DR_DROP && this.pl.misc_target1 == tile.x && this.pl.misc_target2 == tile.y)
                     this.mapDrawNum(32, j, i, pl_xoff, pl_yoff);
                 
                 // Pickup from position
-                if (this.pl.misc_action == DR_PICKUP && this.pl.misc_target1 == tilemap[tile_id].x && this.pl.misc_target2 == tilemap[tile_id].y)
+                if (this.pl.misc_action == DR_PICKUP && this.pl.misc_target1 == tile.x && this.pl.misc_target2 == tile.y)
                     this.mapDrawNum(33, j, i, pl_xoff, pl_yoff);
                 
                 // Use at position
-                if (this.pl.misc_action == DR_USE && this.pl.misc_target1 == tilemap[tile_id].x && this.pl.misc_target2 == tilemap[tile_id].y)
+                if (this.pl.misc_action == DR_USE && this.pl.misc_target1 == tile.x && this.pl.misc_target2 == tile.y)
                     this.mapDrawNum(45, j, i, pl_xoff, pl_yoff);
 
                 /** MAP EFFECTS */
+                // Build flags
+                if (tile.flags2 & MF_MOVEBLOCK) this.mapDrawNum(55, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_SIGHTBLOCK) this.mapDrawNum(84, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_INDOORS) this.mapDrawNum(56, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_UWATER) this.mapDrawNum(75, j, i, pl_xoff, pl_yoff, 0);
+                //if (tile.flags2 & MF_NOFIGHT) this.mapDrawNum(58, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_NOMONST) this.mapDrawNum(59, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_BANK) this.mapDrawNum(60, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_TAVERN) this.mapDrawNum(61, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_NOMAGIC) this.mapDrawNum(62, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_DEATHTRAP) this.mapDrawNum(73, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_NOLAG) this.mapDrawNum(57, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_ARENA) this.mapDrawNum(76, j, i, pl_xoff, pl_yoff, 0);
+                //if (tile.flags2 & MF_TELEPORT2) this.mapDrawNum(77, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & MF_NOEXPIRE) this.mapDrawNum(82, j, i, pl_xoff, pl_yoff, 0);
+                if (tile.flags2 & 0x80000000) this.mapDrawNum(72, j, i, pl_xoff, pl_yoff, 0);
+                
                 // Injury effects
-                if ((tilemap[tile_id].flags & (INJURED|INJURED1|INJURED2)) == INJURED)
+                if ((tile.flags & (INJURED|INJURED1|INJURED2)) == INJURED)
                     this.mapDrawNum(1079, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
 
-                if ((tilemap[tile_id].flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED1))
+                if ((tile.flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED1))
                     this.mapDrawNum(1080, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
 
-                if ((tilemap[tile_id].flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED2))
+                if ((tile.flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED2))
                     this.mapDrawNum(1081, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
 
-                if ((tilemap[tile_id].flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED1|INJURED2))
+                if ((tile.flags & (INJURED|INJURED1|INJURED2)) == (INJURED|INJURED1|INJURED2))
                     this.mapDrawNum(1082, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
                 
                 // Death mist
-                if (tilemap[tile_id].flags & DEATH) {
-                    var m_spr = 280 + ((tilemap[tile_id].flags & DEATH) >> 17) - 1;
-                    if (tilemap[tile_id].obj2) {
+                if (tile.flags & DEATH) {
+                    var m_spr = 280 + ((tile.flags & DEATH) >> 17) - 1;
+                    if (tile.obj2) {
                         this.mapDrawNum(m_spr, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff);
                     } else {
                         this.mapDrawNum(m_spr, j, i, pl_xoff, pl_yoff);
@@ -906,8 +927,8 @@ class GameRenderer {
                 }
 
                 // Grave
-                if (tilemap[tile_id].flags & TOMB) {
-                    var grave_sprnum = 240 + ((tilemap[tile_id].flags & TOMB) >> 12) - 1;
+                if (tile.flags & TOMB) {
+                    var grave_sprnum = 240 + ((tile.flags & TOMB) >> 12) - 1;
                     var grave_spr_suff = getNumSpritePath(grave_sprnum) + fx_suff;
                     this.mapCanvas.loadImage(getNumSpritePath(grave_sprnum), 1, gfx_filter, grave_spr_suff);
                     this.mapDraw(grave_spr_suff, j, i, pl_xoff, pl_yoff);
@@ -943,7 +964,7 @@ class GameRenderer {
                 }
 
                 // Character info
-                let ch_nr = tilemap[tile_id].ch_nr;
+                let ch_nr = tile.ch_nr;
                 if (ch_nr) {
                     let char_info = null;
                     if (this.look_chars.hasOwnProperty(ch_nr)) char_info = this.look_chars[ch_nr];
@@ -963,7 +984,7 @@ class GameRenderer {
                         if (!this.hide_names) {
                             var chname_img;
                             var chname_full = char_info.name;
-                            if (tilemap[tile_id].ch_proz && !this.hide_hp) chname_full += " " + tilemap[tile_id].ch_proz + "%";
+                            if (tile.ch_proz && !this.hide_hp) chname_full += " " + tile.ch_proz + "%";
 
                             if (!this.charname_imgs.hasOwnProperty(chname_full)) {
                                 chname_img = this.fontDrawer.get_text_img(FNT_YELLOW, chname_full);
@@ -980,8 +1001,8 @@ class GameRenderer {
 
                         // Healthbar
                         if (!this.hide_hpbars) {
-                            if (tilemap[tile_id].ch_proz) {
-                                this.char_hbar_cv.width = Math.ceil(48 * tilemap[tile_id].ch_proz / 100);
+                            if (tile.ch_proz) {
+                                this.char_hbar_cv.width = Math.ceil(48 * tile.ch_proz / 100);
                                 this.char_hbar_cv.getContext('2d').fillStyle = 'red';
                                 this.char_hbar_cv.getContext('2d').fillRect(0, 0, this.char_hbar_cv.width, 1);
 

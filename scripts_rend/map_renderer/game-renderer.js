@@ -234,6 +234,8 @@ class GameRenderer {
         this.cdisp_charcv.height = 64;
         this.cdisp_charcv_ctx = this.cdisp_charcv.getContext('2d');
 
+        this.div_buffs = document.getElementById('div-buffs');
+
         // Shop screen
         this.shop_screen = document.getElementById('div-shop');
         this.shop_div_items = document.getElementById('div-shopitems');
@@ -1333,6 +1335,36 @@ class GameRenderer {
         this.shop_span_money.innerHTML = `Your money: ${Math.floor(this.pl.gold / 100)}G ${this.pl.gold % 100}S`;
         if (this.shop_sellval) {
             this.shop_span_money.innerHTML += ` - Item in hand value: ${Math.floor(this.shop_sellval / 100)}G ${this.shop_sellval % 100}S`;
+        }
+
+        // Buffs
+        /**
+         * for (n=0; n<20; n++) {
+			if (pl.spell[n]) {
+				copyspritex(pl.spell[n],374+(n%5)*24,4+(n/5)*24,15-min(15,pl.active[n]));
+			}
+		}
+        */
+        while (this.div_buffs.firstChild) this.div_buffs.removeChild(this.div_buffs.firstChild);
+        for (var i = 0; i < 20; i++) {
+            if (this.pl.spell[i]) {
+                let tmp_buffdiv = document.createElement('div');
+
+                let tmp_buffimg = document.createElement('img');
+                tmp_buffimg.style.width = "32px";
+                tmp_buffimg.style.height = "32px";
+                tmp_buffimg.src = getNumSpritePath(this.pl.spell[i]);
+                tmp_buffdiv.appendChild(tmp_buffimg);
+
+                let tmp_buffdur = document.createElement('span');
+                tmp_buffdur.style.position = "fixed";
+                tmp_buffdur.style.width = "16px";
+                tmp_buffdur.style.transform = "translate(-200%, 100%)";
+                tmp_buffdur.innerHTML = this.pl.active[i];
+                tmp_buffdiv.appendChild(tmp_buffdur);
+
+                this.div_buffs.appendChild(tmp_buffdiv);
+            }
         }
 
         this.cdisp_bar_hp.style.width = Math.floor((this.pl.a_hp / this.pl.hp[5]) * 80) + "px";

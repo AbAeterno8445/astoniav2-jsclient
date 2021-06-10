@@ -171,11 +171,15 @@
                             <!-- Boots -->
                             <div class="div-invitem" id="eq-boots" style="background-image: url(&quot;./gfx/ui/eq_boots.png&quot;)"></div>
                         </div>
+
+                        <!-- Character info display -->
                         <div style="text-align: center;">
+                            <!-- Character view -->
                             <div id="div-char-display">
                                 <canvas id="cv-char-display" style="position: fixed;"></canvas>
                                 <img id="img-rank-display" class="unselectable">
                             </div>
+                            <!-- healthbars, name, rank, money -->
                             <span id="span-displaybars" class="span-displaydata unselectable" style="padding: 1px;">
                                 <span class="span-hpbar unselectable" id="span-displaybar-hp" style="margin-top: 1px;"></span>
                                 <span class="span-hpbar unselectable" id="span-displaybar-end" style="margin-top: 1px;"></span>
@@ -185,10 +189,18 @@
                             <span id="span-rankname" class="span-displaydata unselectable"></span>
                             <span id="span-money" class="span-displaydata unselectable"></span>
                         </div>
+
+                        <!-- Misc info (WV, AV, exp), buffs -->
                         <div style="width: max-content; margin: 2px;">
                             <span id="span-weaponvalue" class="span-displaydata unselectable" style="border-top: 1px solid white; padding: 2px;">Weapon value: 0</span>
                             <span id="span-armorvalue" class="span-displaydata unselectable" style="padding: 2px;">Armor value: 0</span>
                             <span id="span-experience" class="span-displaydata unselectable" style="padding: 2px;">Experience: 0</span>
+
+                            <!-- Buffs -->
+                            <div id="div-buffs">
+                                <img style="width: 32px; height: 32px;">
+                                <img style="width: 32px; height: 32px;">
+                            </div>
                         </div>
                     </div>
                 </div>

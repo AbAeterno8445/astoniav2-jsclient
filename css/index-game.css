@@ -106,3 +106,9 @@
     border: 1px solid gray;
     background-color: rgb(10, 10, 10);
 }
+
+#div-buffs {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}

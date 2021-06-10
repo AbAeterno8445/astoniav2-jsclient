@@ -1211,7 +1211,7 @@ class GameRenderer {
                 val = this.pl.hp[5] + this.stat_raised[i];
                 can_raise = this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]) <= this.pl.points - this.stat_points_used;
                 upgreq_val = this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]);
-                if (this.pl.hp_needed(i, this.pl.hp[0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
+                if (this.pl.hp_needed(this.pl.hp[0] + this.stat_raised[i]) == HIGH_VAL) upgreq_val = "";
 
             } else if (i == 6) {
                 // Update endurance
@@ -1338,13 +1338,6 @@ class GameRenderer {
         }
 
         // Buffs
-        /**
-         * for (n=0; n<20; n++) {
-			if (pl.spell[n]) {
-				copyspritex(pl.spell[n],374+(n%5)*24,4+(n/5)*24,15-min(15,pl.active[n]));
-			}
-		}
-        */
         while (this.div_buffs.firstChild) this.div_buffs.removeChild(this.div_buffs.firstChild);
         for (var i = 0; i < 20; i++) {
             if (this.pl.spell[i]) {

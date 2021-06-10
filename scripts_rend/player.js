@@ -132,31 +132,23 @@ class MainPlayer {
 	    return Math.floor(v * v * v * this.attrib[n][3] / 20);
     }
 
-    hp_needed(v)
-    {
+    hp_needed(v) {
         if (v >= this.hp[2]) return HIGH_VAL;
-
         return Math.floor(v * this.hp[3]);
     }
 
-    end_needed(v)
-    {
+    end_needed(v) {
         if (v >= this.end[2]) return HIGH_VAL;
-
         return Math.floor(v * this.end[3] / 2);
     }
 
-    mana_needed(v)
-    {
+    mana_needed(v) {
         if (v >= this.mana[2]) return HIGH_VAL;
-
         return Math.floor(v * this.mana[3]);
     }
 
-    skill_needed(n, v)
-    {
+    skill_needed(n, v) {
         if (v >= this.skill[n][2]) return HIGH_VAL;
-
         return Math.floor(Math.max(v, v * v * v * this.skill[n][3] / 40));
     }
 }

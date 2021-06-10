@@ -41,7 +41,6 @@ class SocketClient {
 
             this._pdata_state = 0;
 
-            // TODO: Handle new char creation / existing char login
             var buf = Buffer.alloc(16);
             if (newchar) {
                 buf[0] = cl_cmds["CL_NEWLOGIN"];

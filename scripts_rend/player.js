@@ -5,6 +5,8 @@ class MainPlayer {
     }
 
     reset() {
+        if (this.autosave_intv) clearInterval(this.autosave_intv);
+
         this.file = "";
         this.name = "";
         this.newname = ""; // New char name
@@ -78,8 +80,6 @@ class MainPlayer {
         this.creation = 0;
         this.skillbinds = [];
         for (var i = 0; i < 12; i++) this.skillbinds.push(null);
-
-        if (this.autosave_intv) clearInterval(this.autosave_intv);
     }
 
     /** Loads character data using the 'file' var (remember to set it before calling this).
@@ -114,6 +114,7 @@ class MainPlayer {
             skillbinds: this.skillbinds
         };
         fs.writeFileSync(this.file, JSON.stringify(savedata));
+        console.log("Saved", this.name, "-", savedata);
     }
 
     toggleAutosave(tog, delay=10000) {

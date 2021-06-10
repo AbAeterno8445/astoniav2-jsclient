@@ -239,6 +239,7 @@ class LoginHandler {
             this.div_maingame.style.display = "none";
             this.div_loginscreen.style.display = "block";
 
+            mainPlayer.savefile();
             gameRenderer.resetVars();
         }
     }

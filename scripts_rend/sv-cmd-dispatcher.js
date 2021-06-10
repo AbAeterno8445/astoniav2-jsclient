@@ -198,7 +198,6 @@ class ServerCMDDispatcher {
         }
 
         this.pl.file = pl_newfile;
-        this.pl.savefile();
         
         this._game_eng.removeLookChar(this.pl.usnr);
 

@@ -72,6 +72,7 @@ class GameRenderer {
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Injured char fx
         for (var i = 0; i < 8; i++)
             this.mapCanvas.loadImage(`./gfx/misc/spell_fx${i}.png`, 1, "none", null, false); // Spell fx
+        this.mapCanvas.loadImage("./gfx/misc/tile_hover.png", 1, "opacity(0.7)", null, false); // Tile hover
 
         // Hovered tile in map
         this.tile_hovered = -1;
@@ -699,15 +700,23 @@ class GameRenderer {
                 if (!tile) continue;
 
                 var fx_suff = "l" + tile.light;
-                var gfx_filter = "brightness(" + Math.round((16 - tile.light) * 100 / 16) + "%)";
+                var gfx_filter = "";
+                var gfx_filter_fx = "";
+                var first_fx = false;
+                var gfx_brightness = Math.round((16 - tile.light) * 100 / 16);
 
-                // Hovered tile effect
-                if (this.tile_hovered == tile_id && !this.doc_keyheld.ctrl && !this.doc_keyheld.alt) {
-                    if (!this.doc_keyheld.shift || (this.doc_keyheld.shift && !(tilemap[this.tile_hovered].flags & ISITEM) && this.pl.citem)) {
-                        gfx_filter = "brightness(200%)";
-                        fx_suff = "hover";
+                // Underwater effect
+                if (tile.flags & UWATER) {
+                    if (!first_fx) {
+                        first_fx = true;
+                        gfx_filter_fx += " sepia(1) saturate(2)";
+                        gfx_brightness = Math.ceil(gfx_brightness / 1.5);
                     }
+                    gfx_filter_fx += " hue-rotate(240deg)";
+                    fx_suff += "uwater";
                 }
+
+                gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
                 if (tile.ba_sprite) {
                     var spr_path = getNumSpritePath(tile.ba_sprite);
@@ -726,6 +735,13 @@ class GameRenderer {
                     }
                 }
 
+                // Hovered tile image
+                if (this.tile_hovered == tile_id && !this.doc_keyheld.ctrl && !this.doc_keyheld.alt) {
+                    if (!this.doc_keyheld.shift || (this.doc_keyheld.shift && !(tilemap[this.tile_hovered].flags & ISITEM) && this.pl.citem)) {
+                        this.mapDraw("./gfx/misc/tile_hover.png", j, i, pl_xoff, pl_yoff, 0);
+                    }
+                }
+
                 // Target position image
                 if (tile.x == this.pl.goto_x && tile.y == this.pl.goto_y) {
                     this.mapDrawNum(31, j, i, pl_xoff, pl_yoff, 0);
@@ -741,8 +757,12 @@ class GameRenderer {
                 if (!tile) continue;
 
                 var fx_suff = "l" + tile.light;
-                var gfx_filter_first = "brightness(" + Math.round((16 - tile.light) * 100 / 16) + "%)";
-                var gfx_filter = gfx_filter_first;
+                var gfx_filter = "";
+                var gfx_filter_fx = "";
+                var first_fx = false;
+                var tile_light = Math.round((16 - tile.light) * 100 / 16);
+
+                var gfx_brightness = tile_light;
 
                 // Load new character sprite sets
                 if (tile.ch_sprite && !this.mapCanvas.getImage(getNumSpritePath(tile.ch_sprite))) {
@@ -753,13 +773,27 @@ class GameRenderer {
                 if (tile.obj1) {
                     var it = tile.obj1;
                     // Autohide
-                    if (this.hide_walls && !(tilemap[tile_id].flags & ISITEM) && !this.autohide(i, j)) it++;
+                    if (this.hide_walls && !(tile.flags & ISITEM) && !this.autohide(i, j)) it++;
+
+                    // Underwater effect
+                    if (tile.flags & UWATER) {
+                        if (!first_fx) {
+                            first_fx = true;
+                            gfx_filter_fx = " sepia(90%) saturate(2)";
+                            gfx_brightness = Math.ceil(gfx_brightness / 1.5);
+                        }
+                        gfx_filter_fx += " hue-rotate(210deg)";
+                        fx_suff += "uwater";
+                    }
 
                     // Shift hover effect
-                    if (this.doc_keyheld.shift && this.tile_hovered == tile_id && tilemap[tile_id].flags & (ISUSABLE|ISITEM)) {
-                        gfx_filter = "brightness(200%)";
-                        fx_suff = "hover";
+                    if (this.doc_keyheld.shift && this.tile_hovered == tile_id && tile.flags & (ISUSABLE|ISITEM)) {
+                        gfx_brightness = 200;
+                        fx_suff += "hover";
                     }
+
+                    gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
+
                     var it_spr_path = getNumSpritePath(it);
                     var it_spr_suff = it_spr_path + fx_suff;
 
@@ -768,7 +802,9 @@ class GameRenderer {
                 }
 
                 // Reset filter for characters
-                gfx_filter = gfx_filter_first;
+                gfx_filter_fx = "";
+                first_fx = false;
+                gfx_brightness = tile_light;
 
                 // Character
                 var obj_xoff = Math.round(tilemap[tile_id].obj_xoff);
@@ -777,12 +813,27 @@ class GameRenderer {
                 if (tile.obj2) {
                     // Selected char effect
                     if (this.selected_char == tilemap[tile_id].ch_nr) {
-                        gfx_filter += " sepia(90%) hue-rotate(90deg) saturate(2)";
+                        if (!first_fx) {
+                            first_fx = true;
+                            gfx_filter_fx += " sepia(90%) saturate(2)";
+                            gfx_brightness = Math.ceil(gfx_brightness / 1.5);
+                        }
+                        gfx_filter_fx += " hue-rotate(90deg)";
+                    } else {
+                        // Underwater effect
+                        if (tile.flags & UWATER) {
+                            if (!first_fx) {
+                                first_fx = true;
+                                gfx_filter_fx += " sepia(90%) saturate(2)";
+                                gfx_brightness = Math.ceil(gfx_brightness / 1.5);
+                            }
+                            gfx_filter_fx += " hue-rotate(210deg)"
+                        }
                     }
 
                     // Ctrl / Alt hover effect
                     if ((this.doc_keyheld.ctrl || this.doc_keyheld.alt) && this.tile_hovered == tile_id) {
-                        gfx_filter += " brightness(200%)";
+                        gfx_brightness = 200;
                     }
 
                     // Draw characters into a temporary canvas, apply filter, then print it (makes filtering characters more efficient)
@@ -791,6 +842,8 @@ class GameRenderer {
                         this.char_cv.width = char_img.width;
                         this.char_cv.height = char_img.height;
                         this.char_cv_ctx.clearRect(0, 0, char_img.width, char_img.height);
+
+                        gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
                         this.char_cv_ctx.filter = gfx_filter;
                         this.char_cv_ctx.drawImage(char_img, 0, 0);

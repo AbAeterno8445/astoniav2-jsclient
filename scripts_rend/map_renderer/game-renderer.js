@@ -1000,6 +1000,7 @@ class GameRenderer {
 
         // Attrib name
         var span_skillname = document.createElement('span');
+        span_skillname.id = `span-${id_name}-name`;
         span_skillname.className = "span-skill span-skill-title unselectable";
         span_skillname.innerHTML = skill_name;
         div_skillslot.appendChild(span_skillname);
@@ -1039,7 +1040,6 @@ class GameRenderer {
         div_skillslot.appendChild(span_skill_upgval);
 
         this.div_skills.appendChild(div_skillslot);
-        return div_skillslot;
     }
 
     createSkillSlots() {
@@ -1058,11 +1058,12 @@ class GameRenderer {
         // Skill slots
         for (let i = 0; i < skilltab.length; i++) {
             var elem_skillslot = this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
-            elem_skillslot.onclick = () => {
+            var elem_skillname = document.getElementById(`span-skill${i}-name`);
+            elem_skillname.onclick = () => {
                 this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skilltab[i].nr , data2: this.selected_char , data3: skilltab[i].attrib[0] });
                 this.sfxPlayer.play_sfx("click");
             };
-            elem_skillslot.oncontextmenu = () => {
+            elem_skillname.oncontextmenu = () => {
                 this.chatLogger.chat_logmsg_format(skilltab[i].desc, FNT_YELLOW);
             }
         }

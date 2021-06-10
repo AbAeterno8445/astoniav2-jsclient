@@ -12,7 +12,6 @@ class MainPlayer {
         this.mode = 0; // 0: slow, 1: medium, 2: fast
 
         // character attributes+abilities
-	    // [0]=bare value, [1]=modifier, [2]=total value
         this.attrib = [];
         for (var i = 0; i < 6; i++) this.attrib.push([0, 0, 0, 0, 0, 0]);
 
@@ -77,6 +76,8 @@ class MainPlayer {
         this.description = "";
         this.race = 0;
         this.creation = 0;
+        this.skillbinds = [];
+        for (var i = 0; i < 12; i++) this.skillbinds.push(null);
 
         if (this.autosave_intv) clearInterval(this.autosave_intv);
     }
@@ -89,14 +90,7 @@ class MainPlayer {
 
         try {
             var chardata = JSON.parse(fs.readFileSync(this.file));
-            this.name = chardata.name;
-            this.race = chardata.race;
-            this.creation = chardata.creation;
-            this.points_tot = chardata.points;
-            this.description = chardata.description;
-            this.usnr = chardata.usnr;
-            this.pass1 = chardata.pass1;
-            this.pass2 = chardata.pass2;
+            Object.assign(this, chardata);
         } catch (err) {
             console.log("ERROR - Reading character file:", err);
             return 0;
@@ -116,7 +110,8 @@ class MainPlayer {
             description: this.description,
             usnr: this.usnr,
             pass1: this.pass1,
-            pass2: this.pass2
+            pass2: this.pass2,
+            skillbinds: this.skillbinds
         };
         fs.writeFileSync(this.file, JSON.stringify(savedata));
     }

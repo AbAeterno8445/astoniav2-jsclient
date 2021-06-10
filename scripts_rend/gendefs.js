@@ -223,51 +223,51 @@ const AT_AGIL = 3;
 const AT_STREN = 4;
 
 const skilltab = [
-    {nr: 0, sortkey: 'C', name: "Hand to Hand", desc: "Fighting without weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
-    {nr: 1, sortkey: 'C', name: "Karate", desc: "Fighting without weapons and doing damage.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
-	{nr: 2, sortkey: 'C', name: "Dagger", desc: "Fighting with daggers or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_INT]},
-	{nr: 3, sortkey: 'C', name: "Sword", desc: "Fighting with swords or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
-	{nr: 4, sortkey: 'C', name: "Axe", desc: "Fighting with axes or similar weapons.", attrib: [AT_BRAVE, AT_STREN, AT_STREN]},
-	{nr: 5, sortkey: 'C', name: "Staff", desc: "Fighting with staves or similar weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
-	{nr: 6, sortkey: 'C', name: "Two-Handed", desc: "Fighting with two-handed weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
+    {nr: 0, sortkey: 'C', name: "Hand to Hand", name_short: "H2H", desc: "Fighting without weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+    {nr: 1, sortkey: 'C', name: "Karate", name_short: "Karate", desc: "Fighting without weapons and doing damage.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 2, sortkey: 'C', name: "Dagger", name_short: "Dagger", desc: "Fighting with daggers or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_INT]},
+	{nr: 3, sortkey: 'C', name: "Sword", name_short: "Sword", desc: "Fighting with swords or similar weapons.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 4, sortkey: 'C', name: "Axe", name_short: "Axe", desc: "Fighting with axes or similar weapons.", attrib: [AT_BRAVE, AT_STREN, AT_STREN]},
+	{nr: 5, sortkey: 'C', name: "Staff", name_short: "Staff", desc: "Fighting with staves or similar weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
+	{nr: 6, sortkey: 'C', name: "Two-Handed", name_short: "Two-Handed", desc: "Fighting with two-handed weapons.", attrib: [AT_AGIL, AT_STREN, AT_STREN]},
 
-    {nr: 7, sortkey: 'G', name: "Lock-Picking", desc: "Opening doors without keys.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
-	{nr: 8, sortkey: 'G', name: "Stealth", desc: "Moving without being seen or heard.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
-    {nr: 9, sortkey: 'G', name: "Perception", desc: "Seeing and hearing.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+    {nr: 7, sortkey: 'G', name: "Lock-Picking", name_short: "Lock-Pick", desc: "Opening doors without keys.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+	{nr: 8, sortkey: 'G', name: "Stealth", name_short: "Stealth", desc: "Moving without being seen or heard.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+    {nr: 9, sortkey: 'G', name: "Perception", name_short: "Perception", desc: "Seeing and hearing.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
 
-    {nr: 10, sortkey: 'M', name: "Swimming", desc: "Moving through water without drowning.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
-	{nr: 11, sortkey: 'R', name: "Magic Shield", desc: "Spell: Create a magic shield (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+    {nr: 10, sortkey: 'M', name: "Swimming", name_short: "Swim", desc: "Moving through water without drowning.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+	{nr: 11, sortkey: 'R', name: "Magic Shield", name_short: "Magic Sh.", desc: "Spell: Create a magic shield (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
 
-    {nr: 12, sortkey: 'G', name: "Bartering", desc: "Getting good prices from merchants.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 13, sortkey: 'G', name: "Repair", desc: "Repairing items.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
+    {nr: 12, sortkey: 'G', name: "Bartering", name_short: "Barter", desc: "Getting good prices from merchants.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 13, sortkey: 'G', name: "Repair", name_short: "Repair", desc: "Repairing items.", attrib: [AT_INT, AT_WILL, AT_AGIL]},
 
-    {nr: 14, sortkey: 'R', name: "Light", desc: "Spell: Create light (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 15, sortkey: 'R', name: "Recall", desc: "Spell: Teleport to temple (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 16, sortkey: 'R', name: "Guardian Angel", desc: "Spell: Avoid loss of HPs and items on death.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 17, sortkey: 'R', name: "Protection", desc: "Spell: Enhance Armor of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 18, sortkey: 'R', name: "Enhance Weapon", desc: "Spell: Enhance Weapon of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 19, sortkey: 'R', name: "Stun", desc: "Spell: Make target motionless (Cost: 20 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 20, sortkey: 'R', name: "Curse", desc: "Spell: Decrease attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 21, sortkey: 'R', name: "Bless", desc: "Spell: Increase attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 22, sortkey: 'R', name: "Identify", desc: "Spell: Read stats of item/character (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+    {nr: 14, sortkey: 'R', name: "Light", name_short: "Light", desc: "Spell: Create light (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 15, sortkey: 'R', name: "Recall", name_short: "Recall", desc: "Spell: Teleport to temple (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 16, sortkey: 'R', name: "Guardian Angel", name_short: "Guardian A.", desc: "Spell: Avoid loss of HPs and items on death.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 17, sortkey: 'R', name: "Protection", name_short: "Protect", desc: "Spell: Enhance Armor of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 18, sortkey: 'R', name: "Enhance Weapon", name_short: "Enhance W.", desc: "Spell: Enhance Weapon of target (Cost: 15 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 19, sortkey: 'R', name: "Stun", name_short: "Stun", desc: "Spell: Make target motionless (Cost: 20 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 20, sortkey: 'R', name: "Curse", name_short: "Curse", desc: "Spell: Decrease attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 21, sortkey: 'R', name: "Bless", name_short: "Bless", desc: "Spell: Increase attributes of target (Cost: 35 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 22, sortkey: 'R', name: "Identify", name_short: "Identify", desc: "Spell: Read stats of item/character (Cost: 5 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
 
-    {nr: 23, sortkey: 'G', name: "Resistance", desc: "Resist against magic.", attrib: [AT_INT, AT_WILL, AT_STREN]},
+    {nr: 23, sortkey: 'G', name: "Resistance", name_short: "Resist", desc: "Resist against magic.", attrib: [AT_INT, AT_WILL, AT_STREN]},
 
-    {nr: 24, sortkey: 'R', name: "Blast", desc: "Spell: Inflict injuries to target (Cost: varies).", attrib: [AT_INT, AT_WILL, AT_STREN]},
-	{nr: 25, sortkey: 'R', name: "Dispel Magic", desc: "Spell: Removes curse magic from target (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+    {nr: 24, sortkey: 'R', name: "Blast", name_short: "Blast", desc: "Spell: Inflict injuries to target (Cost: varies).", attrib: [AT_INT, AT_WILL, AT_STREN]},
+	{nr: 25, sortkey: 'R', name: "Dispel Magic", name_short: "Dispel", desc: "Spell: Removes curse magic from target (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
 
-    {nr: 26, sortkey: 'R', name: "Heal", desc: "Spell: Heal injuries (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 27, sortkey: 'R', name: "Ghost Companion", desc: "Spell: Create a ghost to attack an enemy.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+    {nr: 26, sortkey: 'R', name: "Heal", name_short: "Heal", desc: "Spell: Heal injuries (Cost: 25 Mana).", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 27, sortkey: 'R', name: "Ghost Companion", name_short: "Ghost C.", desc: "Spell: Create a ghost to attack an enemy.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
 
-    {nr: 28, sortkey: 'B', name: "Regenerate", desc: "Regenerate Hitpoints faster.", attrib: [AT_STREN, AT_STREN, AT_STREN]},
-	{nr: 29, sortkey: 'B', name: "Rest", desc: "Regenerate Endurance faster.", attrib: [AT_AGIL, AT_AGIL, AT_AGIL]},
-	{nr: 30, sortkey: 'B', name: "Meditate", desc: "Regenerate Mana faster.", attrib: [AT_INT, AT_WILL, AT_WILL]},
+    {nr: 28, sortkey: 'B', name: "Regenerate", name_short: "Regen", desc: "Regenerate Hitpoints faster.", attrib: [AT_STREN, AT_STREN, AT_STREN]},
+	{nr: 29, sortkey: 'B', name: "Rest", name_short: "Rest", desc: "Regenerate Endurance faster.", attrib: [AT_AGIL, AT_AGIL, AT_AGIL]},
+	{nr: 30, sortkey: 'B', name: "Meditate", name_short: "Meditate", desc: "Regenerate Mana faster.", attrib: [AT_INT, AT_WILL, AT_WILL]},
 
-    {nr: 31, sortkey: 'G', name: "Sense Magic", desc: "Find out who casts what at you.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
-	{nr: 32, sortkey: 'G', name: "Immunity", desc: "Partial immunity against negative magic.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
-	{nr: 33, sortkey: 'G', name: "Surround Hit", desc: "Hit all your enemies at once.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
-	{nr: 34, sortkey: 'G', name: "Concentrate", desc: "Reduces mana cost for all spells.", attrib: [AT_WILL, AT_WILL, AT_WILL]},
-	{nr: 35, sortkey: 'G', name: "Warcry", desc: "Frighten all enemies in hearing distance.", attrib: [AT_BRAVE, AT_BRAVE, AT_STREN]}
+    {nr: 31, sortkey: 'G', name: "Sense Magic", name_short: "Sense M.", desc: "Find out who casts what at you.", attrib: [AT_BRAVE, AT_INT, AT_WILL]},
+	{nr: 32, sortkey: 'G', name: "Immunity", name_short: "Immunity", desc: "Partial immunity against negative magic.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 33, sortkey: 'G', name: "Surround Hit", name_short: "Surround", desc: "Hit all your enemies at once.", attrib: [AT_BRAVE, AT_AGIL, AT_STREN]},
+	{nr: 34, sortkey: 'G', name: "Concentrate", name_short: "Concentrate", desc: "Reduces mana cost for all spells.", attrib: [AT_WILL, AT_WILL, AT_WILL]},
+	{nr: 35, sortkey: 'G', name: "Warcry", name_short: "Warcry", desc: "Frighten all enemies in hearing distance.", attrib: [AT_BRAVE, AT_BRAVE, AT_STREN]}
 ];
 
 const INJURED = (1<<0) >>> 0;

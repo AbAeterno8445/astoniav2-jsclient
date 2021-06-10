@@ -88,6 +88,8 @@ class GameRenderer {
         this.stat_raised = [];
         for (var i = 0; i < 108; i++) this.stat_raised.push(0);
 
+        this.skillbind_selected = null;
+
         this.createSkillSlots();
 
         // Skill update button
@@ -306,9 +308,29 @@ class GameRenderer {
 
                 case "Escape": this.toggleShop(false); break;
 
-                case "F1": this.but_speed_slow.click(); break;
-                case "F2": this.but_speed_normal.click(); break;
-                case "F3": this.but_speed_fast.click(); break;
+                case "F1": if (!this.doc_keyheld.shift) this.but_speed_slow.click(); break;
+                case "F2": if (!this.doc_keyheld.shift) this.but_speed_normal.click(); break;
+                case "F3": if (!this.doc_keyheld.shift) this.but_speed_fast.click(); break;
+            }
+
+            // Skillbind hotkeys
+            if (this.doc_keyheld.shift) {
+                switch (e.key) {
+                    case "F1":
+                    case "F2":
+                    case "F3":
+                    case "F4":
+                    case "F5":
+                    case "F6":
+                    case "F7":
+                    case "F8":
+                    case "F9":
+                    case "F10":
+                    case "F11":
+                    case "F12":
+                        document.getElementById(`span-skillbind${parseInt(e.key.substring(1))}`).click();
+                    break;
+                }
             }
         });
 
@@ -361,6 +383,8 @@ class GameRenderer {
             this.stat_raised[i] = 0;
         }
         this.stat_points_used = 0;
+        
+        this.skillbind_selected = null;
     }
 
     /** Queue a server command */
@@ -753,7 +777,7 @@ class GameRenderer {
                 if (tile.obj2) {
                     // Selected char effect
                     if (this.selected_char == tilemap[tile_id].ch_nr) {
-                        gfx_filter += " sepia(90%) hue-rotate(90deg) saturate(4)";
+                        gfx_filter += " sepia(90%) hue-rotate(90deg) saturate(2)";
                     }
 
                     // Ctrl / Alt hover effect
@@ -1057,15 +1081,45 @@ class GameRenderer {
 
         // Skill slots
         for (let i = 0; i < skilltab.length; i++) {
-            var elem_skillslot = this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
+            this.createSkillSlot(`skill${i}`, skilltab[i].name, () => this.raiseSkill(8 + i), () => this.lowerSkill(8 + i));
             var elem_skillname = document.getElementById(`span-skill${i}-name`);
             elem_skillname.onclick = () => {
-                this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skilltab[i].nr , data2: this.selected_char , data3: skilltab[i].attrib[0] });
+                this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skilltab[i].nr, data2: this.selected_char, data3: skilltab[i].attrib[0] });
                 this.sfxPlayer.play_sfx("click");
             };
             elem_skillname.oncontextmenu = () => {
+                this.skillbind_selected = i;
                 this.chatLogger.chat_logmsg_format(skilltab[i].desc, FNT_YELLOW);
             }
+        }
+
+        // Skill binds
+        for (let i = 0; i < 12; i++) {
+            let elem_skillbind = document.getElementById(`span-skillbind${i + 1}`);
+            elem_skillbind.onclick = () => {
+                if (this.pl.skillbinds[i] != null) {
+                    var skill_data = skilltab[this.pl.skillbinds[i]];
+                    this.queueCommand(cl_cmds.CL_CMD_SKILL, { data1: skill_data.nr, data2: this.selected_char, data3: skill_data.attrib[0] });
+                }
+                this.sfxPlayer.play_sfx("click");
+            };
+            elem_skillbind.oncontextmenu = () => {
+                if (this.skillbind_selected != null) {
+                    if (this.skillbind_selected == this.pl.skillbinds[i]) {
+                        this.pl.skillbinds[i] = null;
+                        elem_skillbind.innerHTML = "-";
+                        this.chatLogger.chat_logmsg_format(`Skill bind ${i + 1} now set to none.`);
+                    } else {
+                        this.pl.skillbinds[i] = this.skillbind_selected;
+
+                        var skill_n = skilltab[this.skillbind_selected].name_short;
+                        elem_skillbind.innerHTML = skill_n;
+                        this.chatLogger.chat_logmsg_format(`Skill bind ${i + 1} now set to ${skill_n}.`);
+                    }
+                } else if (this.pl.skillbinds[i] != null) {
+                    this.chatLogger.chat_logmsg_format(skilltab[this.pl.skillbinds[i]].desc, FNT_YELLOW);
+                }
+            };
         }
     }
 
@@ -1148,6 +1202,17 @@ class GameRenderer {
         elem.innerHTML = this.pl.points - this.stat_points_used;
     }
 
+    updateSkillbinds() {
+        for (let i = 0; i < 12; i++) {
+            let elem_skillbind = document.getElementById(`span-skillbind${i + 1}`);
+            if (this.pl.skillbinds[i] != null) {
+                elem_skillbind.innerHTML = skilltab[this.pl.skillbinds[i]].name_short;
+            } else {
+                elem_skillbind.innerHTML = "-";
+            }
+        }
+    }
+
     updateMaincharData() {
         // Update inventory items
         for (var i = 0; i < 40; i++) {
@@ -1222,5 +1287,6 @@ class GameRenderer {
         this.cdisp_bar_mana.style.width = Math.floor((this.pl.a_mana / this.pl.mana[5]) * 80) + "px";
 
         this.updateSkills();
+        this.updateSkillbinds();
     }
 }

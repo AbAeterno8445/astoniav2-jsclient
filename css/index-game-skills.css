@@ -42,3 +42,12 @@
     text-align: center;
     float: right;
 }
+
+.span-skillbind {
+    display: block;
+    background-color: black;
+    border: 1px solid white;
+    width: 80px;
+    height: 20px;
+    text-align: center;
+}

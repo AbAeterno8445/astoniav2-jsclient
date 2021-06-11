@@ -1,4 +1,5 @@
 const gameConfig = JSON.parse(fs.readFileSync("./config.json"), 'utf-8');
+const oldsv_mode = gameConfig.oldsv_mode;
 
 // Taken from mjackson's color-conversion-algorithms.js
 function rgbToHsl(r, g, b) {
@@ -341,7 +342,7 @@ const FNT_EMERALD = 1966;
 const FNT_DEMON = 1967;
 
 const TICKS = 18;
-const TICK = (1000/TICKS);
+const TICK = Math.round(1000/TICKS);
 const QSIZE = 8;
 
 const MAPX = 1024;

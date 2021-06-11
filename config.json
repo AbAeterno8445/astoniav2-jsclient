@@ -1,6 +1,7 @@
 {
     "ip": "192.168.0.20",
     "port": 5555,
+    "oldsv_mode": 0,
     "GFX": {
         "render_distance": 54
     }

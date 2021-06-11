@@ -23,7 +23,11 @@ class GameRenderer {
 
         // Map drawing canvas
         this.mapCanvas = new CanvasHandler(document.getElementById('cv-map'));
-        this.mapCanvas.setDefaultOffset(-280, 360, true);
+        if (renderdistance == 34) {
+            this.mapCanvas.setDefaultOffset(64, 360, true);
+        } else if (renderdistance == 54) {
+            this.mapCanvas.setDefaultOffset(-280, 360, true);
+        }
         this.mapCanvas.setLoadingImage(getNumSpritePath(35));
 
         // Minimap renderer
@@ -490,7 +494,9 @@ class GameRenderer {
         var in_canvas = 1;
         if (mpos.x < 0 || mpos.y < 0 || mpos.x > this.mapCanvas.cv.width || mpos.y > this.mapCanvas.cv.height) in_canvas = 0;
 
-        var x = mpos.x + 160;
+        var x = mpos.x;
+        if (renderdistance == 34) x += 480;
+        else if (renderdistance == 54) x += 160;
         var y = mpos.y + 16;
 
         var mx = 2 * y + x - (this.mapCanvas.drawYOffset * 2) - this.mapCanvas.drawXOffset + ((renderdistance - 34) / 2 * 32);

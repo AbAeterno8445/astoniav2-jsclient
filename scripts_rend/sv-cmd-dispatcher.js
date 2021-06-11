@@ -93,7 +93,9 @@ class ServerCMDDispatcher {
             case sv_cmds["SV_SETCHAR_SPELL"]: this.sv_setchar_spell(buf); return 9;
             case sv_cmds["SV_SETCHAR_OBJ"]: this.sv_setchar_obj(buf); return 5;
     
-            case sv_cmds["SV_SETMAP3"]: return this.sv_setmap3(buf, 20);
+            case sv_cmds["SV_SETMAP3"]:
+                if (oldsv_mode == 1) return this.sv_setmap3(buf, 26);
+                else return this.sv_setmap3(buf, 20);
             case sv_cmds["SV_SETMAP4"]: return this.sv_setmap3(buf, 0);
             case sv_cmds["SV_SETMAP5"]: return this.sv_setmap3(buf, 2);
             case sv_cmds["SV_SETMAP6"]: return this.sv_setmap3(buf, 6);
@@ -158,7 +160,7 @@ class ServerCMDDispatcher {
     }
 
     sv_tick(buf) {
-        this._render_eng.ctick = buf.readUInt8(1);
+        //this._render_eng.ctick = buf.readUInt8(1);
     }
 
     sv_load(buf) {
@@ -420,9 +422,14 @@ class ServerCMDDispatcher {
             this.map_cnt[0]++;
         }
         if (flags & 2) {
-            if (buf.length < p + 8) return p;
-            mapdata.flags = buf.readUInt32LE(p); p += 4;
-            mapdata.flags3 = buf.readUInt32LE(p); p += 4;
+            if (oldsv_mode == 1) {
+                if (buf.length < p + 4) return p;
+                mapdata.flags = buf.readUInt32LE(p); p += 4;
+            } else {
+                if (buf.length < p + 8) return p;
+                mapdata.flags = buf.readUInt32LE(p); p+= 4;
+                mapdata.flags3 = buf.readUInt32LE(p); p += 4;
+            }
             this.map_cnt[1]++;
         }
         if (flags & 4) {
@@ -464,11 +471,20 @@ class ServerCMDDispatcher {
     }
 
     sv_setmap3(buf, cnt) {
-        if (buf.length < 6) return;
+        if (buf.length < 6) {
+            console.log("WARNING: corrupt setmap3! (buf.length < 6)");
+            //this.log_add("WARNING: corrupt setmap3! (buf.length < 6)", FNT_RED);
+            return buf.length;
+        }
 
-        var n = buf.readUInt32LE(1);
-        var tmp = buf.readUInt8(5);
-        var p = 6;
+        var n, tmp;
+        if (oldsv_mode == 1) {
+            n = buf.readUInt16LE(1) & 2047;
+            tmp = (buf.readUInt16LE(1) >> 12) >>> 0;
+        } else {
+            n = buf.readUInt32LE(1);
+            tmp = buf.readUInt8(5);
+        }
         if (n < 0 || n >= renderdistance * renderdistance) {
             console.log("WARNING: corrupt setmap3!");
             this.log_add("WARNING: corrupt setmap3!", FNT_RED);
@@ -477,13 +493,13 @@ class ServerCMDDispatcher {
 
         this._render_eng.set_tile_data(n, { light: tmp });
     
-        if (cnt > 0) {
-            for (var m = n + 2; m < n + cnt + 2; m += 2, p++) {
-                if (m < renderdistance * renderdistance) {
-                    tmp = buf[p];
-                    this._render_eng.set_tile_data(m, { light: (tmp & 15) });
-                    this._render_eng.set_tile_data(m - 1, { light: (tmp >> 4) });
-                }
+        var p = 6;
+        if (oldsv_mode == 1) p = 3;
+        for (var m = n + 2, p; m < n + cnt + 2; m += 2, p++) {
+            if (m < renderdistance * renderdistance) {
+                tmp = buf[p];
+                this._render_eng.set_tile_data(m, { light: (tmp & 15) });
+                this._render_eng.set_tile_data(m - 1, { light: (tmp >> 4) >>> 0 });
             }
         }
     

@@ -160,7 +160,7 @@ class ServerCMDDispatcher {
     }
 
     sv_tick(buf) {
-        //this._render_eng.ctick = buf.readUInt8(1);
+        this._render_eng.ctick = buf.readUInt8(1);
     }
 
     sv_load(buf) {

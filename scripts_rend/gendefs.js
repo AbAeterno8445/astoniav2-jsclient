@@ -343,10 +343,6 @@ const FNT_DEMON = 1967;
 
 const TICKS = 18;
 const TICK = Math.round(1000/TICKS);
-const QSIZE = 8;
-
-const MAPX = 1024;
-const MAPY = 1024;
 
 const renderdistance = gameConfig.GFX.render_distance;
 

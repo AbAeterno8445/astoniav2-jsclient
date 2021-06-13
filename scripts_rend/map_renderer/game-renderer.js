@@ -1008,10 +1008,17 @@ class GameRenderer {
 
                     } else if (char_info) {
                         // Character name
-                        if (!this.hide_names) {
+                        if (!this.hide_names || !this.hide_hp) {
                             var chname_img;
-                            var chname_full = char_info.name;
-                            if (tile.ch_proz && !this.hide_hp) chname_full += " " + tile.ch_proz + "%";
+
+                            var tmp_name = char_info.name;
+                            if (this.hide_names) tmp_name = "";
+
+                            var tmp_hp = tile.ch_proz + "%";
+                            if (this.hide_hp) tmp_hp = "";
+                            else if (!this.hide_names) tmp_name += " ";
+
+                            var chname_full = tmp_name + tmp_hp;
 
                             if (!this.charname_imgs.hasOwnProperty(chname_full)) {
                                 chname_img = this.fontDrawer.get_text_img(FNT_YELLOW, chname_full);

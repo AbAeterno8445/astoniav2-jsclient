@@ -1,8 +1,13 @@
 class CanvasHandler {
-    constructor(cv) {
+    constructor(cv, width = null, height = null) {
         this.cv = cv;
-        this.cv.width = cv.clientWidth;
-        this.cv.height = cv.clientHeight;
+
+        if (width == null) this.cv.width = cv.clientWidth;
+        else this.cv.width = width;
+
+        if (height == null) this.cv.height = cv.clientHeight;
+        else this.cv.height = height;
+
         this.ctx = this.cv.getContext('2d');
 
         this.drawXOffset = 0;
@@ -19,6 +24,8 @@ class CanvasHandler {
         this.loadedImages = {};
         this.avgColors = {};
         this.redrawTimeout = 100;
+
+        this.onLoadCallback = null;
     }
 
     static getCursorPosition(canvas, event) {
@@ -64,6 +71,8 @@ class CanvasHandler {
             newImg.onload = () => {
                 if (altpath) path = altpath;
                 this.loadedImages[path] = newImg;
+
+                if (this.onLoadCallback) this.onLoadCallback();
             };
         } else {
             var cv_tmp = document.createElement('canvas');
@@ -83,6 +92,8 @@ class CanvasHandler {
                     var ct = new ColorThief();
                     this.avgColors[orig_path] = ct.getColor(newImg);
                 }
+
+                if (this.onLoadCallback) this.onLoadCallback();
             };
         }
         newImg.src = path;
@@ -102,6 +113,11 @@ class CanvasHandler {
         for (let imgP of pathList) {
             this.loadImage(imgP);
         }
+    }
+
+    /** Will call the given function once an image is finished loading with loadImage(). */
+    onImageLoadCallback(callback) {
+        this.onLoadCallback = callback;
     }
 
     getImage(path) {
@@ -132,11 +148,19 @@ class CanvasHandler {
         this.loadedImages = {};
     }
 
-    clearContext() {
-        if (this.cv.clientWidth != this.cv.width || this.cv.clientHeight != this.cv.height) {
-            this.cv.width = this.cv.clientWidth;
-            this.cv.height = this.cv.clientHeight;
+    clearContext(width = null, height = null) {
+        if (width == null) {
+            if (this.cv.clientWidth != this.cv.width) this.cv.width = this.cv.clientWidth;
+        } else {
+            this.cv.width = width;
         }
+
+        if (height == null) {
+            if (this.cv.clientHeight != this.cv.height) this.cv.height = this.cv.clientHeight;
+        } else {
+            this.cv.height = height;
+        }
+
         this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
     }
 

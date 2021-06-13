@@ -420,6 +420,8 @@ class ServerCMDDispatcher {
             if (buf.length < p + 2) return p;
             mapdata.ba_sprite = buf.readUInt16LE(p); p += 2;
             this.map_cnt[0]++;
+
+            this._game_eng.update_floors = true; // Update floors
         }
         if (flags & 2) {
             if (oldsv_mode == 1) {
@@ -503,6 +505,7 @@ class ServerCMDDispatcher {
             }
         }
     
+        this._game_eng.update_floors = true;
         return p;
     }
 

@@ -21,14 +21,22 @@ class GameRenderer {
         // Command queue
         this.cmdQueue = [];
 
-        // Map drawing canvas
+        // Map/floor drawing canvas
+        var map_xoff = 0;
+        var map_yoff = 360;
+        if (renderdistance == 34) map_xoff = 64;
+        else if (renderdistance == 54) map_xoff = -280;
+
         this.mapCanvas = new CanvasHandler(document.getElementById('cv-map'));
-        if (renderdistance == 34) {
-            this.mapCanvas.setDefaultOffset(64, 360, true);
-        } else if (renderdistance == 54) {
-            this.mapCanvas.setDefaultOffset(-280, 360, true);
-        }
+        this.mapCanvas.setDefaultOffset(map_xoff, map_yoff, true);
         this.mapCanvas.setLoadingImage(getNumSpritePath(35));
+
+        this.floorCanvas = new CanvasHandler(document.createElement('canvas'), this.mapCanvas.cv.width, this.mapCanvas.cv.height);
+        this.floorCanvas.setDefaultOffset(map_xoff, map_yoff, true);
+        this.floorCanvas.setLoadingImage(getNumSpritePath(35));
+        this.floorCanvas.onImageLoadCallback(() => { this.update_floors = true; });
+
+        this.update_floors = true;
 
         // Minimap renderer
         this.minimapRenderer = new MinimapRenderer();
@@ -67,7 +75,6 @@ class GameRenderer {
         this.cursor_default = "./gfx/MOUSE.png";
 
         // Pre-load basic images
-        this.mapCanvas.loadImage(getNumSpritePath(31), 1, "none", null, false); // Target tile (player movement)
         this.mapCanvas.loadImage(getNumSpritePath(32), 1, "none", null, false); // Drop at position
         this.mapCanvas.loadImage(getNumSpritePath(33), 1, "none", null, false); // Take from position
         this.mapCanvas.loadImage(getNumSpritePath(34), 1, "none", null, false); // Attack target
@@ -80,6 +87,12 @@ class GameRenderer {
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Injured char fx
         for (var i = 0; i < 8; i++)
             this.mapCanvas.loadImage(`./gfx/misc/spell_fx${i}.png`, 1, "none", null, false); // Spell fx
+        for (var i = 240; i < 268; i++)
+            this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Grave skeleton falling fx
+        for (var i = 280; i < 298; i++)
+            this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Poof fx
+
+        this.mapCanvas.loadImage(getNumSpritePath(31), 1, "none", null, false); // Target tile (player movement)
         this.mapCanvas.loadImage("./gfx/misc/tile_hover.png", 1, "opacity(0.7)", null, false); // Tile hover
 
         // Hovered tile in map
@@ -667,6 +680,10 @@ class GameRenderer {
         this.mapCanvas.drawImageIsometric(img, x, y, xoff, yoff, redraw);
     }
 
+    mapDrawFloor(img, x, y, xoff, yoff, redraw) {
+        this.floorCanvas.drawImageIsometric(img, x, y, xoff, yoff, redraw);
+    }
+
     /** Draws the sprite with the given number into the map isometrically */
     mapDrawNum(nr, x, y, xoff, yoff, redraw) {
         this.mapDraw(getNumSpritePath(nr), x, y, xoff, yoff, redraw);
@@ -699,61 +716,56 @@ class GameRenderer {
         }
 
         // Draw all floors first
-        for (var i = y1; i < y2; i++) {
-            for (var j = x2 - 1; j > x1; j--) {
-                var tile_id = i + j * renderdistance;
-                var tile = tilemap[tile_id];
-                if (!tile) continue;
+        if (this.update_floors) {
+            this.update_floors = false;
 
-                var fx_suff = "l" + tile.light;
-                var gfx_filter = "";
-                var gfx_filter_fx = "";
-                var first_fx = false;
-                var gfx_brightness = Math.round((16 - tile.light) * 100 / 16);
+            this.floorCanvas.clearContext(this.mapCanvas.cv.width, this.mapCanvas.cv.height);
+            for (var i = y1; i < y2; i++) {
+                for (var j = x2 - 1; j > x1; j--) {
+                    var tile_id = i + j * renderdistance;
+                    var tile = tilemap[tile_id];
+                    if (!tile) continue;
+                    if (tile.flags & INVIS) continue;
 
-                // Underwater effect
-                if (tile.flags & UWATER) {
-                    if (!first_fx) {
-                        first_fx = true;
-                        gfx_filter_fx += " sepia(1) saturate(2)";
-                        gfx_brightness = Math.ceil(gfx_brightness / 1.5);
+                    var fx_suff = "l" + tile.light;
+                    var gfx_filter = "";
+                    var gfx_filter_fx = "";
+                    var first_fx = false;
+                    var gfx_brightness = Math.round((16 - tile.light) * 100 / 16);
+
+                    // Underwater effect
+                    if (tile.flags & UWATER) {
+                        if (!first_fx) {
+                            first_fx = true;
+                            gfx_filter_fx += " sepia(1) saturate(2)";
+                            gfx_brightness = Math.ceil(gfx_brightness / 1.5);
+                        }
+                        gfx_filter_fx += " hue-rotate(240deg)";
+                        fx_suff += "uwater";
                     }
-                    gfx_filter_fx += " hue-rotate(240deg)";
-                    fx_suff += "uwater";
-                }
 
-                gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
+                    gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
-                if (tile.ba_sprite) {
-                    var spr_path = getNumSpritePath(tile.ba_sprite);
-                    var spr_suff = spr_path + fx_suff;
-                    this.mapCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
+                    if (tile.ba_sprite) {
+                        var spr_path = getNumSpritePath(tile.ba_sprite);
+                        var spr_suff = spr_path + fx_suff;
+                        this.floorCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
 
-                    this.mapDraw(spr_suff, j, i, pl_xoff, pl_yoff, 0);
+                        this.mapDrawFloor(spr_suff, j, i, 0, 0, 0);
 
-                    // Assign average color to tile
-                    if (tile.it_sprite) {
-                        var avgcol = this.mapCanvas.getImageAvgcol(getNumSpritePath(tile.it_sprite));
-                        if (avgcol) tile.avgcol = avgcol.slice();
-                    } else {
-                        var avgcol = this.mapCanvas.getImageAvgcol(spr_path);
-                        if (avgcol) tile.avgcol = avgcol.slice();
+                        // Assign average color to tile
+                        if (tile.it_sprite) {
+                            var avgcol = this.mapCanvas.getImageAvgcol(getNumSpritePath(tile.it_sprite));
+                            if (avgcol) tile.avgcol = avgcol.slice();
+                        } else {
+                            var avgcol = this.floorCanvas.getImageAvgcol(spr_path);
+                            if (avgcol) tile.avgcol = avgcol.slice();
+                        }
                     }
-                }
-
-                // Hovered tile image
-                if (this.tile_hovered == tile_id && !this.doc_keyheld.ctrl && !this.doc_keyheld.alt) {
-                    if (!this.doc_keyheld.shift || (this.doc_keyheld.shift && !(tilemap[this.tile_hovered].flags & ISITEM) && this.pl.citem)) {
-                        this.mapDraw("./gfx/misc/tile_hover.png", j, i, pl_xoff, pl_yoff, 0);
-                    }
-                }
-
-                // Target position image
-                if (tile.x == this.pl.goto_x && tile.y == this.pl.goto_y) {
-                    this.mapDrawNum(31, j, i, pl_xoff, pl_yoff, 0);
                 }
             }
         }
+        this.mapCanvas.ctx.drawImage(this.floorCanvas.cv, pl_xoff, pl_yoff);
 
         // Items & characters next
         for (var i = y1; i < y2; i++) {
@@ -761,6 +773,20 @@ class GameRenderer {
                 var tile_id = i + j * renderdistance;
                 var tile = tilemap[tile_id];
                 if (!tile) continue;
+
+                // Target position image
+                if (tile.x == this.pl.goto_x && tile.y == this.pl.goto_y) {
+                    this.mapDrawNum(31, j, i, pl_xoff, pl_yoff, 0);
+                }
+
+                if (tile.flags & INVIS) continue;
+
+                // Hovered tile image
+                if (this.tile_hovered == tile_id && !this.doc_keyheld.ctrl && !this.doc_keyheld.alt) {
+                    if (!this.doc_keyheld.shift || (this.doc_keyheld.shift && !(tilemap[this.tile_hovered].flags & ISITEM) && this.pl.citem)) {
+                        this.mapDraw("./gfx/misc/tile_hover.png", j, i, pl_xoff, pl_yoff, 0);
+                    }
+                }
 
                 var fx_suff = "l" + tile.light;
                 var gfx_filter = "";

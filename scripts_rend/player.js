@@ -114,7 +114,6 @@ class MainPlayer {
             skillbinds: this.skillbinds
         };
         fs.writeFileSync(this.file, JSON.stringify(savedata));
-        console.log("Saved", this.name, "-", savedata);
     }
 
     toggleAutosave(tog, delay=10000) {

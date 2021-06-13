@@ -19,6 +19,8 @@ class SocketClient {
 
         this.logged = false; // Logged-in state
 
+        this.first_render = false; // First render (for floors)
+
         this._cmd_dispatcher.exit = 0;
     }
 
@@ -307,6 +309,13 @@ class SocketClient {
 
         if ((this._renderengine.ticker & 15) == 0) {
             this.send_client_command(cl_cmds["CL_CMD_CTICK"]);
+        }
+
+        if (!this.first_render) {
+            this.first_render = true;
+            
+            // Ensure floors are rendered on login
+            setTimeout(() => { this._game_eng.update_floors = true; }, 3000);
         }
 
         this._tick_do();

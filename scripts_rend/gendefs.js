@@ -342,7 +342,7 @@ const FNT_EMERALD = 1966;
 const FNT_DEMON = 1967;
 
 const TICKS = 18;
-const TICK = Math.round(1000/TICKS);
+const TICK = Math.floor(1000/TICKS);
 
 const renderdistance = gameConfig.GFX.render_distance;
 

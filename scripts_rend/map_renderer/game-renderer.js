@@ -1015,7 +1015,7 @@ class GameRenderer {
                             if (this.hide_names) tmp_name = "";
 
                             var tmp_hp = tile.ch_proz + "%";
-                            if (this.hide_hp) tmp_hp = "";
+                            if (this.hide_hp || !tile.ch_proz) tmp_hp = "";
                             else if (!this.hide_names) tmp_name += " ";
 
                             var chname_full = tmp_name + tmp_hp;

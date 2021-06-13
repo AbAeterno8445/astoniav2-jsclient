@@ -756,7 +756,6 @@ class GameRenderer {
         }
 
         // Items & characters next
-        var charitem_timerstart = window.performance.now();
         for (var i = y1; i < y2; i++) {
             for (var j = x2 - 1; j > x1; j--) {
                 var tile_id = i + j * renderdistance;
@@ -1023,7 +1022,6 @@ class GameRenderer {
                 }
             }
         }
-        console.log("character + item drawing took", window.performance.now() - charitem_timerstart, "ms");
 
         if (this.pl.citem) {
             this.setCursorImg(getNumSpritePath(this.pl.citem), 16);

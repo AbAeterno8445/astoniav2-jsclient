@@ -144,12 +144,6 @@ class GameRenderer {
 
         this.selected_char = 0;
 
-        this.char_cv = document.createElement('canvas');
-        this.char_cv_ctx = this.char_cv.getContext('2d');
-
-        this.char_hbar_cv = document.createElement('canvas');
-        this.char_hbar_cv.height = 1;
-
         this.spellfx_cv = document.createElement('canvas');
         this.spellfx_cv.width = 64;
         this.spellfx_cv.height = 64;
@@ -762,6 +756,7 @@ class GameRenderer {
         }
 
         // Items & characters next
+        var charitem_timerstart = window.performance.now();
         for (var i = y1; i < y2; i++) {
             for (var j = x2 - 1; j > x1; j--) {
                 var tile_id = i + j * renderdistance;
@@ -851,14 +846,15 @@ class GameRenderer {
                     // Draw characters into a temporary canvas, apply filter, then print it (makes filtering characters more efficient)
                     var char_img = this.mapCanvas.getImage(getNumSpritePath(tile.obj2));
                     if (char_img) {
-                        this.char_cv.width = char_img.width;
-                        this.char_cv.height = char_img.height;
-                        this.char_cv_ctx.clearRect(0, 0, char_img.width, char_img.height);
+                        let tmp_char_cv = document.createElement('canvas');
+                        tmp_char_cv.width = 64;
+                        tmp_char_cv.height = 64;
+                        let tmp_ctx = tmp_char_cv.getContext('2d');
 
                         gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
-                        this.char_cv_ctx.filter = gfx_filter;
-                        this.char_cv_ctx.drawImage(char_img, 0, 0);
+                        tmp_ctx.filter = gfx_filter;
+                        tmp_ctx.drawImage(char_img, 0, 0);
 
                         // Draw main character on display canvas as well
                         if (tile_id == plr_tile_id) {
@@ -866,7 +862,7 @@ class GameRenderer {
                             this.cdisp_charcv_ctx.drawImage(char_img, 0, 0);
                         }
 
-                        this.mapDraw(this.char_cv, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff, 0);
+                        this.mapDraw(tmp_char_cv, j, i, pl_xoff + obj_xoff, pl_yoff + obj_yoff, 0);
                     }
                 }
 
@@ -1000,7 +996,7 @@ class GameRenderer {
 
                             if (chname_img) {
                                 var chname_xoff = Math.round(pl_xoff + obj_xoff);
-                                var chname_yoff = Math.round(pl_yoff + obj_yoff - this.char_cv.height + 4);
+                                var chname_yoff = Math.round(pl_yoff + obj_yoff - 68);
                                 this.mapDraw(chname_img, j, i, chname_xoff, chname_yoff);
                             }
                         }
@@ -1008,19 +1004,26 @@ class GameRenderer {
                         // Healthbar
                         if (!this.hide_hpbars) {
                             if (tile.ch_proz) {
-                                this.char_hbar_cv.width = Math.ceil(48 * tile.ch_proz / 100);
-                                this.char_hbar_cv.getContext('2d').fillStyle = 'red';
-                                this.char_hbar_cv.getContext('2d').fillRect(0, 0, this.char_hbar_cv.width, 1);
+                                let hbar_width = Math.ceil(48 * tile.ch_proz / 100);
 
-                                var hbar_xoff = pl_xoff + obj_xoff - Math.floor((48 - this.char_hbar_cv.width) / 2);
-                                var hbar_yoff = pl_yoff + obj_yoff - this.char_cv.height + 9;
-                                this.mapDraw(this.char_hbar_cv, j, i, hbar_xoff, hbar_yoff);
+                                let tmp_char_hbar_cv = document.createElement('canvas');
+                                tmp_char_hbar_cv.height = 1;
+                                tmp_char_hbar_cv.width = hbar_width;
+
+                                let tmp_hbar_ctx = tmp_char_hbar_cv.getContext('2d');
+                                tmp_hbar_ctx.fillStyle = 'red';
+                                tmp_hbar_ctx.fillRect(0, 0, hbar_width, 1);
+
+                                var hbar_xoff = pl_xoff + obj_xoff - Math.floor((48 - hbar_width) / 2);
+                                var hbar_yoff = pl_yoff + obj_yoff - 64;
+                                this.mapDraw(tmp_char_hbar_cv, j, i, hbar_xoff, hbar_yoff);
                             }
                         }
                     }
                 }
             }
         }
+        console.log("character + item drawing took", window.performance.now() - charitem_timerstart, "ms");
 
         if (this.pl.citem) {
             this.setCursorImg(getNumSpritePath(this.pl.citem), 16);

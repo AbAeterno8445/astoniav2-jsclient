@@ -5,9 +5,6 @@ class MinimapRenderer {
         this.minimapCanvas.height = 128;
         this.minimapCanvasCtx = this.minimapCanvas.getContext('2d');
 
-        this.last_plx = 0;
-        this.last_ply = 0;
-
         // "x/y": "<color code>"
         // example: "512/500": "#ff00cc"
         this.tilemap = {};
@@ -15,10 +12,6 @@ class MinimapRenderer {
 
     updateMinimap(mapdata, pl_x, pl_y, zoom=1) {
         if (!pl_x && !pl_y) return;
-        if (pl_x == this.last_plx && pl_y == this.last_ply) return;
-
-        this.last_plx = pl_x;
-        this.last_ply = pl_y;
 
         this.minimapCanvasCtx.clearRect(0, 0, 128, 128);
 

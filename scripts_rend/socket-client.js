@@ -371,7 +371,10 @@ class SocketClient {
             this.first_render = true;
             
             // Ensure floors are rendered on login
-            setTimeout(() => { this._game_eng.update_floors = true; }, 3000);
+            setTimeout(() => {
+                this._game_eng.update_floors = true;
+                this._game_eng.update_minimap = true;
+            }, 3000);
         }
 
         this._tick_do();

@@ -38,16 +38,21 @@ class GameRenderer {
 
         this.update_floors = true;
 
+        this.pl_lastpos = [0, 0];
+
         // Minimap renderer
         this.minimapRenderer = new MinimapRenderer();
         this.minimap_zoom = 1;
+        this.update_minimap = true;
 
         // Minimap buttons
         document.getElementById("span-minimap-buttonplus").onclick = () => {   // Zoom in
             if (this.minimap_zoom < 4) this.minimap_zoom++;
+            this.update_minimap = true;
         }
         document.getElementById("span-minimap-buttonminus").onclick = () => {  // Zoom out
             if (this.minimap_zoom > 1) this.minimap_zoom--;
+            this.update_minimap = true;
         }
 
         // Load minimap color data
@@ -707,12 +712,19 @@ class GameRenderer {
         var plr_tile_id = (renderdistance / 2) + (renderdistance / 2) * renderdistance;
         var plr_xpos = 0;
         var plr_ypos = 0;
+        var pl_moved = false;
 
         if (tilemap[plr_tile_id]) {
             pl_xoff = -Math.round(tilemap[plr_tile_id].obj_xoff);
             pl_yoff = -Math.round(tilemap[plr_tile_id].obj_yoff);
             plr_xpos = tilemap[plr_tile_id].x;
             plr_ypos = tilemap[plr_tile_id].y;
+
+            if (plr_xpos != this.pl_lastpos[0] || plr_ypos != this.pl_lastpos[1]) {
+                pl_moved = true;
+                this.pl_lastpos[0] = plr_xpos;
+                this.pl_lastpos[1] = plr_ypos;
+            }
         }
 
         // Draw all floors first
@@ -1064,7 +1076,10 @@ class GameRenderer {
             this.citem_last = 0;
         }
 
-        this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
+        if (this.update_minimap || pl_moved) {
+            this.update_minimap = false;
+            this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
+        }
     }
 
     raiseSkill(i) {

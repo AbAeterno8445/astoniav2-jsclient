@@ -1,5 +1,5 @@
 function padSpriteNum(nr) { return ("00000" + nr).substr(-5); }
-function getNumSpritePath(nr) { return "./gfx/" + padSpriteNum(nr) + ".png"; }
+function getNumSpritePath(nr) { return dirPath + "gfx/" + padSpriteNum(nr) + ".png"; }
 
 /** Load all of a character's animations (given the first sprite number) into a CanvasHandler object */
 function loadCharGFX(cv_handler, ch_spr) {
@@ -77,7 +77,7 @@ class GameRenderer {
         this.doc_mouseheld = { left: 0, middle: 0, right: 0 };
 
         // Default mouse image
-        this.cursor_default = "./gfx/MOUSE.png";
+        this.cursor_default = dirPath + "gfx/MOUSE.png";
 
         // Pre-load basic images
         this.mapCanvas.loadImage(getNumSpritePath(32), 1, "none", null, false); // Drop at position
@@ -91,14 +91,14 @@ class GameRenderer {
         for (var i = 1078; i < 1082; i++)
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Injured char fx
         for (var i = 0; i < 8; i++)
-            this.mapCanvas.loadImage(`./gfx/misc/spell_fx${i}.png`, 1, "none", null, false); // Spell fx
+            this.mapCanvas.loadImage(`${dirPath}gfx/misc/spell_fx${i}.png`, 1, "none", null, false); // Spell fx
         for (var i = 240; i < 268; i++)
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Grave skeleton falling fx
         for (var i = 280; i < 298; i++)
             this.mapCanvas.loadImage(getNumSpritePath(i), 1, "none", null, false); // Poof fx
 
         this.mapCanvas.loadImage(getNumSpritePath(31), 1, "none", null, false); // Target tile (player movement)
-        this.mapCanvas.loadImage("./gfx/misc/tile_hover.png", 1, "opacity(0.7)", null, false); // Tile hover
+        this.mapCanvas.loadImage(dirPath + "gfx/misc/tile_hover.png", 1, "opacity(0.7)", null, false); // Tile hover
 
         // Hovered tile in map
         this.tile_hovered = -1;
@@ -204,24 +204,24 @@ class GameRenderer {
         }
 
         // Equipment display functionality (slot # must match server-side)
-        // Each slot # will contain object: { elem: <equip slot element>, default_img: <path to placeholder empty slot image> }
+        // Each slot # contains object: { elem: <equip slot element>, default_img: <path to placeholder empty slot image> }
         this.equip_slot_elems = {
-            0: { elem: document.getElementById('eq-helmet') },
-            1: { elem: document.getElementById('eq-amulet') },
-            2: { elem: document.getElementById('eq-armor') },
-            3: { elem: document.getElementById('eq-sleeves') },
-            4: { elem: document.getElementById('eq-belt') },
-            5: { elem: document.getElementById('eq-legs') },
-            6: { elem: document.getElementById('eq-boots') },
-            7: { elem: document.getElementById('eq-offhand') },
-            8: { elem: document.getElementById('eq-weapon') },
-            9: { elem: document.getElementById('eq-cloak') },
-            10: { elem: document.getElementById('eq-right-ring') },
-            11: { elem: document.getElementById('eq-left-ring') }
+            0: { elem: document.getElementById('eq-helmet'), default_img: `${dirPath}gfx/ui/eq_helm.png` },
+            1: { elem: document.getElementById('eq-amulet'), default_img: `${dirPath}gfx/ui/eq_amulet.png` },
+            2: { elem: document.getElementById('eq-armor'), default_img: `${dirPath}gfx/ui/eq_armor.png` },
+            3: { elem: document.getElementById('eq-sleeves'), default_img: `${dirPath}gfx/ui/eq_sleeves.png` },
+            4: { elem: document.getElementById('eq-belt'), default_img: `${dirPath}gfx/ui/eq_belt.png` },
+            5: { elem: document.getElementById('eq-legs'), default_img: `${dirPath}gfx/ui/eq_legs.png` },
+            6: { elem: document.getElementById('eq-boots'), default_img: `${dirPath}gfx/ui/eq_boots.png` },
+            7: { elem: document.getElementById('eq-offhand'), default_img: `${dirPath}gfx/ui/eq_offhand.png` },
+            8: { elem: document.getElementById('eq-weapon'), default_img: `${dirPath}gfx/ui/eq_weapon.png` },
+            9: { elem: document.getElementById('eq-cloak'), default_img: `${dirPath}gfx/ui/eq_cloak.png` },
+            10: { elem: document.getElementById('eq-right-ring'), default_img: `${dirPath}gfx/ui/eq_ring.png` },
+            11: { elem: document.getElementById('eq-left-ring'), default_img: `${dirPath}gfx/ui/eq_ring.png` }
         }
 
         for (let i in this.equip_slot_elems) {
-            this.equip_slot_elems[i].default_img = this.equip_slot_elems[i].elem.style.backgroundImage;
+            this.equip_slot_elems[i].elem.style.backgroundImage = "url(" + this.equip_slot_elems[i].default_img + ")";
             this.equip_slot_elems[i].elem.onclick = () => {
                 var d1 = 5;
                 if (this.doc_keyheld.shift) d1 = 1;
@@ -796,7 +796,7 @@ class GameRenderer {
                 // Hovered tile image
                 if (this.tile_hovered == tile_id && !this.doc_keyheld.ctrl && !this.doc_keyheld.alt) {
                     if (!this.doc_keyheld.shift || (this.doc_keyheld.shift && !(tilemap[this.tile_hovered].flags & ISITEM) && this.pl.citem)) {
-                        this.mapDraw("./gfx/misc/tile_hover.png", j, i, pl_xoff, pl_yoff, 0);
+                        this.mapDraw(dirPath + "gfx/misc/tile_hover.png", j, i, pl_xoff, pl_yoff, 0);
                     }
                 }
 
@@ -990,7 +990,7 @@ class GameRenderer {
                 }
 
                 if (spell_color[0] != 0 || spell_color[1] != 0 || spell_color[2] != 0) {
-                    var spellfx_img = this.mapCanvas.getImage("./gfx/misc/spell_fx" + (fx_str - 1) + ".png");
+                    var spellfx_img = this.mapCanvas.getImage(dirPath + "gfx/misc/spell_fx" + (fx_str - 1) + ".png");
                     if (spellfx_img) {
                         var hue = Math.floor(rgbToHsl(spell_color[0], spell_color[1], spell_color[2])[0] * 360);
 
@@ -1360,7 +1360,7 @@ class GameRenderer {
             if (this.pl.worn[i]) {
                 this.equip_slot_elems[i].elem.style.backgroundImage = "url(" + getNumSpritePath(this.pl.worn[i]) + ")";
             } else {
-                this.equip_slot_elems[i].elem.style.backgroundImage = this.equip_slot_elems[i].default_img;
+                this.equip_slot_elems[i].elem.style.backgroundImage = "url(" + this.equip_slot_elems[i].default_img + ")";
             }
         }
 

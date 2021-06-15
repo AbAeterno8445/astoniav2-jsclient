@@ -4,10 +4,10 @@ class SFXPlayer {
 
         this._loadedSFX = {};
         for (let i = 1; i < 40; i++) {
-            this._loadSFX("sfx/" + i + ".wav")
+            this._loadSFX(dirPath + "sfx/" + i + ".wav")
                 .then(sample => { this._loadedSFX[i] = sample; });
         }
-        this._loadSFX("sfx/CLICK.WAV")
+        this._loadSFX(dirPath + "sfx/CLICK.WAV")
             .then(sample => { this._loadedSFX["click"] = sample; });
     }
 

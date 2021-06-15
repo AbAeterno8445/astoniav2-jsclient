@@ -1,3 +1,6 @@
+let dirPath = "./";
+if (__dirname.substr(-5) == ".asar") dirPath = "../";
+
 const gameConfig = JSON.parse(fs.readFileSync("./config.json"), 'utf-8');
 const oldsv_mode = gameConfig.oldsv_mode;
 const zlib_compression = gameConfig.zlib_comp;

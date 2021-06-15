@@ -1,10 +1,15 @@
 {
   "name": "av2clienttest",
+  "productName": "v2ClientTest",
   "version": "1.0.0",
   "description": "v2 Client experiment",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-packager . --out=dist/win --icon=appicon.ico --overwrite --asar --ignore=\"(\\.gitignore|config\\.json|characters*|data*|gfx*|sfx/.*)\" && npm run build-cmds",
+    "build-cmds": "npm run build-dirs & npm run build-files",
+    "build-dirs": "md .\\dist\\win\\v2ClientTest-win32-x64\\data\\minimap & md .\\dist\\win\\v2ClientTest-win32-x64\\characters",
+    "build-files": "copy config.json .\\dist\\win\\v2ClientTest-win32-x64\\ && xcopy sfx .\\dist\\win\\v2ClientTest-win32-x64\\resources\\sfx\\ /s /e /y /f && xcopy gfx .\\dist\\win\\v2ClientTest-win32-x64\\resources\\gfx\\ /s /e /y /f"
   },
   "author": "Ab Aeterno",
   "license": "ISC",
@@ -12,6 +17,7 @@
     "quantize": "^1.0.2"
   },
   "devDependencies": {
-    "electron": "^13.1.2"
+    "electron": "^13.1.2",
+    "electron-packager": "^15.2.0"
   }
 }

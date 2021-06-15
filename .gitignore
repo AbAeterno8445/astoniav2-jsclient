@@ -5,3 +5,4 @@ data/minimap/*
 sfx
 characters/*
 todo
+dist/*

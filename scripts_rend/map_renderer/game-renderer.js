@@ -1405,12 +1405,14 @@ class GameRenderer {
                 let tmp_buffdiv = document.createElement('div');
 
                 let tmp_buffimg = document.createElement('img');
+                tmp_buffimg.className = "unselectable";
                 tmp_buffimg.style.width = "32px";
                 tmp_buffimg.style.height = "32px";
                 tmp_buffimg.src = getNumSpritePath(this.pl.spell[i]);
                 tmp_buffdiv.appendChild(tmp_buffimg);
 
                 let tmp_buffdur = document.createElement('span');
+                tmp_buffdur.className = "unselectable";
                 tmp_buffdur.style.position = "fixed";
                 tmp_buffdur.style.width = "16px";
                 tmp_buffdur.style.transform = "translate(-200%, 100%)";

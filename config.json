@@ -4,6 +4,7 @@
     "oldsv_mode": 0,
     "zlib_comp": 1,
     "GFX": {
-        "render_distance": 54
+        "render_distance": 54,
+        "extrafonts_support": 1
     }
 }

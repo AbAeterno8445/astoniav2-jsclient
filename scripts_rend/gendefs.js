@@ -1,6 +1,7 @@
 const gameConfig = JSON.parse(fs.readFileSync("./config.json"), 'utf-8');
 const oldsv_mode = gameConfig.oldsv_mode;
 const zlib_compression = gameConfig.zlib_comp;
+const extrafonts_support = gameConfig.GFX.extrafonts_support;
 
 // Taken from mjackson's color-conversion-algorithms.js
 function rgbToHsl(r, g, b) {

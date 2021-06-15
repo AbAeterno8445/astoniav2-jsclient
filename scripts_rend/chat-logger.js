@@ -70,27 +70,29 @@ class ChatLogger {
 
         if (default_font != null) font_dict[0] = default_font;
 
-        for (var i = 1; i < msg.length; i++) {
-            if (!format_flag) {
-                if (msg[i - 1] == '/' && msg[i] == '|') {
-                    format_flag = 1;
-                    format_start = i - 1;
-                }
-            } else {
-                if (msg[i] == '|') {
-                    font_dict[format_start - format_offset] = parseInt(tmp_font, 10);
-                    format_offset += i - format_start + 1;
-
-                    tmp_font = "";
-                    format_flag = 0;
+        if (extrafonts_support) {
+            for (var i = 1; i < msg.length; i++) {
+                if (!format_flag) {
+                    if (msg[i - 1] == '/' && msg[i] == '|') {
+                        format_flag = 1;
+                        format_start = i - 1;
+                    }
                 } else {
-                    tmp_font += msg[i];
+                    if (msg[i] == '|') {
+                        font_dict[format_start - format_offset] = parseInt(tmp_font, 10);
+                        format_offset += i - format_start + 1;
+
+                        tmp_font = "";
+                        format_flag = 0;
+                    } else {
+                        tmp_font += msg[i];
+                    }
                 }
             }
-        }
 
-        for (var fs in font_dict) {
-            msg = msg.replace(`/|${font_dict[fs]}|`, '');
+            for (var fs in font_dict) {
+                msg = msg.replace(`/|${font_dict[fs]}|`, '');
+            }
         }
 
         this.chat_logmsg(msg, font_dict);

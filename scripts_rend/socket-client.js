@@ -7,7 +7,7 @@ class SocketClient {
 
         // Zlib inflate decompressor
         if (zlib_compression == 1) {
-            this.zlib_inf = zlib.createInflate({ flush: zlib.constants.Z_SYNC_FLUSH, chunkSize: 12 * 1024 });
+            this.zlib_inf = zlib.createInflate({ flush: zlib.constants.Z_SYNC_FLUSH, chunkSize: 32 * 1024 });
             this.zlib_inf.on('data', (data) => {
                 this.zlib_inf._outOffset = 0; // Hack to prevent zlib resetting between data chunks
                 this._tick_procdata(data);

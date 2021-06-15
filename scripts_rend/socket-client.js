@@ -5,16 +5,6 @@ class SocketClient {
         this._renderengine = new RenderEngine();
         this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, sfx_player);
 
-        // Zlib inflate decompressor
-        if (zlib_compression == 1) {
-            this.zlib_inf = zlib.createInflate({ flush: zlib.constants.Z_SYNC_FLUSH, chunkSize: 32 * 1024 });
-            this.zlib_inf.on('data', (data) => {
-                this.zlib_inf._outOffset = 0; // Hack to prevent zlib resetting between data chunks
-                this._tick_procdata(data);
-                this.comp_tick_proc = false;
-            });
-        }
-
         this._init(conn_data.ip, conn_data.port, conn_data.version);
     }
 
@@ -32,8 +22,17 @@ class SocketClient {
 
         this.first_render = false; // First render (for floors)
 
-        if (zlib_compression == 1)
+        // Zlib inflate decompressor
+        if (zlib_compression == 1) {
+            this.zlib_inf = zlib.createInflate({ flush: zlib.constants.Z_SYNC_FLUSH, chunkSize: 32 * 1024 });
+            this.zlib_inf.on('data', (data) => {
+                this.zlib_inf._outOffset = 0; // Hack to prevent zlib resetting between data chunks
+                this._tick_procdata(data);
+                this.comp_tick_proc = false;
+            });
+
             this.comp_tick_proc = false; // True while processing compressed tick
+        }
 
         this._cmd_dispatcher.exit = 0;
     }

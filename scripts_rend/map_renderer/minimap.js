@@ -27,7 +27,7 @@ class MinimapRenderer {
                 var tile_id = i + j * renderdistance;
                 var tile = mapdata[tile_id];
                 if (!tile) continue;
-                if (!tile.avgcol || tile.ba_sprite == SPR_EMPTY) continue;
+                if (!tile.avgcol || tile.ba_sprite == SPR_EMPTY || tile.flags & INVIS) continue;
 
                 this.tilemap[tile.x + "/" + tile.y] = `rgb(${tile.avgcol[0]},${tile.avgcol[1]},${tile.avgcol[2]})`;
             }

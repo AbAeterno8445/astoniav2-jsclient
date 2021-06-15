@@ -473,7 +473,7 @@ class ServerCMDDispatcher {
     }
 
     sv_setmap3(buf, cnt) {
-        if (buf.length < 6) {
+        if (buf.length < 6 && oldsv_mode != 1) {
             console.log("WARNING: corrupt setmap3! (buf.length < 6)");
             //this.log_add("WARNING: corrupt setmap3! (buf.length < 6)", FNT_RED);
             return buf.length;

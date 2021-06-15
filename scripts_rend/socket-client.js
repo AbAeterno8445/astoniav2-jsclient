@@ -4,6 +4,17 @@ class SocketClient {
         this._game_eng = game_eng;
         this._renderengine = new RenderEngine();
         this._cmd_dispatcher = new ServerCMDDispatcher(player, this._renderengine, this._game_eng, sfx_player);
+
+        // Zlib inflate decompressor
+        if (zlib_compression == 1) {
+            this.zlib_inf = zlib.createInflate({ flush: zlib.constants.Z_SYNC_FLUSH, chunkSize: 12 * 1024 });
+            this.zlib_inf.on('data', (data) => {
+                this.zlib_inf._outOffset = 0; // Hack to prevent zlib resetting between data chunks
+                this._tick_procdata(data);
+                this.comp_tick_proc = false;
+            });
+        }
+
         this._init(conn_data.ip, conn_data.port, conn_data.version);
     }
 
@@ -20,6 +31,9 @@ class SocketClient {
         this.logged = false; // Logged-in state
 
         this.first_render = false; // First render (for floors)
+
+        if (zlib_compression == 1)
+            this.comp_tick_proc = false; // True while processing compressed tick
 
         this._cmd_dispatcher.exit = 0;
     }
@@ -153,8 +167,9 @@ class SocketClient {
 
     _tick_do() {
         if (this._tickbuf.length < 2) return 0;
+        if (this.comp_tick_proc) return 0;
 
-        while(this._tickbuf.length >= 2) {
+        /*while(this._tickbuf.length >= 2) {
             var data = Buffer.from(this._tickbuf);
             var buf = new Array();
             var len = data.readUInt16LE(0) & 0x7fff;
@@ -176,6 +191,47 @@ class SocketClient {
             }
 
             if (this._tickbuf.length) this._tickbuf = this._tickbuf.slice(len);
+        }*/
+
+        while (this._tickbuf.length >= 2 && !this.comp_tick_proc) {
+            var data = Buffer.from(this._tickbuf);
+            var buf = [];
+
+            var comp = data.readUInt16LE(0) & 0x8000;
+            var len = data.readUInt16LE(0) & 0x7fff;
+            if (len > this._tickbuf.length) return 0;
+
+            this._cmd_dispatcher.lastn = -1; // reset sv_setmap
+
+            var csize = len - 2;
+            if (csize) {
+                buf = this._tickbuf.slice(2, csize + 2);
+                this._tickbuf = this._tickbuf.slice(len);
+            } else {
+                this._tickbuf = this._tickbuf.slice(2);
+                continue;
+            }
+
+            if (comp && zlib_compression == 1) {
+                this.zlib_inf.write(Buffer.from(buf));
+                this.comp_tick_proc = true;
+            } else {
+                this._tick_procdata(buf);
+            }
+        }
+    }
+
+    _tick_procdata(data_buf) {
+        var buf_arr = [...data_buf];
+
+        var idx = 0;
+        while (idx < buf_arr.length) {
+            var ret = this._cmd_dispatcher.sv_cmd(buf_arr.slice(idx));
+            if (ret == -1) {
+                this._client.end();
+                throw "syntax error in server data";
+            }
+            idx += ret;
         }
     }
 

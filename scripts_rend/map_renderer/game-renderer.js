@@ -772,13 +772,15 @@ class GameRenderer {
                         if (avgcol) tile.avgcol = avgcol.slice();
                     }
 
-                    if (this.drawn_floors.hasOwnProperty(tile_id)) {
-                        if (this.drawn_floors[tile_id] == spr_suff) continue;
-                    }
-
                     if (!this.floorCanvas.getImage(spr_suff)) {
                         this.floorCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
                     } else {
+                        this.minimapRenderer.drawTile(tile);
+
+                        // Skip drawing this tile if it hasn't changed from last draw
+                        if (this.drawn_floors.hasOwnProperty(tile_id)) {
+                            if (this.drawn_floors[tile_id] == spr_suff) continue;
+                        }
                         this.drawn_floors[tile_id] = spr_suff;
                     }
 
@@ -1088,7 +1090,9 @@ class GameRenderer {
 
         if (this.update_minimap || pl_moved) {
             this.update_minimap = false;
-            this.minimapRenderer.updateMinimap(tilemap, plr_xpos, plr_ypos, this.minimap_zoom);
+            //var time_start = window.performance.now();
+            this.minimapRenderer.updateMinimap(plr_xpos, plr_ypos, this.minimap_zoom);
+            //console.log("minimap rendering took", window.performance.now() - time_start, "ms");
         }
     }
 

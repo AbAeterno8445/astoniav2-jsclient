@@ -168,8 +168,8 @@ class ServerCMDDispatcher {
     }
 
     sv_setorigin(buf) {
-        var xp = buf.readUInt16LE(1);
-        var yp = buf.readUInt16LE(3);
+        var xp = buf.readInt16LE(1);
+        var yp = buf.readInt16LE(3);
 
         var x, y, n;
         for (y = n = 0; y < renderdistance; y++) {

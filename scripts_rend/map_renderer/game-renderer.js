@@ -797,7 +797,7 @@ class GameRenderer {
                 if (!tile) continue;
 
                 // Target position image
-                if (tile.x == this.pl.goto_x && tile.y == this.pl.goto_y) {
+                if (tile.x == this.pl.goto_x && tile.y == this.pl.goto_y && tile.x > 0 && tile.y > 0) {
                     this.mapDrawNum(31, j, i, pl_xoff, pl_yoff, 0);
                 }
 

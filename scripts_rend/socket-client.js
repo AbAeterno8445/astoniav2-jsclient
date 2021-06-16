@@ -305,8 +305,8 @@ class SocketClient {
                 var tcoords = this._renderengine.get_tile_coords(data.x, data.y);
                 if (!tcoords) return;
 
-                buf.writeUInt16LE(tcoords.x, 1);
-                buf.writeUInt32LE(tcoords.y, 3);
+                buf.writeUInt16LE(Math.max(0, tcoords.x), 1);
+                buf.writeUInt32LE(Math.max(0, tcoords.y), 3);
             break;
 
             case cl_cmds["CL_CMD_GIVE"]:

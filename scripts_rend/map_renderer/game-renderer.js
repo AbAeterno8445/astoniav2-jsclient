@@ -739,7 +739,9 @@ class GameRenderer {
                     var tile_id = i + j * renderdistance;
                     var tile = tilemap[tile_id];
                     if (!tile) continue;
-                    if (tile.flags & INVIS || !tile.ba_sprite) continue;
+
+                    var tile_sprite = tile.ba_sprite;
+                    if (!tile_sprite || tile.flags & INVIS) tile_sprite = SPR_EMPTY;
 
                     var fx_suff = "l" + tile.light;
                     var gfx_filter = "";
@@ -760,7 +762,7 @@ class GameRenderer {
 
                     gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
-                    var spr_path = getNumSpritePath(tile.ba_sprite);
+                    var spr_path = getNumSpritePath(tile_sprite);
                     var spr_suff = spr_path + fx_suff;
 
                     // Assign average color to tile

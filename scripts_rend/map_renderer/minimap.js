@@ -22,8 +22,7 @@ class MinimapRenderer {
         if (!pl_x && !pl_y) return;
 
         this.minimapCanvasCtx.clearRect(0, 0, 128, 128);
-        this.minimapCanvasCtx.setTransform(1, 0, 0, 1, 0, 0);
-        this.minimapCanvasCtx.scale(zoom, zoom);
+        this.minimapCanvasCtx.setTransform(zoom, 0, 0, zoom, 0, 0);
 
         var orig = Math.round(64 / zoom);
         this.minimapCanvasCtx.drawImage(this.tile_cv, pl_y - orig, pl_x - orig, 128, 128, 0, 0, 128, 128);

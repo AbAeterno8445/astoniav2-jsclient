@@ -22,17 +22,19 @@ class GameRenderer {
         this.cmdQueue = [];
 
         // Map/floor drawing canvas
-        var map_xoff = 0;
-        var map_yoff = 360;
-        if (renderdistance == 34) map_xoff = 64;
-        else if (renderdistance == 54) map_xoff = -280;
+        this.mainmap_zoom = 1;
+        this.map_xoff = 0;
+        this.map_yoff = 360;
+        if (renderdistance == 34) this.map_xoff = 64;
+        else if (renderdistance == 54) this.map_xoff = -280;
 
         this.mapCanvas = new CanvasHandler(document.getElementById('cv-map'));
-        this.mapCanvas.setDefaultOffset(map_xoff, map_yoff, true);
+        this.mapCanvas.setDefaultOffset(this.map_xoff, this.map_yoff, true);
         this.mapCanvas.setLoadingImage(getNumSpritePath(35));
+        this.mapCanvas.ctx.imageSmoothingEnabled = false;
 
         this.floorCanvas = new CanvasHandler(document.createElement('canvas'), this.mapCanvas.cv.width, this.mapCanvas.cv.height);
-        this.floorCanvas.setDefaultOffset(map_xoff, map_yoff, true);
+        this.floorCanvas.setDefaultOffset(this.map_xoff, this.map_yoff, true);
         this.floorCanvas.setLoadingImage(getNumSpritePath(35));
         this.floorCanvas.onImageLoadCallback(() => { this.update_floors = true; });
 
@@ -372,29 +374,64 @@ class GameRenderer {
         but_hw.onclick = () => {
             this.hide_walls = !this.hide_walls;
             if (this.hide_walls) but_hw.style.border = "1px solid red";
-            else but_hw.style.border = "1px solid white";
+            else but_hw.style.border = null;
         };
 
         var but_hp = document.getElementById('but-togglehp');
         but_hp.onclick = () => {
             this.hide_hp = !this.hide_hp;
             if (this.hide_hp) but_hp.style.border = "1px solid red";
-            else but_hp.style.border = "1px solid white";
+            else but_hp.style.border = null;
         };
 
         var but_hpb = document.getElementById('but-togglehpbars');
         but_hpb.onclick = () => {
             this.hide_hpbars = !this.hide_hpbars;
             if (this.hide_hpbars) but_hpb.style.border = "1px solid red";
-            else but_hpb.style.border = "1px solid white";
+            else but_hpb.style.border = null;
         };
 
         var but_n = document.getElementById('but-togglenames');
         but_n.onclick = () => {
             this.hide_names = !this.hide_names;
             if (this.hide_names) but_n.style.border = "1px solid red";
-            else but_n.style.border = "1px solid white";
+            else but_n.style.border = null;
         };
+
+        // Zoom in/out buttons (affect main canvas)
+        var but_zoomin = document.getElementById('but-zoomin');
+        but_zoomin.onclick = () => {
+            this.mainmap_zoom = Math.min(2, this.mainmap_zoom + 0.1);
+            this.updateZoom();
+        };
+
+        var but_zoomout = document.getElementById('but-zoomout');
+        but_zoomout.onclick = () => {
+            this.mainmap_zoom = Math.max(1, this.mainmap_zoom - 0.1);
+            this.updateZoom();
+        };
+
+        var but_zoomscaling = document.getElementById('but-zoom-scaling');
+        but_zoomscaling.onclick = () => {
+            this.mapCanvas.ctx.imageSmoothingEnabled = !this.mapCanvas.ctx.imageSmoothingEnabled;
+            if (this.mapCanvas.ctx.imageSmoothingEnabled) {
+                but_zoomscaling.style.border = "1px solid red";
+            } else {
+                but_zoomscaling.style.border = null;
+            }
+        }
+    }
+
+    updateZoom() {
+        this.map_yoff = Math.round(360 / this.mainmap_zoom);;
+        this.map_xoff = -16 * renderdistance + 608 - 320 * (this.mainmap_zoom - 1);
+
+        this.mapCanvas.setDefaultOffset(this.map_xoff, this.map_yoff, true);
+        this.floorCanvas.setDefaultOffset(this.map_xoff, this.map_yoff, true);
+
+        this.mapCanvas.ctx.setTransform(this.mainmap_zoom, 0, 0, this.mainmap_zoom, 0, 0);
+
+        this.redrawFloors();
     }
 
     /** Reset relevant variables, for exiting current character session */
@@ -410,6 +447,14 @@ class GameRenderer {
         this.stat_points_used = 0;
         
         this.skillbind_selected = null;
+
+        this.drawn_floors = {};
+    }
+
+    redrawFloors() {
+        this.drawn_floors = {};
+        this.update_floors = true;
+        this.floors_clearctx = true;
     }
 
     /** Queue a server command */
@@ -508,13 +553,11 @@ class GameRenderer {
         var in_canvas = 1;
         if (mpos.x < 0 || mpos.y < 0 || mpos.x > this.mapCanvas.cv.width || mpos.y > this.mapCanvas.cv.height) in_canvas = 0;
 
-        var x = mpos.x;
-        if (renderdistance == 34) x += 480;
-        else if (renderdistance == 54) x += 160;
-        var y = mpos.y + 16;
+        var x = mpos.x / this.mainmap_zoom + 1024 - renderdistance * 16;
+        var y = mpos.y / this.mainmap_zoom + 16;
 
-        var mx = 2 * y + x - (this.mapCanvas.drawYOffset * 2) - this.mapCanvas.drawXOffset + ((renderdistance - 34) / 2 * 32);
-        var my = x - 2 * y + (this.mapCanvas.drawYOffset * 2) - this.mapCanvas.drawXOffset + ((renderdistance - 34) / 2 * 32);
+        var mx = 2 * y + x - (this.map_yoff * 2) - this.map_xoff + ((renderdistance - 34) / 2 * 32);
+        var my = x - 2 * y + (this.map_yoff * 2) - this.map_xoff + ((renderdistance - 34) / 2 * 32);
 
         mx = Math.floor(mx / 32) - 17;
         my = Math.floor(my / 32) - 12;

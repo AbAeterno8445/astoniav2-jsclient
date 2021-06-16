@@ -306,7 +306,7 @@ class SocketClient {
                 if (!tcoords) return;
 
                 buf.writeUInt16LE(tcoords.x, 1);
-                buf.writeUInt16LE(tcoords.y, 3);
+                buf.writeUInt32LE(tcoords.y, 3);
             break;
 
             case cl_cmds["CL_CMD_GIVE"]:

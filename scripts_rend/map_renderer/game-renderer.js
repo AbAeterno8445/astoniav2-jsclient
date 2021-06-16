@@ -36,7 +36,9 @@ class GameRenderer {
         this.floorCanvas.setLoadingImage(getNumSpritePath(35));
         this.floorCanvas.onImageLoadCallback(() => { this.update_floors = true; });
 
+        this.drawn_floors = {};
         this.update_floors = true;
+        this.floors_clearctx = true;
 
         this.pl_lastpos = [0, 0];
 
@@ -685,10 +687,6 @@ class GameRenderer {
         this.mapCanvas.drawImageIsometric(img, x, y, xoff, yoff, redraw);
     }
 
-    mapDrawFloor(img, x, y, xoff, yoff, redraw) {
-        this.floorCanvas.drawImageIsometric(img, x, y, xoff, yoff, redraw);
-    }
-
     /** Draws the sprite with the given number into the map isometrically */
     mapDrawNum(nr, x, y, xoff, yoff, redraw) {
         this.mapDraw(getNumSpritePath(nr), x, y, xoff, yoff, redraw);
@@ -728,16 +726,20 @@ class GameRenderer {
         }
 
         // Draw all floors first
-        if (this.update_floors) {
+        if (this.update_floors || pl_moved) {
             this.update_floors = false;
 
-            this.floorCanvas.clearContext(this.mapCanvas.cv.width, this.mapCanvas.cv.height);
+            //var time_start = window.performance.now();
+            if (this.floors_clearctx) {
+                this.floors_clearctx = false;
+                this.floorCanvas.clearContext(this.mapCanvas.cv.width, this.mapCanvas.cv.height);
+            }
             for (var i = y1; i < y2; i++) {
                 for (var j = x2 - 1; j > x1; j--) {
                     var tile_id = i + j * renderdistance;
                     var tile = tilemap[tile_id];
                     if (!tile) continue;
-                    if (tile.flags & INVIS) continue;
+                    if (tile.flags & INVIS || !tile.ba_sprite) continue;
 
                     var fx_suff = "l" + tile.light;
                     var gfx_filter = "";
@@ -758,24 +760,32 @@ class GameRenderer {
 
                     gfx_filter = `brightness(${gfx_brightness}%) ${gfx_filter_fx}`;
 
-                    if (tile.ba_sprite) {
-                        var spr_path = getNumSpritePath(tile.ba_sprite);
-                        var spr_suff = spr_path + fx_suff;
-                        this.floorCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
+                    var spr_path = getNumSpritePath(tile.ba_sprite);
+                    var spr_suff = spr_path + fx_suff;
 
-                        this.mapDrawFloor(spr_suff, j, i, 0, 0, 0);
-
-                        // Assign average color to tile
-                        if (tile.it_sprite) {
-                            var avgcol = this.mapCanvas.getImageAvgcol(getNumSpritePath(tile.it_sprite));
-                            if (avgcol) tile.avgcol = avgcol.slice();
-                        } else {
-                            var avgcol = this.floorCanvas.getImageAvgcol(spr_path);
-                            if (avgcol) tile.avgcol = avgcol.slice();
-                        }
+                    // Assign average color to tile
+                    if (tile.it_sprite) {
+                        var avgcol = this.mapCanvas.getImageAvgcol(getNumSpritePath(tile.it_sprite));
+                        if (avgcol) tile.avgcol = avgcol.slice();
+                    } else {
+                        var avgcol = this.floorCanvas.getImageAvgcol(spr_path);
+                        if (avgcol) tile.avgcol = avgcol.slice();
                     }
+
+                    if (this.drawn_floors.hasOwnProperty(tile_id)) {
+                        if (this.drawn_floors[tile_id] == spr_suff) continue;
+                    }
+
+                    if (!this.floorCanvas.getImage(spr_suff)) {
+                        this.floorCanvas.loadImage(spr_path, 1, gfx_filter, spr_suff);
+                    } else {
+                        this.drawn_floors[tile_id] = spr_suff;
+                    }
+
+                    this.floorCanvas.drawImageIsometric(spr_suff, j, i, 0, 0, 0);
                 }
             }
+            //console.log("drawing floors took", window.performance.now() - time_start, "ms");
         }
         this.mapCanvas.ctx.drawImage(this.floorCanvas.cv, pl_xoff, pl_yoff);
 

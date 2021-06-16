@@ -371,7 +371,7 @@ class SocketClient {
             
             // Ensure floors/minimap are rendered properly on login
             setTimeout(() => {
-                this._game_eng.update_floors = true;
+                this._game_eng.redrawFloors();
                 this._game_eng.update_minimap = true;
             }, 3000);
         }

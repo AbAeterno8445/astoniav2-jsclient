@@ -369,6 +369,12 @@ class GameRenderer {
             }
         });
 
+        window.addEventListener('blur', (e) => {
+            this.doc_keyheld.shift = 0;
+            this.doc_keyheld.alt = 0;
+            this.doc_keyheld.ctrl = 0;
+        });
+
         // Toggle buttons
         var but_hw = document.getElementById('but-togglewalls');
         but_hw.onclick = () => {

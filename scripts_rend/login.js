@@ -24,10 +24,27 @@ class LoginHandler {
         }
         this.spr_temp_m = 2000;
         this.spr_temp_f = 8144;
+
         this.spr_merc_m = 5072;
         this.spr_merc_f = 7120;
+
         this.spr_hara_m = 4048;
         this.spr_hara_f = 6096;
+
+        this.spr_seyan_m = 3024;
+        this.spr_seyan_f = 11216;
+
+        this.spr_at_m = 23504;
+        this.spr_at_f = 24528;
+
+        this.spr_ah_m = 29648;
+        this.spr_ah_f = 30672;
+
+        this.spr_sorc_m = 28624;
+        this.spr_sorc_f = 27600;
+
+        this.spr_warr_m = 25552;
+        this.spr_warr_f = 26576;
 
         // Load basic characters
         loadCharGFX(this.elems_newchar.cv_newcharprev, this.spr_temp_m); // Templar male
@@ -40,6 +57,14 @@ class LoginHandler {
         this.loginprev_char = 0;
         this.loginprev_frame = 0;
         this.loginprev_intv = null;
+
+        // Refresh button
+        var tmp_refresh_button = document.getElementById('but-refresh-charselect');
+        tmp_refresh_button.onclick = () => this.updateCharSelect();
+
+        // Convert .moa button
+        var tmp_convertmoa_button = document.getElementById('but-convertmoa');
+        tmp_convertmoa_button.onclick = () => this.convertMoaFile();
     }
 
     updateNewcharPreview() {
@@ -88,11 +113,28 @@ class LoginHandler {
         var char_sprite = 35; // 35 for question mark sprite
         switch (chardata.race) {
             case 2: char_sprite = this.spr_merc_m; break;
-            case 3: char_sprite = this.spr_temp_m; break;
-            case 4: char_sprite = this.spr_hara_m; break;
             case 76: char_sprite = this.spr_merc_f; break;
+
+            case 3: char_sprite = this.spr_temp_m; break;
             case 77: char_sprite = this.spr_temp_f; break;
+
+            case 4: char_sprite = this.spr_hara_m; break;
             case 78: char_sprite = this.spr_hara_f; break;
+
+            case 13: char_sprite = this.spr_seyan_m; break;
+            case 79: char_sprite = this.spr_seyan_f; break;
+
+            case 544: char_sprite = this.spr_at_m; break;
+            case 549: char_sprite = this.spr_at_f; break;
+
+            case 545: char_sprite = this.spr_ah_m; break;
+            case 550: char_sprite = this.spr_ah_f; break;
+
+            case 546: char_sprite = this.spr_sorc_m; break;
+            case 551: char_sprite = this.spr_sorc_f; break;
+
+            case 547: char_sprite = this.spr_warr_m; break;
+            case 552: char_sprite = this.spr_warr_f; break;
         }
         
         tmp_chardiv_img.style.backgroundImage = "url(" + getNumSpritePath(char_sprite) + ")";
@@ -139,9 +181,6 @@ class LoginHandler {
             };
         };
         tmp_chardiv.appendChild(tmp_selbutton);
-
-        var tmp_refresh_button = document.getElementById('but-refresh-charselect');
-        tmp_refresh_button.onclick = () => this.updateCharSelect();
 
         return tmp_chardiv;
     }
@@ -206,6 +245,60 @@ class LoginHandler {
         this.elems_newchar.inp_newcharname.value = "";
         this.elems_newchar.inp_newcharpass.value = "";
         this.elems_newchar.inp_newchardesc.value = "";
+    }
+
+    convertMoaFile() {
+        var tmp_inp = document.createElement('input');
+        tmp_inp.type = "file";
+        tmp_inp.accept = ".moa";
+        tmp_inp.onchange = (e) => {
+            var p = tmp_inp.files[0].path;
+            if (p.length < 4 || p.substr(-4) != ".moa") {
+                console.log("ERROR: You must choose a .moa file.");
+                return;
+            }
+
+            try {
+                var char_data = fs.readFileSync(p);
+                var char_data_stat = fs.statSync(p);
+
+                var ch_usnr = char_data.readUInt32LE(0);
+                var ch_pass1 = char_data.readUInt32LE(4);
+                var ch_pass2 = char_data.readUInt32LE(8);
+
+                var ch_name = "";
+                for (let i = 0; i < 40; i++) {
+                    if (char_data.readUInt8(12 + i) == 0) break;
+                    ch_name += String.fromCharCode(char_data.readUInt8(12 + i));
+                }
+
+                var ch_race = char_data.readUInt32LE(52);
+
+                var ch_desc = "";
+                for (let i = 0; i < 160; i++) {
+                    if (char_data.readUInt8(216 + i) == 0) break;
+                    ch_desc += String.fromCharCode(char_data.readUInt8(216 + i));
+                }
+
+                var ch_creation = char_data_stat.birthtime;
+                
+                var char_obj = {
+                    name: ch_name,
+                    race: ch_race,
+                    creation: `${ch_creation.getFullYear()}-${ch_creation.getMonth() + 1}-${ch_creation.getDate()}`,
+                    points: 0,
+                    description: ch_desc,
+                    usnr: ch_usnr,
+                    pass1: ch_pass1,
+                    pass2: ch_pass2
+                };
+                fs.writeFileSync('./characters/' + char_obj.name + '.json', JSON.stringify(char_obj));
+                this.updateCharSelect();
+            } catch (err) {
+                console.log("ERROR: while reading character data -", err);
+            }
+        };
+        tmp_inp.click();
     }
 
     getRaceNum(race, gender) {

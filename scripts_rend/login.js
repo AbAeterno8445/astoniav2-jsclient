@@ -140,6 +140,9 @@ class LoginHandler {
         };
         tmp_chardiv.appendChild(tmp_selbutton);
 
+        var tmp_refresh_button = document.getElementById('but-refresh-charselect');
+        tmp_refresh_button.onclick = () => this.updateCharSelect();
+
         return tmp_chardiv;
     }
 

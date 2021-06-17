@@ -620,7 +620,15 @@ class GameRenderer {
         }
 
         if (this.tile_hovered > -1) {
-            if (this.doc_keyheld.shift) {
+            if (this.pl.citem == 46) { // Build mode
+                if (this.doc_mouseheld.left) {
+                    this.queueCommand(cl_cmds["CL_CMD_PICKUP"], { x: mpos.x, y: mpos.y });
+                    this.sfxPlayer.play_sfx("click");
+                } else if (this.doc_mouseheld.right) {
+                    this.queueCommand(cl_cmds["CL_CMD_DROP"], { x: mpos.x, y: mpos.y });
+                    this.sfxPlayer.play_sfx("click");
+                }
+            } else if (this.doc_keyheld.shift) {
                 if (!this.pl.citem) {
                     var scan = this.scanMapFlag(tilemap, this.tile_hovered, ISITEM);
                     if (scan.length > 0) {
